@@ -19,6 +19,6 @@ CREATE COMPUTE MODULE Test1_Compute
 	END;
 
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
-		SET OutputRoot.JSON.Data = InputRoot.XMLNSC;
+		SET OutputRoot.XMLNSC = InputRoot.JSON.Data;
 	END;
 END MODULE;
