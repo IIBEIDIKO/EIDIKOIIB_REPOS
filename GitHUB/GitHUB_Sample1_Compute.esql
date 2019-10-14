@@ -19,6 +19,6 @@ CREATE COMPUTE MODULE GitHUB_Sample1_Compute
 	END;
 
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
-		SET OutputRoot.JSON.Data.id = InputRoot.XMLNSC.id;
+		SET OutputRoot.JSON.Data.id = InputRoot.XMLNSC;
 	END;
 END MODULE;
