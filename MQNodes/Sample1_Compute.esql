@@ -23,7 +23,7 @@ CREATE COMPUTE MODULE Sample1_Compute
 	-- SET OutputLocalEnvironment.Destination.File.Directory = 'C:\Users\Administrator\Desktop\File\OverriddenDestination';
 --	set OutputRoot = InputRoot;
 --	SET OutputRoot.MQMD.CorrelId=InputRoot.MQMD.MsgId;
-		SET OutputRoot = InputRoot;
+		SET OutputRoot.JSON.Data = InputRoot.XMLNSC;
 		
 	END;
 END MODULE;
