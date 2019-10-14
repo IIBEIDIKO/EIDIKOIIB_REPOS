@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0" xmlns:map="default">
+    <input path="/entityLoan.xsd" var="var4"/>
+    <input path="/localEnvironmentVariables.xsd" var="var2"/>
+    <input path="/localEnvironmentVariables.xsd" var="var5"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var6"/>
+    <output path="db:table(/ganaseva.dbm,GANASEVADB,dbo,msl:db-name('[HO-LOAN-STAGING]'))" var="HOLOANSTAGING"/>
+    <output path="/ganasevaEntity.xsd" var="var"/>
+    <imports>
+        <import kind="esql" namespace="/helper.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="supplement" prefix="in" uri="http://www.quantiguous.com/gufa/dfdl/entityLoan.xsd"/>
+        <namespace kind="supplement" prefix="out" uri="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd"/>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="helper" uri="/helper.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="moveLoanToStaging">
+        <input namespace="http://www.quantiguous.com/gufa/dfdl/entityLoan.xsd" path="$var4/mb:msg(entityLoan,assembly,DFDL,LocalEnvironment,Properties)">
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaBatchID" ref="var2" var="any"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaEntityID" ref="var2" var="any1"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaEntityName" ref="var2" var="any2"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaExternalCustomerID" ref="var2" var="any3"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaExternalID" ref="var2" var="any4"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaProcessName" ref="var2" var="any5"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaProcessID" ref="var2" var="any6"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="procCallRequired" ref="var2" var="any7"/>
+        </input>
+        <output path="$HOLOANSTAGING/db:insert(fn:false(),[ID],[BATCHID],[EXTERNALLOANNO],[EXTERNALCUSTOMERID],[EXTERNAL GROUPID],[PRODUCT CODE],[AGENTID],[LOANAMOUNT],[EXPECTEDDISBURSALDATE],[LOANSTARTDATE],[ORIGINATOR],[APPROVER],[COLLECTOR],[LOANPURPOSE],[PAYMENTMODE],[NOOFINSTALLMENTS],[FREQUENCY],[FIRSTEMIDATE],[DAYOFPERIOD],[NETINCOME],[SAVINGSACCOUNTNO],[HIGHMARKRATING],[PATNER RECOMMENDATION],[LOAN CYCLE],[RECOMMENDED LOAN],[JUSTIFICATION COMMENTS],[BCPARTNERID],[UDF1],[UDF2],[UDF3],[UDF4],[UDF5],[UDF6],[UDF7],[UDF8],[UDF9],[UDF10],[UDF11],[UDF12],[UDF13],[UDF14],[UDF15],[UDF16],[UDF17],[UDF18],[UDF19],[UDF20],[UDF21],[UDF22],[UDF23],[UDF24],[UDF25],[UDF26],[UDF27],[UDF28],[UDF29],[UDF30],[ERROR_DESCRIPTION],[ERROR_STAGE],[IS-ERROR],[APPLICATION-DATE],[SYSTEM-DATE],[TARGET_EMI],BCBRANCH,RenewalLoan,PSLCode,[Hospital cash],[Prepaid charges],BankName,IFSCCode,BankAccountNumber)" var="dbinsert"/>
+        <output namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="$var/mb:msg(ganasevaEntity,assembly,XMLNSC,Properties)" var="MessageAssembly"/>
+        <join>
+            <input path="LocalEnvironment/Variables/ganasevaBatchID[1]" var="ganasevaBatchID"/>
+            <input path="entityLoan" var="entityLoan"/>
+            <output path="$dbinsert/."/>
+            <transaction>
+                <insert ref="dbinsert">
+                    <input path="$entityLoan/." var="entityLoan1"/>
+                    <input path="$ganasevaBatchID/.[1]" var="ganasevaBatchID1"/>
+                    <output path="."/>
+                    <function ref="xs:int">
+                        <input path="$ganasevaBatchID1/.[1]" var="ganasevaBatchID2"/>
+                        <output path="msl:db-name('[BATCHID]')"/>
+                        <param name="primitive" value="$ganasevaBatchID2"/>
+                    </function>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/external_customer_id"/>
+                        <output path="msl:db-name('[EXTERNALCUSTOMERID]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/external_group_id"/>
+                        <output path="msl:db-name('[EXTERNAL GROUPID]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/loan_amount"/>
+                        <output path="msl:db-name('[LOANAMOUNT]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/no_of_installments"/>
+                        <output path="msl:db-name('[NOOFINSTALLMENTS]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/loan_cycle"/>
+                        <output path="msl:db-name('[LOAN CYCLE]')"/>
+                    </move>
+                    <customFunction lang="esql" ref="helper:formatDateToString">
+                        <input path="$entityLoan1/loan/loan_start_date" var="loan_start_date1"/>
+                        <output path="msl:db-name('[LOANSTARTDATE]')"/>
+                        <param name="piDate" value="$loan_start_date1"/>
+                    </customFunction>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/collector"/>
+                        <output path="msl:db-name('[COLLECTOR]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/approver"/>
+                        <output path="msl:db-name('[APPROVER]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/udf1"/>
+                        <output path="msl:db-name('[UDF1]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf2"/>
+                        <output path="msl:db-name('[UDF2]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf3"/>
+                        <output path="msl:db-name('[UDF3]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf4"/>
+                        <output path="msl:db-name('[UDF4]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf5"/>
+                        <output path="msl:db-name('[UDF5]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf6"/>
+                        <output path="msl:db-name('[UDF6]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf7"/>
+                        <output path="msl:db-name('[UDF7]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf8"/>
+                        <output path="msl:db-name('[UDF8]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf9"/>
+                        <output path="msl:db-name('[UDF9]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf10"/>
+                        <output path="msl:db-name('[UDF10]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf11"/>
+                        <output path="msl:db-name('[UDF11]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf12"/>
+                        <output path="msl:db-name('[UDF12]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf13"/>
+                        <output path="msl:db-name('[UDF13]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf14"/>
+                        <output path="msl:db-name('[UDF14]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf15"/>
+                        <output path="msl:db-name('[UDF15]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf16"/>
+                        <output path="msl:db-name('[UDF16]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf17"/>
+                        <output path="msl:db-name('[UDF17]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf18"/>
+                        <output path="msl:db-name('[UDF18]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf19"/>
+                        <output path="msl:db-name('[UDF19]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf20"/>
+                        <output path="msl:db-name('[UDF20]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf21"/>
+                        <output path="msl:db-name('[UDF21]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf22"/>
+                        <output path="msl:db-name('[UDF22]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf23"/>
+                        <output path="msl:db-name('[UDF23]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf24"/>
+                        <output path="msl:db-name('[UDF24]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf25"/>
+                        <output path="msl:db-name('[UDF25]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf26"/>
+                        <output path="msl:db-name('[UDF26]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf27"/>
+                        <output path="msl:db-name('[UDF27]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf28"/>
+                        <output path="msl:db-name('[UDF28]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf29"/>
+                        <output path="msl:db-name('[UDF29]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityLoan1/loan/udf30"/>
+                        <output path="msl:db-name('[UDF30]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/external_id"/>
+                        <output path="msl:db-name('[EXTERNALLOANNO]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/loan_product_code"/>
+                        <output path="msl:db-name('[PRODUCT CODE]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/barcode_no"/>
+                        <output path="msl:db-name('[JUSTIFICATION COMMENTS]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/collector"/>
+                        <output path="msl:db-name('[ORIGINATOR]')"/>
+                    </move>
+                    <assign value="0">
+                        <output path="msl:db-name('[AGENTID]')"/>
+                    </assign>
+                    <function ref="xs:int">
+                        <input path="$entityLoan1/loan/disbursement_mode" var="disbursement_mode"/>
+                        <output path="msl:db-name('[PAYMENTMODE]')"/>
+                        <param name="primitive" value="$disbursement_mode"/>
+                    </function>
+                    <move>
+                        <input path="$entityLoan1/loan/repayment_frequency"/>
+                        <output path="msl:db-name('[FREQUENCY]')"/>
+                    </move>
+                    <customFunction lang="esql" ref="helper:formatDateToString">
+                        <input path="$entityLoan1/loan/repayment_start_date" var="repayment_start_date"/>
+                        <output path="msl:db-name('[FIRSTEMIDATE]')"/>
+                        <param name="piDate" value="$repayment_start_date"/>
+                    </customFunction>
+                    <move>
+                        <input path="$entityLoan1/loan/loan_amount"/>
+                        <output path="msl:db-name('[RECOMMENDED LOAN]')"/>
+                    </move>
+                    <customFunction lang="esql" ref="helper:formatDateToString">
+                        <input path="$entityLoan1/loan/expected_disbursal_date" var="expected_disbursal_date"/>
+                        <output path="msl:db-name('[EXPECTEDDISBURSALDATE]')"/>
+                        <param name="piDate" value="$expected_disbursal_date"/>
+                    </customFunction>
+                    <move>
+                        <input path="$entityLoan1/loan/bc_branch_code"/>
+                        <output path="BCBRANCH"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/psl_code"/>
+                        <output path="PSLCode"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/loan_purpose"/>
+                        <output path="msl:db-name('[LOANPURPOSE]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/hospital_cash"/>
+                        <output path="msl:db-name('[Hospital cash]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/prepaid_charges"/>
+                        <output path="msl:db-name('[Prepaid charges]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/is_top_up"/>
+                        <output path="RenewalLoan"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/bankname"/>
+                        <output path="BankName"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/ifsccode"/>
+                        <output path="IFSCCode"/>
+                    </move>
+                    <move>
+                        <input path="$entityLoan1/loan/bankaccountnumber"/>
+                        <output path="BankAccountNumber"/>
+                    </move>
+                </insert>
+                <return>
+                    <input path="$var6/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </join>
+        <move>
+            <input path="Properties"/>
+            <output path="$MessageAssembly/Properties"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaEntityID[1]"/>
+            <output path="$MessageAssembly/ganasevaEntity/entityID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaEntityName[1]"/>
+            <output path="$MessageAssembly/ganasevaEntity/entityName"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaExternalID[1]"/>
+            <output path="$MessageAssembly/ganasevaEntity/externalID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaProcessName[1]"/>
+            <output path="$MessageAssembly/ganasevaEntity/processName"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaBatchID[1]"/>
+            <output path="$MessageAssembly/ganasevaEntity/batchID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaProcessID[1]"/>
+            <output path="$MessageAssembly/ganasevaEntity/processID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/procCallRequired[1]"/>
+            <output path="$MessageAssembly/ganasevaEntity/procCallRequired"/>
+        </move>
+    </mappingDeclaration>
+</mappingRoot>

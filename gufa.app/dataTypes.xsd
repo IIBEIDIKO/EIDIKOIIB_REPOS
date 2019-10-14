@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.quantiguous.com/FI/dataTypes.xsd" xmlns:tns="http://www.quantiguous.com/FI/dataTypes.xsd">
+
+  <xsd:simpleType name="userNameType">
+  	<xsd:restriction base="xsd:string">
+  		<xsd:maxLength value="256"/>
+  	</xsd:restriction>
+  </xsd:simpleType>	
+  
+  <xsd:complexType name="addressType">
+  	<xsd:sequence>
+  		<xsd:element name="line1">
+  			<xsd:simpleType>
+  				<xsd:restriction base="xsd:string">
+  					<xsd:maxLength value="500"/>
+  				</xsd:restriction>
+  			</xsd:simpleType>
+  		</xsd:element>
+  		<xsd:element name="line2">
+  			<xsd:simpleType> 
+  				<xsd:restriction base="xsd:string">
+  					<xsd:maxLength value="500"/>
+  				</xsd:restriction>
+  			</xsd:simpleType>
+  		</xsd:element>
+  		<xsd:element name="line3">
+  			<xsd:simpleType>
+  			 	<xsd:restriction base="xsd:string">
+  					<xsd:maxLength value="500"/>
+  				</xsd:restriction>
+  			</xsd:simpleType>
+  		</xsd:element>
+  		<xsd:element name="cityCode" type="xsd:string"/>
+  		<xsd:element name="cityName" type="xsd:string"/>
+  		<xsd:element name="stateCode" type="xsd:string"/>
+  		<xsd:element name="stateName" type="xsd:string"/>
+  		<xsd:element name="pin" type="xsd:int"/>
+  	</xsd:sequence>
+  </xsd:complexType>
+  
+  
+  
+  
+  <xsd:simpleType name="nameType">
+  	<xsd:restriction base="xsd:string">
+  		<xsd:maxLength value="20"/>
+  	</xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:simpleType name="phoneNoType">
+  	<xsd:restriction base="xsd:string">
+  		<xsd:maxLength value="20"/>
+  	</xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="emailType">
+  	<xsd:restriction base="xsd:string">
+  		<xsd:maxLength value="20"/>
+  	</xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="contactType">
+  	<xsd:sequence>
+  		<xsd:element name="name" type="tns:nameType"/>
+  		<xsd:element name="phoneNo" type="tns:phoneNoType"/>
+  		<xsd:element name="email" type="tns:emailType"/>
+  	</xsd:sequence>
+  </xsd:complexType> 
+  
+ <xsd:simpleType name="panType">
+  	<xsd:restriction base="xsd:string">
+  		<xsd:maxLength value="10"/>
+  	</xsd:restriction>
+  </xsd:simpleType>
+  
+</xsd:schema>

@@ -1,0 +1,150 @@
+-- method to update the exception list in record errors in case there is one while creating the entity in Ganaseva
+CREATE COMPUTE MODULE setEntityException
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lExceptionMsg, lEntity CHARACTER;
+		DECLARE faultCode INT;
+        DECLARE faultText, faultInserts CHAR;
+		DECLARE lPrefix CHARACTER '--- !omap';
+		DECLARE lColumn CHARACTER 'base';
+		
+		-- get the last exception, this is in most cases the root case
+		CALL getLastExceptionDetail(faultCode, faultText, faultInserts);
+		
+		-- create exception message in yaml format
+		SET lExceptionMsg = 'Please report this error message to support team. SYSTEM: ESB '||'FaultCode> '||CAST(faultCode AS CHARACTER)||' FaultText> '||faultText||' FaultInserts> '||faultInserts;
+		SET lExceptionMsg = convertToYaml(lPrefix,lColumn,lExceptionMsg);
+		
+		-- we need to take substring ofthe message as record_errors only take 2000 characters
+		SET lExceptionMsg = SUBSTRING(lExceptionMsg FROM 1 FOR 2000);
+		
+		IF Environment.Variables.entityName = 'IMAGE' THEN	
+			UPDATE Database.CUSTOMER_IMAGES AS D
+		   	SET RECORD_ERRORS = lExceptionMsg,
+		   	STATUS = 'FAILED',
+			UPDATED_AT = CURRENT_TIMESTAMP
+		 	WHERE D.EXTERNAL_ID = Environment.Variables.externalID
+		   	AND D.ID = Environment.Variables.entityID;
+		ELSE
+			-- set the entity table in variable to be used in update statement at the end
+			IF Environment.Variables.entityName = 'CENTER' THEN
+				SET lEntity = 'CENTERS';
+			ELSEIF Environment.Variables.entityName = 'CUSTOMER' THEN
+				SET lEntity = 'CUSTOMERS';
+			ELSEIF Environment.Variables.entityName = 'EXISTINGCUSTOMER' THEN
+				SET lEntity = 'CUSTOMERS';
+			ELSEIF Environment.Variables.entityName = 'GROUP' THEN	
+				SET lEntity = 'GROUPS';
+			ELSEIF Environment.Variables.entityName = 'SAVING' THEN
+				SET lEntity = 'SAVINGS';
+			ELSEIF Environment.Variables.entityName = 'LOAN' THEN	
+				SET lEntity = 'LOANS';
+			END IF;
+			-- common statement to update the exception in entity table
+			UPDATE Database.{lEntity} AS D
+			SET RECORD_ERRORS = lExceptionMsg,
+			UPDATED_AT = CURRENT_TIMESTAMP,
+			STATUS = 'FAILED'
+			WHERE D.ID = Environment.Variables.entityID;
+		END IF;
+
+		RETURN TRUE;
+	END;
+	
+	CREATE PROCEDURE getLastExceptionDetail(OUT messageNumber INT, OUT messageText CHAR, OUT messageInserts CHAR)
+	BEGIN		
+		SET messageNumber = 0;
+		SET messageText = '';
+		SET messageInserts = '';
+		
+	-- Create a reference to the first child of the exception list
+		DECLARE ptrException REFERENCE TO InputExceptionList.*[1];
+	
+		-- keep looping while the moves to the child of exception list work
+	    WHILE lastmove(ptrException) DO
+	        -- store the current values for the error number and text
+	        IF ptrException.Number is not null THEN
+	        SET messageNumber = ptrException.Number;
+	        SET messageText = ptrException.Text;
+	
+	        SET messageInserts = '';
+	        DECLARE ptrInsert REFERENCE TO ptrException.Insert[1];
+	        WHILE lastmove(ptrInsert) DO
+	                IF ptrInsert.Text is not null THEN
+	                        SET messageInserts = messageInserts || ',' || ptrInsert.Text;
+	                END IF;
+	                MOVE ptrInsert NEXTSIBLING;
+	        END WHILE;
+	
+	        END IF;
+	        -- now move to the last child which should be the next exceptionlist
+	        MOVE ptrException LASTCHILD;
+	    END WHILE;
+	    
+	END;
+	
+END MODULE;
+
+-- method which will set failure while creating the entity
+CREATE COMPUTE MODULE setEntityFail
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lPrefix CHARACTER '--- !omap';
+		DECLARE lColumn CHARACTER 'base';
+		DECLARE lFaultMessage CHARACTER 'GanasevaError# ';
+		DECLARE lInterval	INTERVAL;
+		DECLARE lSeconds FLOAT;
+		DECLARE lEntity CHARACTER;
+		
+		-- we alse need to update the time in seconds taken by the Ganseva to process the request	
+		SET lInterval = (CAST(CURRENT_TIMESTAMP AS TIMESTAMP) - CAST(Environment.Variables.startTimeStamp AS TIMESTAMP)) SECOND;		
+		SET lSeconds = CAST(lInterval AS FLOAT);
+
+		-- update the time taken by the job 
+		UPDATE Database.INTEGRATION_JOB_HISTORIES AS A
+		   SET UPDATED_AT = CURRENT_TIMESTAMP,
+		       GANASEVA_EXECUTION_TIME = (A.GANASEVA_EXECUTION_TIME + lSeconds)
+		 WHERE A.INTEGRATION_PROCESS_ID =  Environment.Variables.processID
+		   AND A.ID = (SELECT MAX(INTEGRATION_JOB_HISTORIES.ID) FROM Database.INTEGRATION_JOB_HISTORIES WHERE INTEGRATION_JOB_HISTORIES.INTEGRATION_PROCESS_ID =  Environment.Variables.processID );
+
+		-- create fault message in yaml format for the entity
+		SET lFaultMessage = lFaultMessage || InputLocalEnvironment.Variables.faultMessage;
+		SET lFaultMessage = convertToYaml(lPrefix,lColumn,lFaultMessage);
+		
+		-- we need to take substring ofthe message as record_errors only take 2000 characters
+		SET lFaultMessage = SUBSTRING(lFaultMessage FROM 1 FOR 2000);
+				
+		IF Environment.Variables.entityName = 'IMAGE' THEN	
+			UPDATE Database.CUSTOMER_IMAGES AS D
+		   	SET RECORD_ERRORS = lFaultMessage,
+		   	STATUS = 'FAILED',
+			UPDATED_AT = CURRENT_TIMESTAMP
+		 	WHERE D.EXTERNAL_ID = InputLocalEnvironment.Variables.externalID
+		   	AND D.ID = Environment.Variables.entityID;
+		ELSE
+			-- set the entity table in variable to be used in update statement at the end
+			IF Environment.Variables.entityName = 'CENTER' THEN
+				SET lEntity = 'CENTERS';
+			ELSEIF Environment.Variables.entityName = 'CUSTOMER' THEN
+				SET lEntity = 'CUSTOMERS';
+			ELSEIF Environment.Variables.entityName = 'EXISTINGCUSTOMER' THEN
+				SET lEntity = 'CUSTOMERS';
+			ELSEIF Environment.Variables.entityName = 'GROUP' THEN	
+				SET lEntity = 'GROUPS';
+			ELSEIF Environment.Variables.entityName = 'SAVING' THEN
+				SET lEntity = 'SAVINGS';
+			ELSEIF Environment.Variables.entityName = 'LOAN' THEN	
+				SET lEntity = 'LOANS';
+			END IF;
+			-- common statement to update the fault in entity table
+			UPDATE Database.{lEntity} AS D
+		   	SET RECORD_ERRORS = lFaultMessage,
+			UPDATED_AT = CURRENT_TIMESTAMP,
+			INTEGRATION_TIME = CAST(lSeconds AS DECIMAL),
+			STATUS = 'FAILED'
+		 	WHERE D.ID = Environment.Variables.entityID;
+		END IF;
+
+		RETURN TRUE;
+	END;
+END MODULE;

@@ -1,0 +1,634 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/entityExistingCustomer.xsd" var="var2"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var3"/>
+    <input path="/localEnvironmentVariables.xsd" var="var"/>
+    <input path="/localEnvironmentVariables.xsd" var="var4"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,RCDSCUSTOMERS))" var="GANASEVA1"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA2"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA3"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA4"/>
+    <output path="db:table(/ganaseva.dbm,GANASEVADB,dbo,msl:db-name('[HO-CUSTOMERDEMOGRAPHIC-UPDATE-STAGING]'))" var="HOCUSTOMERDEMOGRAPHICUPDATESTAGING"/>
+    <output path="/ganasevaEntity.xsd" var="var1"/>
+    <imports>
+        <import kind="esql" namespace="/helper.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="helper" uri="/helper.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="moveExistingCustomerToStaging">
+        <input namespace="http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd" path="$var2/mb:msg(entityExistingCustomer,assembly,DFDL,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaBatchID" ref="var" var="any"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaEntityID" ref="var" var="any1"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaEntityName" ref="var" var="any2"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaExternalCustomerID" ref="var" var="any3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaExternalID" ref="var" var="any4"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaProcessID" ref="var" var="any5"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaProcessName" ref="var" var="any6"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="procCallRequired" ref="var" var="any7"/>
+        </input>
+        <input path="$GANASEVA1/db:select(fn:false(),ResultSet(dbo/RCDSCUSTOMERS/CUSTOMERID,dbo/RCDSCUSTOMERS/EXTERNALCUSTNO),db:where('dbo.RCDSCUSTOMERS.EXTERNALCUSTNO  =  ?','?'=$MessageAssembly/{http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd}:entityExistingCustomer/existingCustomer/external_id))" var="dbselect"/>
+        <input path="$GANASEVA/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_ID),db:where(&quot;dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? AND dbo.GEO_HIERARCHY_SETTING.GHS_DELFLAG &lt;&gt; 'D'&quot;,'?'=$MessageAssembly/{http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd}:entityExistingCustomer/existingCustomer/city_code))" var="dbselect1"/>
+        <input path="$GANASEVA2/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_ID),db:where(&quot;dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? AND dbo.GEO_HIERARCHY_SETTING.GHS_DELFLAG &lt;&gt; 'D' &quot;,'?'=$MessageAssembly/{http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd}:entityExistingCustomer/existingCustomer/state_code))" var="dbselect2"/>
+        <input path="$GANASEVA3/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_ID),db:where(&quot;dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? AND dbo.GEO_HIERARCHY_SETTING.GHS_DELFLAG &lt;&gt; 'D'&quot;,'?'=$MessageAssembly/{http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd}:entityExistingCustomer/existingCustomer/branch_code))" var="dbselect3"/>
+        <input path="$GANASEVA4/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_ID),db:where(&quot;dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? AND dbo.GEO_HIERARCHY_SETTING.GHS_DELFLAG &lt;&gt; 'D'&quot;,'?'=$MessageAssembly/{http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd}:entityExistingCustomer/existingCustomer/operating_region_code))" var="dbselect4"/>
+        <output path="$HOCUSTOMERDEMOGRAPHICUPDATESTAGING/db:insert(fn:false(),[ID],[BATCHID],[CUSTOMERID],[TITLE],[CUSTOMERNAME],[ADDRESS1],[ADDRESS2],[ADDRESS3],[CITY Code],[STATE Code],[PINCODE],[CUST Date OF Birth],[MOBILE NO],[CASTE],[GENDER],[MARITALSTATUS],[SPOUSE NAME],[SPOUSE DOB],[NATIONALITY],[RELIGION],[MOTHER TONGUE],[BRANCH-CODE],[OPERATING-REGION-CODE],[AADHARNO],[PENSION CARDNO],[RATION CARD NO],[VOTER ID],[PAN NO],[BARCODE NO],[AADHARSEEDINGCONSENT],[HEALTH],[OCCUPATION],[EDU-QUALIFICATION],[CATEGORY],[LANGUAGE],[CardIssuanceFlag],[BC-BRANCH-CODE],[UDF1],[UDF2],[UDF3],[UDF4],[UDF5],[UDF6],[UDF7],[UDF8],[UDF9],[UDF10],[UDF11],[UDF12],[UDF13],[UDF14],[UDF15],[UDF16],[UDF17],[UDF18],[UDF19],[UDF20],[UDF21],[UDF22],[UDF23],[UDF24],[UDF25],[UDF26],[UDF27],[UDF28],[UDF29],[UDF30],[ERROR_DESCRIPTION],[ERROR_STAGE],[IS-ERROR],[APPLICATION-DATE],[SYSTEM-DATE],[BANKNAME],[BANK-A/C-NO],[BANK-BRANCH-NAME])" var="dbinsert"/>
+        <output namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="$var1/mb:msg(ganasevaEntity,assembly,XMLNSC,Properties)" var="MessageAssembly1"/>
+        <join>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaBatchID[1]" var="ganasevaBatchID"/>
+            <input path="$MessageAssembly/entityExistingCustomer" var="entityExistingCustomer"/>
+            <input path="$dbselect/ResultSet/dbo/RCDSCUSTOMERS/CUSTOMERID" var="CUSTOMERID"/>
+            <input auxiliary="true" path="$dbselect1/ResultSet[1]/dbo/GEO_HIERARCHY_SETTING/GHS_ID" var="GHSID"/>
+            <input auxiliary="true" path="$dbselect2/ResultSet[1]/dbo/GEO_HIERARCHY_SETTING/GHS_ID" var="GHSID2"/>
+            <input auxiliary="true" path="$dbselect3/ResultSet[1]/dbo/GEO_HIERARCHY_SETTING/GHS_ID" var="GHSID3"/>
+            <input auxiliary="true" path="$dbselect4/ResultSet[1]/dbo/GEO_HIERARCHY_SETTING/GHS_ID" var="GHSID4"/>
+            <output path="$dbinsert/."/>
+            <transaction>
+                <insert ref="dbinsert">
+                    <input path="$entityExistingCustomer/." var="entityExistingCustomer1"/>
+                    <input path="$ganasevaBatchID/." var="ganasevaBatchID1"/>
+                    <input path="$CUSTOMERID/." var="CUSTOMERID1"/>
+                    <input path="$GHSID/." var="GHSID1"/>
+                    <input path="$GHSID2/." var="GHSID5"/>
+                    <input path="$GHSID3/." var="GHSID6"/>
+                    <input path="$GHSID4/." var="GHSID7"/>
+                    <output path="."/>
+                    <function ref="xs:int">
+                        <input path="$ganasevaBatchID1/." var="ganasevaBatchID2"/>
+                        <output path="msl:db-name('[BATCHID]')"/>
+                        <param name="primitive" value="$ganasevaBatchID2"/>
+                    </function>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/title"/>
+                        <output path="msl:db-name('[TITLE]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/customer_name"/>
+                        <output path="msl:db-name('[CUSTOMERNAME]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/mobile_no"/>
+                        <output path="msl:db-name('[MOBILE NO]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/caste"/>
+                        <output path="msl:db-name('[CASTE]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/gender"/>
+                        <output path="msl:db-name('[GENDER]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/marital_status"/>
+                        <output path="msl:db-name('[MARITALSTATUS]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/nationality"/>
+                        <output path="msl:db-name('[NATIONALITY]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/religion"/>
+                        <output path="msl:db-name('[RELIGION]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/mother_tongue"/>
+                        <output path="msl:db-name('[MOTHER TONGUE]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/aadhar_no"/>
+                        <output path="msl:db-name('[AADHARNO]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/pension_card_no"/>
+                        <output path="msl:db-name('[PENSION CARDNO]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/ration_card_no"/>
+                        <output path="msl:db-name('[RATION CARD NO]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/voter_id"/>
+                        <output path="msl:db-name('[VOTER ID]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/pan_no"/>
+                        <output path="msl:db-name('[PAN NO]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <if>
+                        <input path="$entityExistingCustomer1/existingCustomer/aadhar_seeding_consent" var="aadhar_seeding_consent"/>
+                        <input path="$entityExistingCustomer1/existingCustomer/aadhar_no" var="aadhar_no"/>
+                        <output path="msl:db-name('[AADHARSEEDINGCONSENT]')"/>
+                        <test lang="xpath">fn:exists($aadhar_no)</test>
+                        <move>
+                            <input path="$aadhar_seeding_consent/."/>
+                            <output path="."/>
+                        </move>
+                    </if>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/health"/>
+                        <output path="msl:db-name('[HEALTH]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/occupation"/>
+                        <output path="msl:db-name('[OCCUPATION]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/category"/>
+                        <output path="msl:db-name('[CATEGORY]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/language"/>
+                        <output path="msl:db-name('[LANGUAGE]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <function ref="fn:string">
+                        <input path="$entityExistingCustomer1/existingCustomer/card_issuance_flag" var="card_issuance_flag"/>
+                        <output path="msl:db-name('[CardIssuanceFlag]')"/>
+                        <param name="item" value="$card_issuance_flag"/>
+                    </function>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/bc_branch_code"/>
+                        <output path="msl:db-name('[BC-BRANCH-CODE]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/spouse_name"/>
+                        <output path="msl:db-name('[SPOUSE NAME]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf1"/>
+                        <output path="msl:db-name('[UDF1]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf2"/>
+                        <output path="msl:db-name('[UDF2]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf3"/>
+                        <output path="msl:db-name('[UDF3]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf4"/>
+                        <output path="msl:db-name('[UDF4]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf5"/>
+                        <output path="msl:db-name('[UDF5]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf6"/>
+                        <output path="msl:db-name('[UDF6]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf7"/>
+                        <output path="msl:db-name('[UDF7]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf8"/>
+                        <output path="msl:db-name('[UDF8]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf9"/>
+                        <output path="msl:db-name('[UDF9]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf10"/>
+                        <output path="msl:db-name('[UDF10]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf11"/>
+                        <output path="msl:db-name('[UDF11]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf12"/>
+                        <output path="msl:db-name('[UDF12]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf13"/>
+                        <output path="msl:db-name('[UDF13]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf14"/>
+                        <output path="msl:db-name('[UDF14]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf15"/>
+                        <output path="msl:db-name('[UDF15]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf16"/>
+                        <output path="msl:db-name('[UDF16]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf17"/>
+                        <output path="msl:db-name('[UDF17]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf18"/>
+                        <output path="msl:db-name('[UDF18]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf19"/>
+                        <output path="msl:db-name('[UDF19]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf20"/>
+                        <output path="msl:db-name('[UDF20]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf21"/>
+                        <output path="msl:db-name('[UDF21]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf22"/>
+                        <output path="msl:db-name('[UDF22]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf23"/>
+                        <output path="msl:db-name('[UDF23]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf24"/>
+                        <output path="msl:db-name('[UDF24]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf25"/>
+                        <output path="msl:db-name('[UDF25]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf26"/>
+                        <output path="msl:db-name('[UDF26]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf27"/>
+                        <output path="msl:db-name('[UDF27]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf28"/>
+                        <output path="msl:db-name('[UDF28]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityExistingCustomer1/existingCustomer/udf29"/>
+                        <output path="msl:db-name('[UDF29]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/udf30"/>
+                        <output path="msl:db-name('[UDF30]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/address_line1"/>
+                        <output path="msl:db-name('[ADDRESS1]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/address_line2"/>
+                        <output path="msl:db-name('[ADDRESS2]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/address_line3"/>
+                        <output path="msl:db-name('[ADDRESS3]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <function ref="fn:string">
+                        <input path="$entityExistingCustomer1/existingCustomer/pin" var="pin"/>
+                        <output path="msl:db-name('[PINCODE]')"/>
+                        <param name="item" value="$pin"/>
+                    </function>
+                    <customFunction lang="esql" ref="helper:formatDateToString">
+                        <input path="$entityExistingCustomer1/existingCustomer/date_of_birth" var="date_of_birth"/>
+                        <output path="msl:db-name('[CUST Date OF Birth]')"/>
+                        <param name="piDate" value="$date_of_birth"/>
+                    </customFunction>
+                    <if>
+                        <input path="$entityExistingCustomer1/existingCustomer/spouse_date_of_birth" var="spouse_date_of_birth"/>
+                        <output path="msl:db-name('[SPOUSE DOB]')"/>
+                        <test lang="xpath">fn:exists($spouse_date_of_birth)</test>
+                        <customFunction lang="esql" ref="helper:formatDateToString">
+                            <input path="$spouse_date_of_birth/." var="spouse_date_of_birth1"/>
+                            <output path="."/>
+                            <param name="piDate" value="$spouse_date_of_birth1"/>
+                        </customFunction>
+                    </if>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/educational_qualification"/>
+                        <output path="msl:db-name('[EDU-QUALIFICATION]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$CUSTOMERID1/."/>
+                        <output path="msl:db-name('[CUSTOMERID]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/barcode_no"/>
+                        <output path="msl:db-name('[BARCODE NO]')"/>
+                    </move>
+                    <move>
+                        <input path="$GHSID1/."/>
+                        <output path="msl:db-name('[CITY Code]')"/>
+                    </move>
+                    <move>
+                        <input path="$GHSID5/."/>
+                        <output path="msl:db-name('[STATE Code]')"/>
+                    </move>
+                    <move>
+                        <input path="$GHSID6/."/>
+                        <output path="msl:db-name('[BRANCH-CODE]')"/>
+                    </move>
+                    <move>
+                        <input path="$GHSID7/."/>
+                        <output path="msl:db-name('[OPERATING-REGION-CODE]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/bank_name"/>
+                        <output path="msl:db-name('[BANKNAME]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/bank_account_no"/>
+                        <output path="msl:db-name('[BANK-A/C-NO]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityExistingCustomer1/existingCustomer/bank_branch_name"/>
+                        <output path="msl:db-name('[BANK-BRANCH-NAME]')"/>
+                    </move>
+                </insert>
+                <return>
+                    <input path="$var3/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </join>
+        <move>
+            <input path="$MessageAssembly/Properties"/>
+            <output path="$MessageAssembly1/Properties"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaBatchID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/batchID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaEntityID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/entityID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaEntityName[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/entityName"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaExternalCustomerID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/externalCustomerID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaProcessID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/processID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaProcessName[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/processName"/>
+        </move>
+        <move>
+            <input path="$dbselect/ResultSet[1]/dbo/RCDSCUSTOMERS/CUSTOMERID"/>
+            <output path="$MessageAssembly1/ganasevaEntity/externalID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/procCallRequired[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/procCallRequired"/>
+        </move>
+    </mappingDeclaration>
+</mappingRoot>

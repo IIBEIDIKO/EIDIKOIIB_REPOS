@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:manifest_version.subflow="manifest/version.subflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="version/version.msgflow"
+    nsPrefix="version_version.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="version" bundleName="version/version" pluginId="gufa.app"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj16/version.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj30/version.gif"/>
+    <composition>
+      <nodes xmi:type="manifest_version.subflow:FCMComposite_1" xmi:id="FCMComposite_1_1" location="239,215" UDP_UNIT_TYPE="Application" UDP_UNIT_NAME="gufa.app" UDP_SEMANTIC_VERSION="1.1.11" UDP_RELEASE_NO="12" UDP_RELEASE_DATE="2018-01-04" UDP_RELEASE_NOTE="RSY-35 : Cb check basis on new or renewal loan flag" URLSpecifier="/gufa.app/version">
+        <translation xmi:type="utility:ConstantString" string="version"/>
+      </nodes>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

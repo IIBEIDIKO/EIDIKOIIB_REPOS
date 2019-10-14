@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:csv="http://www.ibm.com/dfdl/CommaSeparatedFormat" xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:ibmDfdlExtn="http://www.ibm.com/dfdl/extensions" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions">
+
+
+            <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:import namespace="http://www.ibm.com/dfdl/CommaSeparatedFormat" schemaLocation="IBMdefined/CommaSeparatedFormat.xsd"/>
+    <xsd:annotation>
+		<xsd:appinfo source="http://www.ogf.org/dfdl/">
+			<dfdl:format documentFinalTerminatorCanBeMissing="yes" encoding="{$dfdl:encoding}" escapeSchemeRef="csv:CSVEscapeScheme" ref="csv:CommaSeparatedFormat"/>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+
+	<xsd:element ibmSchExtn:docRoot="true" name="fileExtract">
+		<xsd:complexType>
+			<xsd:sequence dfdl:separator="">
+                                                                											            <xsd:element maxOccurs="unbounded" minOccurs="0" name="recordCustomer">
+          <xsd:complexType>
+            <xsd:sequence dfdl:separator="" dfdl:terminator="%NL;">
+              <xsd:element ref="newCustomer"/>
+                                                                </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+                                                                                                                                                                                                                                                                                                                                                                                                                                            <xsd:element maxOccurs="unbounded" minOccurs="0" name="recordLoans">
+          <xsd:complexType>
+            <xsd:sequence dfdl:separator="" dfdl:terminator="%NL;">
+              <xsd:element ref="loan"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+                            <xsd:element maxOccurs="unbounded" minOccurs="0" name="recordSavings">
+          <xsd:complexType>
+            <xsd:sequence dfdl:separator="" dfdl:terminator="%NL;">
+              <xsd:element ref="saving"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+                <xsd:element maxOccurs="unbounded" minOccurs="0" name="recordGroup">
+          <xsd:complexType>
+            <xsd:sequence dfdl:separator="" dfdl:terminator="%NL;">
+              <xsd:element ref="group"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+                <xsd:element maxOccurs="unbounded" minOccurs="0" name="recordCenters">
+          <xsd:complexType>
+            <xsd:sequence dfdl:separator="" dfdl:terminator="%NL;">
+              <xsd:element ref="center"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+                            <xsd:element maxOccurs="unbounded" minOccurs="0" name="recordExistingCustomer">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element ref="existingCustomer"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+            </xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+
+</xsd:schema>

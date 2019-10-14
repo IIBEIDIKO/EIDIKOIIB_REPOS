@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/localEnvironmentVariables.xsd" var="var"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,LOANS))" var="GUFA"/>
+    <output path="/entityLoan.xsd"/>
+    <namespaces>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="startJob_createLoanDFDL">
+        <input path="$var/mb:msg(entityID,assembly,XMLNSC,LocalEnvironment,Properties)" var="MessageAssembly"/>
+        <input path="$GUFA/db:select(fn:false(),ResultSet(GUFA/LOANS/ID,GUFA/LOANS/EXTERNAL_ID,GUFA/LOANS/EXTERNAL_CUSTOMER_ID,GUFA/LOANS/EXTERNAL_CENTER_ID,GUFA/LOANS/EXTERNAL_GROUP_ID,GUFA/LOANS/LOAN_PRODUCT_CODE,GUFA/LOANS/LOAN_AMOUNT,GUFA/LOANS/DISBURSEMENT_MODE,GUFA/LOANS/NO_OF_INSTALLMENTS,GUFA/LOANS/REPAYMENT_FREQUENCY,GUFA/LOANS/LOAN_CYCLE,GUFA/LOANS/BARCODE_NO,GUFA/LOANS/LOAN_START_DATE,GUFA/LOANS/REPAYMENT_START_DATE,GUFA/LOANS/COLLECTOR,GUFA/LOANS/APPROVER,GUFA/LOANS/EXPECTED_DISBURSAL_DATE,GUFA/LOANS/UDF1,GUFA/LOANS/UDF2,GUFA/LOANS/UDF3,GUFA/LOANS/UDF4,GUFA/LOANS/UDF5,GUFA/LOANS/UDF6,GUFA/LOANS/UDF7,GUFA/LOANS/UDF8,GUFA/LOANS/UDF9,GUFA/LOANS/UDF10,GUFA/LOANS/UDF11,GUFA/LOANS/UDF12,GUFA/LOANS/UDF13,GUFA/LOANS/UDF14,GUFA/LOANS/UDF15,GUFA/LOANS/UDF16,GUFA/LOANS/UDF17,GUFA/LOANS/UDF18,GUFA/LOANS/UDF19,GUFA/LOANS/UDF20,GUFA/LOANS/UDF21,GUFA/LOANS/UDF22,GUFA/LOANS/UDF23,GUFA/LOANS/UDF24,GUFA/LOANS/UDF25,GUFA/LOANS/UDF26,GUFA/LOANS/UDF27,GUFA/LOANS/UDF28,GUFA/LOANS/UDF29,GUFA/LOANS/UDF30,GUFA/LOANS/BC_BRANCH_CODE,GUFA/LOANS/IS_TOP_UP,GUFA/LOANS/LOAN_PURPOSE,GUFA/LOANS/PSL_CODE,GUFA/LOANS/HOSPITAL_CASH,GUFA/LOANS/PREPAID_CHARGES,GUFA/LOANS/BANKNAME,GUFA/LOANS/IFSCCODE,GUFA/LOANS/BANKACCOUNTNUMBER),db:where('GUFA.LOANS.ID =  ? ','?'=$MessageAssembly/entityID))" var="dbselect"/>
+        <output namespace="http://www.quantiguous.com/gufa/dfdl/entityLoan.xsd" path="mb:msg(entityLoan,assembly,DFDL,LocalEnvironment,Properties)"/>
+        <move>
+            <input path="$MessageAssembly/Properties"/>
+            <output path="Properties"/>
+            <override>
+                <assign value="{http://www.quantiguous.com/gufa/dfdl/entityLoan.xsd}:entityLoan">
+                    <output path="Properties/MessageType"/>
+                </assign>
+            </override>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment"/>
+            <output path="LocalEnvironment"/>
+        </move>
+        <select ref="dbselect">
+            <input path="$dbselect/ResultSet"/>
+            <output path="entityLoan"/>
+            <foreach>
+                <input path="."/>
+                <output path="loan"/>
+                <move automap="true">
+                    <input path="GUFA/LOANS/EXTERNAL_ID"/>
+                    <output path="external_id"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/EXTERNAL_CUSTOMER_ID"/>
+                    <output path="external_customer_id"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/EXTERNAL_CENTER_ID"/>
+                    <output path="external_center_id"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/EXTERNAL_GROUP_ID"/>
+                    <output path="external_group_id"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/LOAN_PRODUCT_CODE"/>
+                    <output path="loan_product_code"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/LOAN_AMOUNT" var="LOANAMOUNT"/>
+                    <output path="loan_amount"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/DISBURSEMENT_MODE"/>
+                    <output path="disbursement_mode"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/NO_OF_INSTALLMENTS"/>
+                    <output path="no_of_installments"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/REPAYMENT_FREQUENCY"/>
+                    <output path="repayment_frequency"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/LOAN_CYCLE"/>
+                    <output path="loan_cycle"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/BARCODE_NO"/>
+                    <output path="barcode_no"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/LOAN_START_DATE"/>
+                    <output path="loan_start_date"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/REPAYMENT_START_DATE"/>
+                    <output path="repayment_start_date"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/COLLECTOR"/>
+                    <output path="collector"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/APPROVER"/>
+                    <output path="approver"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF1"/>
+                    <output path="udf1"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF2"/>
+                    <output path="udf2"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF3"/>
+                    <output path="udf3"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF4"/>
+                    <output path="udf4"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF5"/>
+                    <output path="udf5"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF6"/>
+                    <output path="udf6"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF7"/>
+                    <output path="udf7"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF8"/>
+                    <output path="udf8"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF9"/>
+                    <output path="udf9"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF10"/>
+                    <output path="udf10"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF11"/>
+                    <output path="udf11"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF12"/>
+                    <output path="udf12"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF13"/>
+                    <output path="udf13"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF14"/>
+                    <output path="udf14"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF15"/>
+                    <output path="udf15"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF16"/>
+                    <output path="udf16"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF17"/>
+                    <output path="udf17"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF18"/>
+                    <output path="udf18"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF19"/>
+                    <output path="udf19"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF20"/>
+                    <output path="udf20"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF21"/>
+                    <output path="udf21"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF22"/>
+                    <output path="udf22"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF23"/>
+                    <output path="udf23"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF24"/>
+                    <output path="udf24"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF25"/>
+                    <output path="udf25"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF26"/>
+                    <output path="udf26"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF27"/>
+                    <output path="udf27"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF28"/>
+                    <output path="udf28"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF29"/>
+                    <output path="udf29"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/LOANS/UDF30"/>
+                    <output path="udf30"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/EXPECTED_DISBURSAL_DATE"/>
+                    <output path="expected_disbursal_date"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/BC_BRANCH_CODE"/>
+                    <output path="bc_branch_code"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/IS_TOP_UP"/>
+                    <output path="is_top_up"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/LOAN_PURPOSE"/>
+                    <output path="loan_purpose"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/PSL_CODE"/>
+                    <output path="psl_code"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/HOSPITAL_CASH"/>
+                    <output path="hospital_cash"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/PREPAID_CHARGES"/>
+                    <output path="prepaid_charges"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/BANKNAME"/>
+                    <output path="bankname"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/IFSCCODE"/>
+                    <output path="ifsccode"/>
+                </move>
+                <move>
+                    <input path="GUFA/LOANS/BANKACCOUNTNUMBER"/>
+                    <output path="bankaccountnumber"/>
+                </move>
+            </foreach>
+        </select>
+    </mappingDeclaration>
+</mappingRoot>

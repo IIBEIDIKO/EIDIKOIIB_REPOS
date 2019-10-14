@@ -1,0 +1,41 @@
+
+CREATE COMPUTE MODULE routeToEntity
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment.Variables.batchID = OutputRoot.XMLNSC.ns6:ganasevaEntity.batchID;
+		SET OutputLocalEnvironment.Variables.fileName = OutputRoot.XMLNSC.ns6:ganasevaEntity.externalID || CAST(OutputRoot.XMLNSC.ns6:ganasevaEntity.batchID AS CHARACTER);
+		SET OutputLocalEnvironment.Variables.externalID = OutputRoot.XMLNSC.ns6:ganasevaEntity.externalID;
+		SET OutputLocalEnvironment.Variables.processName = OutputRoot.XMLNSC.ns6:ganasevaEntity.processName;
+		SET OutputLocalEnvironment.Variables.procCallRequired = OutputRoot.XMLNSC.ns6:ganasevaEntity.procCallRequired;
+		SET Environment.Variables.entityID = OutputRoot.XMLNSC.ns6:ganasevaEntity.entityID;
+		SET Environment.Variables.batchID = OutputRoot.XMLNSC.ns6:ganasevaEntity.batchID;
+		SET Environment.Variables.fileName = OutputRoot.XMLNSC.ns6:ganasevaEntity.externalID || CAST(OutputRoot.XMLNSC.ns6:ganasevaEntity.batchID AS CHARACTER);
+		SET Environment.Variables.externalID = OutputRoot.XMLNSC.ns6:ganasevaEntity.externalID;
+		SET Environment.Variables.processName = OutputRoot.XMLNSC.ns6:ganasevaEntity.processName;
+		SET Environment.Variables.entityName = OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName;
+		SET Environment.Variables.externalCustomerID = OutputRoot.XMLNSC.ns6:ganasevaEntity.externalCustomerID;
+		SET Environment.Variables.processID = OutputRoot.XMLNSC.ns6:ganasevaEntity.processID;
+		SET Environment.Variables.procCallRequired = OutputRoot.XMLNSC.ns6:ganasevaEntity.procCallRequired;
+		SET Environment.Variables.startTimeStamp = CURRENT_TIMESTAMP;
+		
+		IF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'CUSTOMER' THEN
+			PROPAGATE TO LABEL 'createCustomer';
+		ELSEIF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'EXISTINGCUSTOMER' THEN
+			PROPAGATE TO LABEL 'updateExistingCustomer';
+		ELSEIF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'SAVING' THEN
+			PROPAGATE TO LABEL 'createSaving';
+		ELSEIF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'GROUP' THEN
+			PROPAGATE TO LABEL 'createGroup';
+		ELSEIF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'LOAN' THEN
+			PROPAGATE TO LABEL 'createLoan';
+		ELSEIF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'CENTER' THEN
+			PROPAGATE TO LABEL 'createCenter';
+		ELSEIF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'IMAGE' THEN
+			PROPAGATE TO LABEL 'uploadImage';
+		ELSEIF OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'UPDATE_JOB' THEN
+			PROPAGATE TO LABEL 'updateIntegrationJob';
+		END IF;
+		RETURN TRUE;
+	END;
+END MODULE;

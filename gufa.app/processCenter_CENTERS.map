@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/processCenter.xsd" var="var"/>
+    <input path="/localEnvironmentVariables.xsd" var="var1"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var2"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,CENTERS)" var="CENTERS1"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,INCOMING_FILE_RECORDS)" var="INCOMINGFILERECORDS"/>
+    <namespaces>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="processCenter_CENTERS">
+        <input path="$var/mb:msg(processCenter,assembly,DFDL,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="errorInYamlForm" ref="var1" var="any"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileID" ref="var1" var="any1"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="sequenceID" var="any2"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileRecordID" ref="var1" var="any3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="entityID" ref="var1" var="any4"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="createdBy" ref="var1" var="any5"/>
+        </input>
+        <output path="$CENTERS1/db:insert(fn:false(),ID,EXTERNAL_ID,CENTER_NAME,FORMATION_DATE,SERVICING_AGENT,MAXIMUM_INDIVIDUALS,MEETING_TIME,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,CITY_CODE,STATE_CODE,PIN,OPERATING_REGION_CODE,BRANCH_CODE,DESCRIPTION,PHONE_NO,CREATED_BY,CREATED_AT,STATUS,INTERNAL_ID,UPDATED_AT,RECORD_ERRORS,INCOMING_FILE_ID,UPDATED_BY,SKIPPED,PROCESS_ID,PRIMARY_CONTACT,SECONDARY_CONTACT,SECONDARY_PHONE_NO,UDF1,UDF2,UDF3,UDF4,UDF5,UDF6,UDF7,UDF8,UDF9,UDF10,UDF11,UDF12,UDF13,UDF14,UDF15,UDF16,UDF17,UDF18,UDF19,UDF20,UDF21,UDF22,UDF23,UDF24,UDF25,UDF26,UDF27,UDF28,UDF29,UDF30,RECORD_NUMBER)" var="dbinsert"/>
+        <output path="$INCOMINGFILERECORDS/db:insert(fn:false(),ID,INCOMING_FILE_ID,RECORD_NO,ENTITY_ID,ENTITY_NAME,RECORD_TXT,RECORD_ERRORS,CREATED_BY,CREATED_AT,IS_VALID)" var="dbinsert2"/>
+        <foreach>
+            <input path="$MessageAssembly/processCenter/center" var="center"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record4"/>
+            <output path="$dbinsert/."/>
+            <transaction>
+                <insert ref="dbinsert">
+                    <input path="$center/." var="center1"/>
+                    <input path="$createdBy/." var="createdBy1"/>
+                    <input path="$errorInYamlForm/." var="errorInYamlForm1"/>
+                    <input path="$incomingFileID/." var="incomingFileID3"/>
+                    <input path="$entityID/." var="entityID3"/>
+                    <input path="$Record4/." var="Record5"/>
+                    <output path="."/>
+                    <move automap="true">
+                        <input path="$center1/external_id"/>
+                        <output path="EXTERNAL_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/center_name"/>
+                        <output path="CENTER_NAME"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/formation_date"/>
+                        <output path="FORMATION_DATE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/servicing_agent"/>
+                        <output path="SERVICING_AGENT"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/maximum_individuals"/>
+                        <output path="MAXIMUM_INDIVIDUALS"/>
+                    </move>
+                    <move>
+                        <input path="$center1/address_line1"/>
+                        <output path="ADDRESS_LINE1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/operating_region_code"/>
+                        <output path="OPERATING_REGION_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/branch_code"/>
+                        <output path="BRANCH_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/description"/>
+                        <output path="DESCRIPTION"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/phone_no"/>
+                        <output path="PHONE_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$createdBy1/."/>
+                        <output path="CREATED_BY"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$incomingFileID3/."/>
+                        <output path="INCOMING_FILE_ID"/>
+                    </move>
+                    <move>
+                        <input path="$errorInYamlForm1/."/>
+                        <output path="RECORD_ERRORS"/>
+                    </move>
+                    <move>
+                        <input path="$entityID3/."/>
+                        <output path="ID"/>
+                    </move>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                    <function ref="fn:current-dateTime">
+                        <output path="UPDATED_AT"/>
+                    </function>
+                    <assign value="0">
+                        <output path="SKIPPED"/>
+                    </assign>
+                    <expression>
+                        <input path="$center1/meeting_time" var="meeting_time"/>
+                        <output path="MEETING_TIME"/>
+                        <code lang="xpath">fn:concat(fn:substring(fn:concat('0',fn:string(fn:hours-from-time($meeting_time))), fn:string-length(fn:concat('0',fn:string(fn:hours-from-time($meeting_time)))) -1,2),
+':',
+fn:substring(fn:concat('0',fn:string(fn:minutes-from-time($meeting_time))), fn:string-length(fn:concat('0',fn:string(fn:minutes-from-time($meeting_time)))) -1,2),
+':',
+fn:substring(fn:concat('0',fn:string(fn:seconds-from-time($meeting_time))), fn:string-length(fn:concat('0',fn:string(fn:seconds-from-time($meeting_time)))) -1,2))</code>
+                    </expression>
+                    <move>
+                        <input path="$center1/pin"/>
+                        <output path="PIN"/>
+                    </move>
+                    <move>
+                        <input path="$center1/state_code"/>
+                        <output path="STATE_CODE"/>
+                    </move>
+                    <move>
+                        <input path="$center1/city_code"/>
+                        <output path="CITY_CODE"/>
+                    </move>
+                    <move>
+                        <input path="$center1/address_line3"/>
+                        <output path="ADDRESS_LINE3"/>
+                    </move>
+                    <move>
+                        <input path="$center1/address_line2"/>
+                        <output path="ADDRESS_LINE2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf1"/>
+                        <output path="UDF1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf2"/>
+                        <output path="UDF2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf3"/>
+                        <output path="UDF3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf4"/>
+                        <output path="UDF4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf5"/>
+                        <output path="UDF5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf6"/>
+                        <output path="UDF6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf7"/>
+                        <output path="UDF7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf8"/>
+                        <output path="UDF8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf9"/>
+                        <output path="UDF9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf10"/>
+                        <output path="UDF10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf11"/>
+                        <output path="UDF11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf12"/>
+                        <output path="UDF12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf13"/>
+                        <output path="UDF13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf14"/>
+                        <output path="UDF14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf15"/>
+                        <output path="UDF15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf16"/>
+                        <output path="UDF16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf17"/>
+                        <output path="UDF17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf18"/>
+                        <output path="UDF18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf19"/>
+                        <output path="UDF19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf20"/>
+                        <output path="UDF20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf21"/>
+                        <output path="UDF21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf22"/>
+                        <output path="UDF22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf23"/>
+                        <output path="UDF23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf24"/>
+                        <output path="UDF24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf25"/>
+                        <output path="UDF25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf26"/>
+                        <output path="UDF26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf27"/>
+                        <output path="UDF27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf28"/>
+                        <output path="UDF28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf29"/>
+                        <output path="UDF29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$center1/udf30"/>
+                        <output path="UDF30"/>
+                    </move>
+                    <function ref="xs:int">
+                        <input path="$Record5/." var="Record3"/>
+                        <output path="RECORD_NUMBER"/>
+                        <param name="primitive" value="$Record3"/>
+                    </function>
+                    <move>
+                        <input path="$center1/primary_contact"/>
+                        <output path="PRIMARY_CONTACT"/>
+                    </move>
+                    <move>
+                        <input path="$center1/secondary_contact"/>
+                        <output path="SECONDARY_CONTACT"/>
+                    </move>
+                    <move>
+                        <input path="$center1/secondary_phone_no"/>
+                        <output path="SECONDARY_PHONE_NO"/>
+                    </move>
+                    <if>
+                        <input path="$errorInYamlForm1/." var="errorInYamlForm4"/>
+                        <output path="STATUS"/>
+                        <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm4, 'A')) &gt; 0</test>
+                        <assign value="FAILED">
+                            <output path="."/>
+                        </assign>
+                    </if>
+                </insert>
+                <return>
+                    <input path="$var2/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+        <foreach>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/incomingFileRecordID[1]" var="incomingFileRecordID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy2"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm2"/>
+            <output path="$dbinsert2/."/>
+            <transaction>
+                <insert ref="dbinsert2">
+                    <input path="$incomingFileRecordID/." var="incomingFileRecordID1"/>
+                    <input path="$Record/." var="Record1"/>
+                    <input path="$incomingFileID1/." var="incomingFileID2"/>
+                    <input path="$entityID1/." var="entityID2"/>
+                    <input path="$createdBy2/." var="createdBy3"/>
+                    <input path="$errorInYamlForm2/." var="errorInYamlForm3"/>
+                    <output path="."/>
+                    <function ref="xs:int">
+                        <input path="$Record1/." var="Record2"/>
+                        <output path="RECORD_NO"/>
+                        <param name="primitive" value="$Record2"/>
+                    </function>
+                    <move>
+                        <input path="$createdBy3/."/>
+                        <output path="CREATED_BY"/>
+                    </move>
+                    <move>
+                        <input path="$incomingFileRecordID1/." var="incomingFileRecordID2"/>
+                        <output path="ID"/>
+                    </move>
+                    <move>
+                        <input path="$entityID2/." var="entityID4"/>
+                        <output path="ENTITY_ID"/>
+                    </move>
+                    <move>
+                        <input path="$incomingFileID2/." var="incomingFileID4"/>
+                        <output path="INCOMING_FILE_ID"/>
+                    </move>
+                    <assign value="CENTER">
+                        <output path="ENTITY_NAME"/>
+                    </assign>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                    <condition>
+                        <if>
+                            <input path="$errorInYamlForm3/." var="errorInYamlForm5"/>
+                            <output path="IS_VALID"/>
+                            <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm5, 'A')) = 0</test>
+                            <assign value="1">
+                                <output path="."/>
+                            </assign>
+                        </if>
+                        <else>
+                            <output path="IS_VALID"/>
+                            <assign value="0">
+                                <output path="."/>
+                            </assign>
+                        </else>
+                    </condition>
+                </insert>
+                <return>
+                    <input path="$var2/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+    </mappingDeclaration>
+</mappingRoot>

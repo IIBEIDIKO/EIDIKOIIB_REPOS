@@ -1,0 +1,116 @@
+CREATE COMPUTE MODULE setExternalID
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lQuery CHARACTER;
+		
+		SET OutputRoot = InputRoot;
+		
+		-- set the id as environment variable for updating the job over
+		SET lQuery = 'SELECT ID FROM UNLINKED_ENTITY_JOBS WHERE CENTER_EXTERNAL_ID = '''||OutputRoot.XMLNSC.externalID ||''' ORDER BY ID DESC';
+		SET rs.rows[] = PASSTHRU (lQuery);
+		SET Environment.Variables.ID = rs.rows[1].ID;
+		SET OutputLocalEnvironment.Wildcard.WildcardMatch = rs.rows[1].ID;	
+		PROPAGATE DELETE NONE;
+		PROPAGATE TO TERMINAL 'out1';	
+	RETURN FALSE;
+	END;
+END MODULE;
+
+
+
+CREATE COMPUTE MODULE setProcessID
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.XMLNSC.entityID = InputLocalEnvironment.HTTP.Input.QueryString.processID;
+	RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE extractJobOver
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		UPDATE Database.UNLINKED_ENTITY_JOBS AS A
+		SET IS_RUNNING = 0,
+		IS_SUCCESSFUL = 1,
+		UPDATED_AT = CURRENT_TIMESTAMP
+		WHERE A.ID = Environment.Variables.ID;
+	RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE buildMQRequest
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lQuery CHARACTER;
+		SET lQuery = 'SELECT ID, CENTER_EXTERNAL_ID FROM UNLINKED_ENTITY_JOBS WHERE ID = '||CAST(InputLocalEnvironment.HTTP.Input.QueryString.unlinkedEntityJobID AS CHARACTER) ||'ORDER BY ID DESC';
+		SET rs = PASSTHRU (lQuery);
+		SET OutputRoot.XMLNSC.externalID = rs.CENTER_EXTERNAL_ID[1];
+		SET Environment.Variables.ID = rs.ID[1];
+		
+		UPDATE Database.UNLINKED_ENTITY_JOBS AS A
+		SET IS_RUNNING = 1,
+		UPDATED_AT = CURRENT_TIMESTAMP
+		WHERE A.ID = Environment.Variables.ID;
+		
+	RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE setExceptionInJob
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE faultCode INT;
+        DECLARE faultText, faultInserts CHAR;
+		DECLARE lExceptionMsg CHARACTER;
+        
+		-- get the last exception, this is in most cases the root case
+		CALL getLastExceptionDetail(faultCode, faultText, faultInserts);
+		
+		-- create exception message which needs to be updated
+		SET lExceptionMsg = 'FaultCode> '||CAST(faultCode AS CHARACTER)||' FaultText> '||faultText||' FaultInserts> '||faultInserts;
+
+		UPDATE Database.UNLINKED_ENTITY_JOBS AS A
+		SET IS_RUNNING = 0,
+		IS_FAILED = 1,
+		ERROR_DESCRIPTION = lExceptionMsg,
+		UPDATED_AT = CURRENT_TIMESTAMP
+		WHERE A.ID = Environment.Variables.ID;
+		
+		SET OutputRoot.XMLNSC.centerErrorDescription = lExceptionMsg;
+	RETURN TRUE;
+	END;
+	
+	CREATE PROCEDURE getLastExceptionDetail(OUT messageNumber INT, OUT messageText CHAR, OUT messageInserts CHAR)
+	BEGIN		
+		SET messageNumber = 0;
+		SET messageText = '';
+		SET messageInserts = '';
+		
+	-- Create a reference to the first child of the exception list
+		DECLARE ptrException REFERENCE TO InputExceptionList.*[1];
+	
+		-- keep looping while the moves to the child of exception list work
+	    WHILE lastmove(ptrException) DO
+	        -- store the current values for the error number and text
+	        IF ptrException.Number is not null THEN
+	        SET messageNumber = ptrException.Number;
+	        SET messageText = ptrException.Text;
+	
+	        SET messageInserts = '';
+	        DECLARE ptrInsert REFERENCE TO ptrException.Insert[1];
+	        WHILE lastmove(ptrInsert) DO
+	                IF ptrInsert.Text is not null THEN
+	                        SET messageInserts = messageInserts || ',' || ptrInsert.Text;
+	                END IF;
+	                MOVE ptrInsert NEXTSIBLING;
+	        END WHILE;
+	
+	        END IF;
+	        -- now move to the last child which should be the next exceptionlist
+	        MOVE ptrException LASTCHILD;
+	    END WHILE;
+	    
+	END;
+END MODULE;

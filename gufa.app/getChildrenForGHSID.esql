@@ -1,0 +1,101 @@
+CREATE COMPUTE MODULE getGHSRecords
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE I INTEGER 1;
+		DECLARE S INTEGER;
+		DECLARE pathInURI CHARACTER;
+		DECLARE P INTEGER;
+		DECLARE lGHSCode CHARACTER;
+		DECLARE lGHSID INTEGER;
+		DECLARE lParent CHARACTER;
+		SET pathInURI = SUBSTRING(InputLocalEnvironment.HTTP.Input.RequestLine.RequestURI AFTER '/gufa/GHSDirectory/');
+		SET P = POSITION('/' IN pathInURI);
+		IF P = 0 THEN
+			SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID, GEO_HIERARCHY_SETTING.GHS_CODE, GEO_HIERARCHY_SETTING.GHS_DESCRIPTION
+							FROM Database.GEO_HIERARCHY_SETTING 
+        					WHERE GEO_HIERARCHY_SETTING.GHS_LEVELID = getGHSLevel(pathInURI)
+        					AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';	
+		ELSE
+			SET lGHSCode = SUBSTRING(SUBSTRING(pathInURI AFTER '/') BEFORE '/');
+			
+			SET lGHSID = THE(SELECT ITEM GEO_HIERARCHY_SETTING.GHS_ID
+							FROM Database.GEO_HIERARCHY_SETTING
+							WHERE GEO_HIERARCHY_SETTING.GHS_CODE = lGHSCode
+							AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D'); 
+			     
+			-- since bc branch code comes from a separate table and is not part of the GHS directory table
+			IF CONTAINS(pathInURI,'bcBranches') THEN
+				SET rs.rows[] = SELECT BANK_MASTER.BMS_ID, BANK_MASTER.BMS_CODE, BANK_MASTER.BMS_NAME
+			        FROM Database.BANK_MASTER
+			              WHERE BANK_MASTER.BMS_BASEBRANCH = lGHSID
+			              AND BANK_MASTER.BMS_DELFLAG <> 'D'
+			              AND BANK_MASTER.BMS_PEBRANCH IS NOT NULL;
+			ELSEIF CONTAINS(pathInURI,'collectors') THEN
+				
+				SET rs.rows[] = SELECT SAD_USERDETAILS.USR_ID, GEO_HIERARCHY_SETTING.GHS_CODE, SAD_USERDETAILS.USR_FULLNAME
+				                 FROM Database.UT_USER_PROFILEMAPPING, Database.SAD_USERDETAILS, Database.BANK_MASTER, Database.CSRTOBRANCHMAPPING, Database.GEO_HIERARCHY_SETTING
+				                WHERE CSRTOBRANCHMAPPING.USR_ID = SAD_USERDETAILS.USR_ID
+				                  AND UT_USER_PROFILEMAPPING.USERID = SAD_USERDETAILS.USR_ID
+				                  AND BANK_MASTER.BMS_ID = CSRTOBRANCHMAPPING.BRANCHCODE
+				                  AND GEO_HIERARCHY_SETTING.GHS_ID = BANK_MASTER.BMS_BASEBRANCH
+				                  AND UT_USER_PROFILEMAPPING.PROFILEID = 'CSR'  
+				                  AND BANK_MASTER.BMS_CODE = lGHSCode
+				                  AND SAD_USERDETAILS.USR_DELFLAG = 'X';
+
+			ELSEIF CONTAINS(pathInURI,'approvers') THEN
+				SET rs.rows[] = SELECT SAD_USERDETAILS.USR_ID, GEO_HIERARCHY_SETTING.GHS_CODE, SAD_USERDETAILS.USR_FULLNAME
+				                 FROM Database.UT_USER_PROFILEMAPPING, Database.SAD_USERDETAILS, Database.BANK_MASTER, Database.CSRTOBRANCHMAPPING, Database.GEO_HIERARCHY_SETTING
+				                WHERE CSRTOBRANCHMAPPING.USR_ID = SAD_USERDETAILS.USR_ID
+				                  AND UT_USER_PROFILEMAPPING.USERID = SAD_USERDETAILS.USR_ID
+				                  AND BANK_MASTER.BMS_ID = CSRTOBRANCHMAPPING.BRANCHCODE
+				                  AND GEO_HIERARCHY_SETTING.GHS_ID = BANK_MASTER.BMS_BASEBRANCH
+				                  AND UT_USER_PROFILEMAPPING.PROFILEID = '0005'  
+				                  AND BANK_MASTER.BMS_CODE = lGHSCode
+				                  AND SAD_USERDETAILS.USR_DELFLAG = 'X';
+			ELSE				
+				-- get children for ghs_id
+				SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID, GEO_HIERARCHY_SETTING.GHS_CODE, GEO_HIERARCHY_SETTING.GHS_DESCRIPTION
+								FROM Database.GEO_HIERARCHY_SETTING 
+				            	WHERE GEO_HIERARCHY_SETTING.GHS_PARENT = lGHSID
+				            	AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+			END IF;
+		END IF;
+		SET S =  CARDINALITY(rs.rows[]);
+		CREATE FIELD OutputRoot.JSON.Data.ghsRecords IDENTITY (JSON.Array)ghsRecords;
+		IF S > 0 THEN
+			WHILE I <= S DO
+				IF CONTAINS(pathInURI,'bcBranches') THEN
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_ID VALUE = rs.rows[I].BMS_ID;
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_CODE VALUE = rs.rows[I].BMS_CODE;
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_DESCRIPTION VALUE = rs.rows[I].BMS_NAME;
+				ELSEIF CONTAINS(pathInURI,'approvers') OR CONTAINS(pathInURI,'collectors') THEN
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_ID VALUE = rs.rows[I].USR_ID;
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_CODE VALUE = rs.rows[I].GHS_CODE;
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_DESCRIPTION VALUE = rs.rows[I].USR_FULLNAME;
+				ELSE
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_ID VALUE = rs.rows[I].GHS_ID;
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_CODE VALUE = rs.rows[I].GHS_CODE;
+					SET OutputRoot.JSON.Data.ghsRecords.Item[I].ghsRecord.GHS_DESCRIPTION VALUE = rs.rows[I].GHS_DESCRIPTION;
+				END IF;
+				SET I = I + 1;
+			END WHILE;
+		END IF;	
+		RETURN TRUE;
+	END;
+		
+	CREATE FUNCTION getGHSLevel(IN piGHSName CHARACTER) RETURNS INTEGER
+	BEGIN
+			IF piGHSName = 'countries' THEN
+				RETURN 1; 
+			ELSEIF piGHSName = 'states' THEN
+				RETURN 2; 
+			ELSEIF piGHSName = 'cities' THEN
+				RETURN 3; 
+			ELSEIF piGHSName = 'branches' THEN
+				RETURN 4; 
+			ELSEIF piGHSName = 'regions' THEN
+				RETURN 5; 
+			END IF;
+	END;
+END MODULE;

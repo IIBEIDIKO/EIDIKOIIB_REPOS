@@ -1,0 +1,96 @@
+PATH com.quantiguous.iib;
+DECLARE soap12 NAMESPACE 'http://www.w3.org/2003/05/soap-envelope';
+DECLARE equifax NAMESPACE 'http://services.equifax.com/eport/ws/schemas/1.0';
+
+CREATE PROCEDURE LOG_CREDIT_CHECK_REPLY(IN PI_BROKER_UUID                 CHAR,
+				                        IN PI_CUST_CREDIT_RATING_ID       INT,
+                                        IN PI_CUSTOMER_ID                 INT,
+                                        IN PI_RESPONSE_XML                CHAR,
+                                        IN PI_WRITTEN_OFF_AMOUNT          FLOAT,
+                                        IN PI_PAST_DUE_AMOUNT             FLOAT,
+                                        IN PI_OUTSTANDING_BALANCE         FLOAT,
+                                        IN PI_INSTITUTIONS_COUNT          INT,
+                                        IN PI_CREDIT_RATING_REASON        CHAR,
+                                        IN PI_CREDIT_PASS                 INT,
+                                        IN PI_MAX_RETRYS                  INT,
+                                        IN PI_RETRY_INTERVAL              INT,
+                                        IN PI_CIBIL_SCORE                 CHAR,
+                                        IN PI_FAULT_CODE                  CHAR,
+                                        IN PI_FAULT_REASON                CHAR,
+                                        IN PI_IS_BY_JOB                   CHAR)
+LANGUAGE DATABASE
+EXTERNAL NAME "*.pk_qg_credit_check_helper.log_credit_check_reply";  
+
+CREATE COMPUTE MODULE buildResponseForCustomer
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lNoOfInstitutions, lCreditPass INT;
+		DECLARE lOutstandingAmount, lWrittenOffAmount, lPastDueAmount FLOAT;
+		DECLARE lcreditDecisionReason, faultCode, faultReason CHARACTER;
+		DECLARE isCreditPass BOOLEAN;
+		DECLARE retryInterval CHAR getProperty(USER_DEFINED_SERVICE_NAME,PROPERTY_RETRY_INTERVAL);
+		DECLARE maxRetries CHAR getProperty(USER_DEFINED_SERVICE_NAME,PROPERTY_MAX_RETRIES);
+		DECLARE auditDataSourceName CHAR getAuditDataSourceName();
+		DECLARE schemaName CHAR getProperty(USER_DEFINED_SERVICE_NAME,PROPERTY_SCHEMA_NAME);
+
+        IF FIELDTYPE(InputRoot.XMLNSC.soap12:Fault) IS  NULL THEN
+			DECLARE refInquiryResponse REFERENCE TO InputRoot.XMLNSC.equifax:InquiryResponse;
+			SET isCreditPass =  equifax.getCreditDecision(refInquiryResponse, 
+												CAST(Environment.Variables.noOfInstitutions AS INT),
+												CAST(Environment.Variables.pastDueAmount AS FLOAT),
+												CAST(Environment.Variables.writeOffAmount AS FLOAT),
+												CAST(Environment.Variables.overDueAmount AS FLOAT),
+												Environment.Variables.isRenewalLoan,
+												lNoOfInstitutions,
+												lPastDueAmount,
+												lWrittenOffAmount,
+												lOutstandingAmount,
+												lcreditDecisionReason);
+												
+			SET OutputLocalEnvironment = InputLocalEnvironment;
+			SET OutputLocalEnvironment.Variables.lInstitutionCount = lNoOfInstitutions;
+			SET OutputLocalEnvironment.Variables.lOutstandingAmount = lOutstandingAmount;
+			SET OutputLocalEnvironment.Variables.lWrittenOffAmount = lWrittenOffAmount;
+			SET OutputLocalEnvironment.Variables.lPastDueAmount = lPastDueAmount;
+			IF isCreditPass THEN 
+				SET lCreditPass = CREDIT_CHECK_SUCCESS;  --1
+			ELSE
+				SET lCreditPass = CREDIT_CHECK_REJECTED; --- 0
+			END IF;
+	
+			SET OutputLocalEnvironment.Variables.lcreditDecisionReason = lcreditDecisionReason;
+			SET OutputLocalEnvironment.Variables.creditPassFail = lCreditPass;
+        END IF;
+        -- ErrorCode '0029' is for time-out case reply from Equifax, it needs to be retried
+        IF InputRoot.XMLNSC.equifax:InquiryResponse.equifax:ReportData.equifax:Error.equifax:ErrorCode = 'E0029' THEN
+        	SET faultCode = InputRoot.XMLNSC.equifax:InquiryResponse.equifax:ReportData.equifax:Error.equifax:ErrorCode ;
+        	SET faultReason = InputRoot.XMLNSC.equifax:InquiryResponse.equifax:ReportData.equifax:Error.equifax:ErrorMsg ;
+        END IF;
+
+        	
+        CALL LOG_CREDIT_CHECK_REPLY( getBrokerUUID1(),
+                                     Environment.Variables.customerCreditRatingID,
+                                     Environment.Variables.entityID,
+                                     CAST(ASBITSTREAM(InputRoot.XMLNSC) AS CHARACTER CCSID 1208),
+                                     lWrittenOffAmount,
+                                     lPastDueAmount,
+                                     lOutstandingAmount,
+                                     lNoOfInstitutions,
+                                     lcreditDecisionReason,
+                                     lCreditPass,
+                                     CAST(maxRetries AS INT),
+                                     CAST(retryInterval AS INT),
+                                     InputRoot.XMLNSC.equifax:InquiryResponse.equifax:ReportData.equifax:Score.equifax:Value,
+                                     COALESCE(InputRoot.XMLNSC.soap12:Fault.soap12:Code.soap12:Subcode.soap12:Value, faultCode),
+                                     COALESCE(InputRoot.XMLNSC.soap12:Fault.soap12:Reason.soap12:Text, faultReason),
+                                     Environment.Variables.isByJob
+         )IN Database.{auditDataSourceName}.{schemaName};
+
+		SET OutputRoot = InputRoot;
+		RETURN TRUE;
+		
+	END;
+	
+END MODULE;
+
+

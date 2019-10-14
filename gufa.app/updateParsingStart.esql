@@ -1,0 +1,201 @@
+PATH com.quantiguous.iib;
+
+DECLARE INCOMING_FILE SHARED ROW;
+
+CREATE PROCEDURE UPDATE_START_PARSING
+(
+	IN PI_FILE_NAME CHAR,
+	OUT PO_FILE_ID INT,
+	OUT PO_CREATED_BY INT
+)
+RETURNS FLOAT
+LANGUAGE DATABASE
+EXTERNAL NAME "*.pk_qg_gufa_service.update_start_parsing";
+
+CREATE PROCEDURE UPDATE_FINISH_PARSING
+(
+	IN PI_FILE_ID INT
+)
+RETURNS FLOAT
+LANGUAGE DATABASE
+EXTERNAL NAME "*.pk_qg_gufa_service.update_finish_parsing";
+
+CREATE DATABASE MODULE updateParsingStart
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE retVal, l_file_id, l_created_by INT;
+		DECLARE schemaName CHAR getProperty('GUFA','gufaSchemaName');
+		DECLARE dataSourceName CHAR getProperty('GUFA','gufaDataSourceName');
+
+		--this is the case where the file has been picked twice by the node
+		IF LocalEnvironment.File.Record = 1 THEN
+		
+			CALL UPDATE_START_PARSING
+				(
+					LocalEnvironment.File.Name,
+					l_file_id,
+					l_created_by
+				)
+				IN Database.{dataSourceName}.{schemaName} INTO retVal;	
+			
+			IF CAST(retVal AS INT) <> 0 THEN
+				SET INCOMING_FILE.ID = NULL;
+				SET INCOMING_FILE.CREATED_BY = NULL;
+				THROW USER EXCEPTION SEVERITY 3 MESSAGE 7777 VALUES ('pk_qg_gufa_service.update_start_parsing returned an unexpected code :'||CAST(retVal AS CHAR)|| ' for the file: '||COALESCE(LocalEnvironment.File.Name,''));
+			END IF;
+					
+			SET INCOMING_FILE.ID = l_file_id;
+			SET INCOMING_FILE.CREATED_BY = l_created_by;
+		END IF;
+		
+		SET Environment.Variables.incomingFileID = INCOMING_FILE.ID;
+		SET Environment.Variables.createdBy = INCOMING_FILE.CREATED_BY;
+				
+		RETURN TRUE;
+	END;
+
+END MODULE;
+
+CREATE DATABASE MODULE updateParsingOver
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		DECLARE retVal INT;
+		DECLARE schemaName CHAR getProperty('GUFA','gufaSchemaName');
+		DECLARE dataSourceName CHAR getProperty('GUFA','gufaDataSourceName');
+
+		--this is the case where the file has been picked twice by the node
+		IF INCOMING_FILE.ID IS NULL OR INCOMING_FILE.CREATED_BY IS NULL THEN
+			LOG EVENT VALUES('File '||LocalEnvironment.File.Name||' skipped as the file has been picked up twice by the file input node');
+			RETURN TRUE;
+		END IF;
+		
+		CALL UPDATE_FINISH_PARSING
+			(
+				INCOMING_FILE.ID
+			)
+			IN Database.{dataSourceName}.{schemaName} INTO retVal;	
+			
+		IF CAST(retVal AS INT) <> 0 THEN
+			THROW USER EXCEPTION SEVERITY 3 MESSAGE 6666 VALUES ('pk_qg_gufa_service.update_finsih_parsing returned an unexpected code :'||CAST(retVal AS CHAR)|| ' for the file: '||COALESCE(LocalEnvironment.File.Name,''));
+		END IF;
+				
+		RETURN TRUE;
+	END;
+
+END MODULE;
+
+
+CREATE COMPUTE MODULE processRecord_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lQuery CHARACTER;
+		
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		
+		--this is the case where the file has been picked twice by the node
+		IF INCOMING_FILE.ID IS NULL OR INCOMING_FILE.CREATED_BY IS NULL THEN
+			LOG EVENT VALUES('Record :'||CAST(InputLocalEnvironment.File.Record AS CHAR)||' from file '||InputLocalEnvironment.File.Name||'has been skipped');
+			RETURN TRUE;
+		END IF;
+		
+		SET Environment.Variables.incomingFileID = INCOMING_FILE.ID;
+		SET Environment.Variables.createdBy = INCOMING_FILE.CREATED_BY;
+		
+		-- reoute the flow for different etities to different subflows with labels
+		IF CARDINALITY(InputRoot.DFDL.processCenter.newCustomer[]) > 0 THEN
+			SET Environment.Variables.entity = 'CUSTOMER';
+			PROPAGATE TO LABEL 'entityCustomer';
+		ELSEIF CARDINALITY(InputRoot.DFDL.processCenter.center[]) > 0  THEN
+			SET Environment.Variables.entity = 'CENTER';
+			PROPAGATE TO LABEL 'entityCenter';
+		ELSEIF CARDINALITY(InputRoot.DFDL.processCenter.group[]) > 0  THEN
+			SET Environment.Variables.entity = 'GROUP';
+			PROPAGATE TO LABEL 'entityGroup';
+		ELSEIF CARDINALITY(InputRoot.DFDL.processCenter.loan[]) > 0  THEN
+			SET Environment.Variables.entity = 'LOAN';
+			PROPAGATE TO LABEL 'entityLoan';
+		ELSEIF CARDINALITY(InputRoot.DFDL.processCenter.saving[]) > 0  THEN
+			SET Environment.Variables.entity = 'SAVING';
+			PROPAGATE TO LABEL 'entitySaving';
+		ELSEIF CARDINALITY(InputRoot.DFDL.processCenter.existingCustomer[]) > 0  THEN
+			SET Environment.Variables.entity = 'EXISTINGCUSTOMER';
+			PROPAGATE TO LABEL 'entityExistingCustomer';
+		ELSEIF CARDINALITY(InputRoot.DFDL.processCenter.unparsedRecord[]) > 0  THEN
+			SET Environment.Variables.entity = 'UNPARSED';
+			PROPAGATE TO LABEL 'entityUnparsed';
+		END IF;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE setFailure
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		UPDATE Database.INCOMING_FILES AS A
+		SET FAULT_TEXT = InputExceptionList.RecoverableException.ParserException.ParserException.ParserException.Insert.Text
+		WHERE A.FILE_NAME = InputLocalEnvironment.File.Name;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE catchException
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lExceptionMsg CHARACTER;
+		DECLARE lExceptionList CHARACTER;
+		DECLARE lSerializedRecord CHARACTER;
+		
+		DECLARE faultCode INT;
+        DECLARE faultText, faultInserts CHAR;
+        
+		-- get the last exception, this is in most cases the root case
+		CALL getLastExceptionDetail(faultCode, faultText, faultInserts);
+		
+		-- specific exception 7777 is raised when the file is picked picked by the broke twice
+		-- we must not update the file record in such case.
+		IF faultCode <> 7777 THEN
+			SET lExceptionMsg = 'Exception in record number '||CAST(InputLocalEnvironment.File.Record AS CHARACTER)||'. Please share the exception log with support. Exception log: '
+			||'FaultCode> '||CAST(faultCode AS CHARACTER)||' FaultText> '||faultText||' FaultInserts> '||faultInserts;
+			UPDATE Database.INCOMING_FILES AS A
+			SET FAULT_TEXT =  lExceptionMsg -- A.FAULT_TEXT ||'**'||
+			WHERE A.FILE_NAME = InputLocalEnvironment.File.Name;
+		END IF;
+		
+		RETURN TRUE;
+	END;
+	
+	CREATE PROCEDURE getLastExceptionDetail(OUT messageNumber INT, OUT messageText CHAR, OUT messageInserts CHAR)
+	BEGIN		
+		SET messageNumber = 0;
+		SET messageText = '';
+		SET messageInserts = '';
+		
+	-- Create a reference to the first child of the exception list
+		DECLARE ptrException REFERENCE TO InputExceptionList.*[1];
+	
+		-- keep looping while the moves to the child of exception list work
+	    WHILE lastmove(ptrException) DO
+	        -- store the current values for the error number and text
+	        IF ptrException.Number is not null THEN
+	        SET messageNumber = ptrException.Number;
+	        SET messageText = ptrException.Text;
+	
+	        SET messageInserts = '';
+	        DECLARE ptrInsert REFERENCE TO ptrException.Insert[1];
+	        WHILE lastmove(ptrInsert) DO
+	                IF ptrInsert.Text is not null THEN
+	                        SET messageInserts = messageInserts || ',' || ptrInsert.Text;
+	                END IF;
+	                MOVE ptrInsert NEXTSIBLING;
+	        END WHILE;
+	
+	        END IF;
+	        -- now move to the last child which should be the next exceptionlist
+	        MOVE ptrException LASTCHILD;
+	    END WHILE;
+	    
+	END;
+	
+	
+END MODULE;

@@ -1,0 +1,79 @@
+DECLARE cust NAMESPACE 'http://www.quantiguous.com/gufa/dfdl/entityCustomer.xsd';
+DECLARE loan NAMESPACE 'http://www.quantiguous.com/gufa/dfdl/entityLoan.xsd';
+DECLARE grp NAMESPACE 'http://www.quantiguous.com/gufa/dfdl/entityGroup.xsd';
+DECLARE sav NAMESPACE 'http://www.quantiguous.com/gufa/dfdl/entitySaving.xsd';
+DECLARE excust NAMESPACE 'http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd';
+DECLARE cen NAMESPACE 'http://www.quantiguous.com/gufa/dfdl/entityCenter.xsd';
+
+CREATE COMPUTE MODULE getUDFDetails
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		DECLARE rs ROW;
+		DECLARE lQuery CHAR;
+		SET lQuery = 'SELECT DECODE(UDF_CONFIGURATIONS.ENTITY_TYPE, ''CustomerCustomField'', ''newCustomer'',
+																	 ''SavingCustomField'',''saving'',
+																	  ''GroupCustomField'',''group'',
+																	  ''LoanCustomField'',''loan'',
+																	  ''CenterCustomField'',''center'') ENTITY_NAME, UDF_CONFIGURATIONS.UDF_FIELD
+						FROM UDF_CONFIGURATIONS
+						WHERE UDF_CONFIGURATIONS.ENABLED = 1
+						AND UDF_CONFIGURATIONS.DATA_TYPE = ''Date''
+						UNION
+						SELECT DECODE(UDF_CONFIGURATIONS.ENTITY_TYPE, ''CustomerCustomField'', ''existingCustomer'') ENTITY_NAME, UDF_CONFIGURATIONS.UDF_FIELD
+						FROM UDF_CONFIGURATIONS
+						WHERE UDF_CONFIGURATIONS.ENABLED = 1
+						AND UDF_CONFIGURATIONS.ENTITY_TYPE = ''CustomerCustomField''
+						AND UDF_CONFIGURATIONS.DATA_TYPE = ''Date''';
+		
+		SET rs.rows[] = PASSTHRU(lQuery);
+		SET OutputRoot = InputRoot;
+		SET Environment.Variables.date.columns[] = rs.rows[];
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE formatUDFs
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE T INTEGER;
+		DECLARE I INTEGER 1;
+		DECLARE lGSDateFormat CHAR;
+		DECLARE lFieldName, lEntityName CHAR;
+		DECLARE lInputDate DATE;
+		
+		SET OutputRoot = InputRoot;
+		SET T = CARDINALITY(Environment.Variables.date.columns[]);
+		WHILE I <= T DO
+			SET lEntityName = Environment.Variables.date.columns[I].ENTITY_NAME;
+			SET lFieldName = Environment.Variables.date.columns[I].UDF_FIELD;
+
+			IF OutputRoot.DFDL.cust:entityCustomer.{lEntityName}.{lFieldName} IS NOT NULL THEN
+				SET lInputDate = CAST(OutputRoot.DFDL.cust:entityCustomer.newCustomer.{lFieldName} AS DATE FORMAT 'yyyy-MM-dd');
+				SET lGSDateFormat = CAST(lInputDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+				SET OutputRoot.DFDL.cust:entityCustomer.newCustomer.{lFieldName}  = lGSDateFormat;
+			ELSEIF OutputRoot.DFDL.excust:entityExistingCustomer.{lEntityName}.{lFieldName} IS NOT NULL THEN
+				SET lInputDate = CAST(OutputRoot.DFDL.excust:entityExistingCustomer.existingCustomer.{lFieldName} AS DATE FORMAT 'yyyy-MM-dd');
+				SET lGSDateFormat = CAST(lInputDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+				SET OutputRoot.DFDL.excust:entityExistingCustomer.existingCustomer.{lFieldName}  = lGSDateFormat;
+			ELSEIF OutputRoot.DFDL.cen:entityCenter.{lEntityName}.{lFieldName} IS NOT NULL THEN
+				SET lInputDate = CAST(OutputRoot.DFDL.cen:entityCenter.center.{lFieldName} AS DATE FORMAT 'yyyy-MM-dd');
+				SET lGSDateFormat = CAST(lInputDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+				SET OutputRoot.DFDL.cen:entityCenter.center.{lFieldName}  = lGSDateFormat;
+			ELSEIF OutputRoot.DFDL.loan:entityLoan.{lEntityName}.{lFieldName} IS NOT NULL THEN
+				SET lInputDate = CAST(OutputRoot.DFDL.loan:entityLoan.loan.{lFieldName} AS DATE FORMAT 'yyyy-MM-dd');
+				SET lGSDateFormat = CAST(lInputDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+				SET OutputRoot.DFDL.loan:entityLoan.loan.{lFieldName}  = lGSDateFormat;
+			ELSEIF OutputRoot.DFDL.grp:entityGroup.{lEntityName}.{lFieldName} IS NOT NULL THEN
+				SET lInputDate = CAST(OutputRoot.DFDL.grp:entityGroup.group.{lFieldName} AS DATE FORMAT 'yyyy-MM-dd');
+				SET lGSDateFormat = CAST(lInputDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+				SET OutputRoot.DFDL.grp:entityGroup.group.{lFieldName}  = lGSDateFormat;
+			ELSEIF OutputRoot.DFDL.sav:entitySaving.{lEntityName}.{lFieldName} IS NOT NULL THEN
+				SET lInputDate = CAST(OutputRoot.DFDL.sav:entitySaving.saving.{lFieldName} AS DATE FORMAT 'yyyy-MM-dd');
+				SET lGSDateFormat = CAST(lInputDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+				SET OutputRoot.DFDL.sav:entitySaving.saving.{lFieldName}  = lGSDateFormat;
+			END IF;
+			
+		SET I = I + 1;
+		END WHILE;
+	END;
+END MODULE;

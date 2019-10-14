@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/processCenter.xsd" var="var"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var2"/>
+    <input path="/localEnvironmentVariables.xsd" var="var1"/>
+    <input path="/localEnvironmentVariables.xsd" var="var3"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,GROUPS)" var="GROUPS1"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,INCOMING_FILE_RECORDS)" var="INCOMINGFILERECORDS"/>
+    <namespaces>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="processCenter_GROUPS">
+        <input path="$var/mb:msg(processCenter,assembly,DFDL,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileRecordID" ref="var1" var="any"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileID" ref="var1" var="any1"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="entityID" ref="var1" var="any2"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="createdBy" ref="var1" var="any3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="errorInYamlForm" ref="var1" var="any4"/>
+        </input>
+        <output path="$GROUPS1/db:insert(fn:false(),ID,EXTERNAL_ID,EXTERNAL_CENTER_ID,CENTER_NAME,MAXIMUM_CENTER_LIMIT,GROUP_NAME,GROUP_TYPE,MIN_NUMBER,MAX_NUMBER,FORMATION_DATE,MEETING_TIME,MEETING_FREQUENCY,DISTANCE_FROM_BRANCH,BRANCH_CODE,OPERATING_REGION_CODE,CREATED_BY,CREATED_AT,STATUS,INTERNAL_ID,PROCESS_ID,UPDATED_AT,RECORD_ERRORS,INCOMING_FILE_ID,UPDATED_BY,SKIPPED,UDF1,UDF2,UDF3,UDF4,UDF5,UDF6,UDF7,UDF8,UDF9,UDF10,UDF11,UDF12,UDF13,UDF14,UDF15,UDF16,UDF17,UDF18,UDF19,UDF20,UDF21,UDF22,UDF23,UDF24,UDF25,UDF26,UDF27,UDF28,UDF29,UDF30,RECORD_NUMBER)" var="dbinsert1"/>
+        <output path="$INCOMINGFILERECORDS/db:insert(fn:false(),ID,INCOMING_FILE_ID,RECORD_NO,ENTITY_ID,ENTITY_NAME,RECORD_TXT,RECORD_ERRORS,CREATED_BY,CREATED_AT,IS_VALID)" var="dbinsert3"/>
+        <foreach>
+            <input path="$MessageAssembly/processCenter/group" var="group"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID2"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID2"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy2"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record4"/>
+            <output path="$dbinsert1/."/>
+            <transaction>
+                <insert ref="dbinsert1">
+                    <input path="$group/." var="group1"/>
+                    <input path="$createdBy2/." var="createdBy3"/>
+                    <input path="$incomingFileID2/." var="incomingFileID3"/>
+                    <input path="$entityID2/." var="entityID3"/>
+                    <input path="$errorInYamlForm/." var="errorInYamlForm1"/>
+                    <input path="$Record4/." var="Record5"/>
+                    <output path="."/>
+                    <move automap="true">
+                        <input path="$group1/external_id"/>
+                        <output path="EXTERNAL_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/external_center_id"/>
+                        <output path="EXTERNAL_CENTER_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/center_name"/>
+                        <output path="CENTER_NAME"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/maximum_center_limit"/>
+                        <output path="MAXIMUM_CENTER_LIMIT"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/group_name"/>
+                        <output path="GROUP_NAME"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/group_type"/>
+                        <output path="GROUP_TYPE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/min_number"/>
+                        <output path="MIN_NUMBER"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/max_number"/>
+                        <output path="MAX_NUMBER"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/formation_date"/>
+                        <output path="FORMATION_DATE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/meeting_frequency"/>
+                        <output path="MEETING_FREQUENCY"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/distance_from_branch"/>
+                        <output path="DISTANCE_FROM_BRANCH"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/branch_code"/>
+                        <output path="BRANCH_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/operating_region_code"/>
+                        <output path="OPERATING_REGION_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$createdBy3/."/>
+                        <output path="CREATED_BY"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$incomingFileID3/."/>
+                        <output path="INCOMING_FILE_ID"/>
+                    </move>
+                    <function ref="fn:string">
+                        <input path="$entityID3/." var="entityID4"/>
+                        <output path="ID"/>
+                        <param name="item" value="$entityID4"/>
+                    </function>
+                    <move>
+                        <input path="$errorInYamlForm1/."/>
+                        <output path="RECORD_ERRORS"/>
+                    </move>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                    <function ref="fn:current-dateTime">
+                        <output path="UPDATED_AT"/>
+                    </function>
+                    <assign value="0">
+                        <output path="SKIPPED"/>
+                    </assign>
+                    <expression>
+                        <input path="$group1/meeting_time" var="meeting_time"/>
+                        <output path="MEETING_TIME"/>
+                        <code lang="xpath">fn:concat(fn:substring(fn:concat('0',fn:string(fn:hours-from-time($meeting_time))), fn:string-length(fn:concat('0',fn:string(fn:hours-from-time($meeting_time)))) -1,2),
+':',
+fn:substring(fn:concat('0',fn:string(fn:minutes-from-time($meeting_time))), fn:string-length(fn:concat('0',fn:string(fn:minutes-from-time($meeting_time)))) -1,2),
+':',
+fn:substring(fn:concat('0',fn:string(fn:seconds-from-time($meeting_time))), fn:string-length(fn:concat('0',fn:string(fn:seconds-from-time($meeting_time)))) -1,2))</code>
+                    </expression>
+                    <move automap="true">
+                        <input path="$group1/udf1"/>
+                        <output path="UDF1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf2"/>
+                        <output path="UDF2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf3"/>
+                        <output path="UDF3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf4"/>
+                        <output path="UDF4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf5"/>
+                        <output path="UDF5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf6"/>
+                        <output path="UDF6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf7"/>
+                        <output path="UDF7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf8"/>
+                        <output path="UDF8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf9"/>
+                        <output path="UDF9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf10"/>
+                        <output path="UDF10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf11"/>
+                        <output path="UDF11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf12"/>
+                        <output path="UDF12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf13"/>
+                        <output path="UDF13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf14"/>
+                        <output path="UDF14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf15"/>
+                        <output path="UDF15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf16"/>
+                        <output path="UDF16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf17"/>
+                        <output path="UDF17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf18"/>
+                        <output path="UDF18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf19"/>
+                        <output path="UDF19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf20"/>
+                        <output path="UDF20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf21"/>
+                        <output path="UDF21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf22"/>
+                        <output path="UDF22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf23"/>
+                        <output path="UDF23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf24"/>
+                        <output path="UDF24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf25"/>
+                        <output path="UDF25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf26"/>
+                        <output path="UDF26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf27"/>
+                        <output path="UDF27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf28"/>
+                        <output path="UDF28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$group1/udf29"/>
+                        <output path="UDF29"/>
+                    </move>
+                    <move>
+                        <input path="$group1/udf30"/>
+                        <output path="UDF30"/>
+                    </move>
+                    <function ref="xs:int">
+                        <input path="$Record5/." var="Record3"/>
+                        <output path="RECORD_NUMBER"/>
+                        <param name="primitive" value="$Record3"/>
+                    </function>
+                    <if>
+                        <input path="$errorInYamlForm1/." var="errorInYamlForm2"/>
+                        <output path="STATUS"/>
+                        <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm2, 'A')) &gt; 0</test>
+                        <assign value="FAILED">
+                            <output path="."/>
+                        </assign>
+                    </if>
+                </insert>
+                <return>
+                    <input path="$var2/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+        <foreach>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/incomingFileRecordID[1]" var="incomingFileRecordID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm5"/>
+            <output path="$dbinsert3/."/>
+            <transaction>
+                <insert ref="dbinsert3">
+                    <input path="$incomingFileRecordID/." var="incomingFileRecordID1"/>
+                    <input path="$incomingFileID/." var="incomingFileID1"/>
+                    <input path="$createdBy/." var="createdBy1"/>
+                    <input path="$entityID/." var="entityID1"/>
+                    <input path="$Record/." var="Record1"/>
+                    <input path="$errorInYamlForm5/." var="errorInYamlForm6"/>
+                    <output path="."/>
+                    <move>
+                        <input path="$incomingFileRecordID1/." var="incomingFileRecordID2"/>
+                        <output path="ID"/>
+                    </move>
+                    <move>
+                        <input path="$incomingFileID1/." var="incomingFileID4"/>
+                        <output path="INCOMING_FILE_ID"/>
+                    </move>
+                    <function ref="xs:int">
+                        <input path="$Record1/." var="Record2"/>
+                        <output path="RECORD_NO"/>
+                        <param name="primitive" value="$Record2"/>
+                    </function>
+                    <move>
+                        <input path="$createdBy1/." var="createdBy4"/>
+                        <output path="CREATED_BY"/>
+                    </move>
+                    <move>
+                        <input path="$entityID1/." var="entityID5"/>
+                        <output path="ENTITY_ID"/>
+                    </move>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                    <assign value="GROUP">
+                        <output path="ENTITY_NAME"/>
+                    </assign>
+                    <condition>
+                        <if>
+                            <input path="$errorInYamlForm6/." var="errorInYamlForm3"/>
+                            <output path="IS_VALID"/>
+                            <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm3, 'A')) = 0</test>
+                            <assign value="1">
+                                <output path="."/>
+                            </assign>
+                        </if>
+                        <else>
+                            <output path="IS_VALID"/>
+                            <assign value="0">
+                                <output path="."/>
+                            </assign>
+                        </else>
+                    </condition>
+                </insert>
+                <return>
+                    <input path="$var2/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+    </mappingDeclaration>
+</mappingRoot>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--xtools2_universal_type_manager-->
+<xmi:XMI xmlns:datamodelversion="http://www.ibm.com/com.ibm.datatools.core/model/data/1.3.0.0" xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SQLConstraints="http:///org/eclipse/datatools/modelbase/sql/constraints.ecore" xmlns:SQLDataTypes="http:///org/eclipse/datatools/modelbase/sql/datatypes.ecore" xmlns:SQLRoutines="http:///org/eclipse/datatools/modelbase/sql/routines.ecore" xmlns:SQLSchema="http:///org/eclipse/datatools/modelbase/sql/schema.ecore" xmlns:SQLTables="http:///org/eclipse/datatools/modelbase/sql/tables.ecore" xmlns:datanotation="http:///datanotation.ecore" xmlns:zSeries="http:///com/ibm/db/models/db2/zSeries.ecore">
+  <SQLSchema:Database xmi:id="_BvbOsCa9EeSw04JoTilubA" name="FINESB" vendor="SQL Server" version="2008" schemas="_ByDr8Ca9EeSw04JoTilubA">
+    <eAnnotations xmi:id="_GZE6YCa9EeSw04JoTilubA" source="ConnectionURI">
+      <details xmi:id="_GZFhcCa9EeSw04JoTilubA" key="ConnectionKey" value="ganaseva_uat"/>
+      <details xmi:id="_s9m9EH7WEeSigqXAzrv1hg" key="ConnectionKey" value="ganaseva_uat"/>
+      <details xmi:id="_DxjZsJAUEeSQtIUFBbFN1A" key="ConnectionKey" value="finesb"/>
+      <details xmi:id="_FOBXsJAUEeSQtIUFBbFN1A" key="ConnectionKey" value="finesb"/>
+    </eAnnotations>
+    <eAnnotations xmi:id="_H_klACbnEeSw04JoTilubA" source="SQL_Statement_URI">
+      <details xmi:id="_H_klASbnEeSw04JoTilubA" key="SQL_Statement_NAME" value="SYNONYMS"/>
+      <details xmi:id="_H_klAibnEeSw04JoTilubA" key="SQL_Statement_KEY" value="create synonym [HO-PROCESS-01] for ganaseva_uat.dbo.[HO-PROCESS-01];&#xA;create synonym [HO-PROCESS-02] for ganaseva_uat.dbo.[HO-PROCESS-02];&#xA;create synonym [HO-PROCESS-04] for ganaseva_uat.dbo.[HO-PROCESS-04];&#xA;create synonym [HO-PROCESS-06] for ganaseva_uat.dbo.[HO-PROCESS-06];&#xA;create synonym [HO-PROCESS-A0] for ganaseva_uat.dbo.[HO-PROCESS-A0];&#xA;create synonym [HO-PROCESS-CU] for ganaseva_uat.dbo.[HO-PROCESS-CU];"/>
+    </eAnnotations>
+  </SQLSchema:Database>
+  <SQLSchema:Schema xmi:id="_ByDr8Ca9EeSw04JoTilubA" name="dbo" indices="_dWlzsPgeEeS2i-Blcm6GdQ _q5YDQPgeEeS2i-Blcm6GdQ _z1XG0PgeEeS2i-Blcm6GdQ _8NQl4PgeEeS2i-Blcm6GdQ _U_KZQPgfEeS2i-Blcm6GdQ _YSsmkPgfEeS2i-Blcm6GdQ" tables="_1tIAUOtSEeS-DMeflfEb8A _jNe3kfVKEeSVNdhsfEu13g _IJ-8MPeTEeSEGcqAgiUQyA" database="_BvbOsCa9EeSw04JoTilubA" routines="_zWxtkBoYEeSuhbqUdtWxWg">
+    <eAnnotations xmi:id="_ByctgCa9EeSw04JoTilubA" source="diagram">
+      <contents xsi:type="datanotation:DataDiagram" xmi:id="_ByctgSa9EeSw04JoTilubA" type="IE_CrowFoot" name="Diagram1" viewKind="ProjectExplorer" notation="IE_CrowFoot" kind="Physical">
+        <styles xsi:type="datanotation:DataAttributeStyle" xmi:id="_Byctgia9EeSw04JoTilubA"/>
+        <styles xsi:type="datanotation:DataCompartmentStyle" xmi:id="_Byctgya9EeSw04JoTilubA"/>
+        <styles xsi:type="datanotation:DataDisplayStyle" xmi:id="_BycthCa9EeSw04JoTilubA"/>
+        <styles xsi:type="datanotation:DataDiagramRelationshipStyle" xmi:id="_BycthSa9EeSw04JoTilubA"/>
+        <styles xsi:type="datanotation:DataShapeNameStyle" xmi:id="_Bycthia9EeSw04JoTilubA"/>
+        <styles xsi:type="datanotation:DataDiagramFormattingStyle" xmi:id="_Bycthya9EeSw04JoTilubA"/>
+        <element xsi:nil="true"/>
+      </contents>
+    </eAnnotations>
+  </SQLSchema:Schema>
+  <SQLRoutines:Procedure xmi:id="_zWxtkBoYEeSuhbqUdtWxWg" name="[INITIATE_BATCH_PROCESS]" language="SQL" schema="_ByDr8Ca9EeSw04JoTilubA">
+    <parameters xmi:id="_3an9gBoYEeSuhbqUdtWxWg" name="@processName">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_zBVK8SkfEeS6HsxlhnHvyw" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="100" characterSet="_44P7ACkfEeS6HsxlhnHvyw"/>
+    </parameters>
+    <parameters xmi:id="_3okS4BoYEeSuhbqUdtWxWg" name="@batchid">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_iemaEBoZEeSuhbqUdtWxWg" name="INT" primitiveType="INTEGER"/>
+    </parameters>
+    <parameters xmi:id="_3wMk4BoYEeSuhbqUdtWxWg" name="@partnerid">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_4AjeACkfEeS6HsxlhnHvyw" name="INT" primitiveType="INTEGER"/>
+    </parameters>
+    <parameters xmi:id="_39VpABoYEeSuhbqUdtWxWg" name="@filename">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_4nHuwCkfEeS6HsxlhnHvyw" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="100" characterSet="_44P7ASkfEeS6HsxlhnHvyw"/>
+    </parameters>
+    <source xmi:id="_DxVbgBoZEeSuhbqUdtWxWg" body="CREATE PROCEDURE INITIATE_BATCH_PROCESS @procedureName VARCHAR(100), @batchid INT, @partnerid INT, @filename VARCHAR(100)&#xA;AS&#xA;--This is an if-else block instead of a dynamic call to avoid sql-injection challenges&#xA;--Since the procedure names include unsupported characters, &#xA;IF @procedureName = 'HO-PROCESS-02' -- center creation&#xA;BEGIN&#xA;EXEC [HO-PROCESS-02] @batchid, @partnerid, @filename&#xA;END&#xA;ELSE IF @procedureName = 'HO-PROCESS-04' -- group creation&#xA;BEGIN&#xA;EXEC [HO-PROCESS-04] @batchid, @partnerid, @filename&#xA;END&#xA;ELSE IF @procedureName = 'HO-PROCESS-CU' -- customer creation&#xA;BEGIN&#xA;EXEC [HO-PROCESS-CU] @batchid, @partnerid, @filename&#xA;END&#xA;ELSE IF @procedureName = 'HO-PROCESS-A0' -- saving account creation&#xA;BEGIN&#xA;EXEC [HO-PROCESS-A0] @batchid, @partnerid, @filename&#xA;END&#xA;ELSE IF @procedureName = 'HO-PROCESS-01' -- loan creation&#xA;BEGIN&#xA;EXEC [HO-PROCESS-01] @batchid, @partnerid, @filename&#xA;END&#xA;ELSE&#xA;RAISERROR ('An invalid procedure name was passed: The procedure was %s, with parameters %d, %d, %s',15,1,@procedureName,@batchid,@partnerid,@filename)&#xA;"/>
+  </SQLRoutines:Procedure>
+  <zSeries:ZSeriesCharacterSet xmi:id="_44P7ACkfEeS6HsxlhnHvyw" CharacterStringDataType="_zBVK8SkfEeS6HsxlhnHvyw"/>
+  <zSeries:ZSeriesCharacterSet xmi:id="_44P7ASkfEeS6HsxlhnHvyw" CharacterStringDataType="_4nHuwCkfEeS6HsxlhnHvyw"/>
+  <SQLTables:PersistentTable xmi:id="_1tIAUOtSEeS-DMeflfEb8A" name="IMAGE_UPLOAD_DTLS" schema="_ByDr8Ca9EeSw04JoTilubA" index="_q5YDQPgeEeS2i-Blcm6GdQ _U_KZQPgfEeS2i-Blcm6GdQ _YSsmkPgfEeS2i-Blcm6GdQ">
+    <columns xmi:id="_A3MFAOtTEeS-DMeflfEb8A" name="ID" nullable="false" defaultValue="">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_O0LkUOtTEeS-DMeflfEb8A" name="INT" primitiveType="INTEGER"/>
+      <identitySpecifier xmi:id="_vXyJ4Pe-EeSbx91BdoOP6g" startValue="1" increment="1" minimum="1" maximum="2147483647"/>
+    </columns>
+    <columns xmi:id="_A6i7AOtTEeS-DMeflfEb8A" name="EXTERNAL_CUSTOMER_ID">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_SHqHQOtTEeS-DMeflfEb8A" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_A-vegOtTEeS-DMeflfEb8A" name="IMAGE_TYPE">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_Ru3MwOtTEeS-DMeflfEb8A" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_BVbgMOtTEeS-DMeflfEb8A" name="IMAGE_ID">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_RWM1IOtTEeS-DMeflfEb8A" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="50"/>
+    </columns>
+    <columns xmi:id="_BaAeMOtTEeS-DMeflfEb8A" name="STATUS">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_Q9CHMOtTEeS-DMeflfEb8A" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_BeHiIOtTEeS-DMeflfEb8A" name="REMARKS">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_QkedQOtTEeS-DMeflfEb8A" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="4000"/>
+    </columns>
+    <columns xmi:id="_BiJtkOtTEeS-DMeflfEb8A" name="INTERNAL_ID">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_QKZwYOtTEeS-DMeflfEb8A" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_BlzegOtTEeS-DMeflfEb8A" name="CREATED_AT">
+      <containedType xsi:type="SQLDataTypes:DateDataType" xmi:id="_K6Kl0OtTEeS-DMeflfEb8A" name="DATETIME" primitiveType="DATE"/>
+    </columns>
+    <columns xmi:id="_y9f7EPe4EeSbx91BdoOP6g" name="BATCH_ID">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_IwpeUPe5EeSbx91BdoOP6g" name="INT" primitiveType="INTEGER"/>
+    </columns>
+  </SQLTables:PersistentTable>
+  <SQLTables:PersistentTable xmi:id="_jNe3kfVKEeSVNdhsfEu13g" name="QG_GROUP_LOAN_DETAILS" schema="_ByDr8Ca9EeSw04JoTilubA" index="_dWlzsPgeEeS2i-Blcm6GdQ _z1XG0PgeEeS2i-Blcm6GdQ _8NQl4PgeEeS2i-Blcm6GdQ">
+    <columns xmi:id="_mzEeMPVKEeSVNdhsfEu13g" name="ID" nullable="false">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_V053cPVLEeSVNdhsfEu13g" name="INT" primitiveType="INTEGER"/>
+      <identitySpecifier xmi:id="_WFFogPVLEeSVNdhsfEu13g" startValue="1" increment="1" minimum="1" maximum="2147483647"/>
+    </columns>
+    <columns xmi:id="_DEAxAPVbEeSVNdhsfEu13g" name="STATUS">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_E_XDYPVbEeSVNdhsfEu13g" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="100"/>
+    </columns>
+    <columns xmi:id="_m0wgQPVKEeSVNdhsfEu13g" name="EXTERNAL_GROUP_ID">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_VaoWQPVLEeSVNdhsfEu13g" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_m2MDoPVKEeSVNdhsfEu13g" name="GROUP_BATCH_ID">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_KIJiIPVbEeSVNdhsfEu13g" name="INT" primitiveType="INTEGER"/>
+    </columns>
+    <columns xmi:id="_FhVdEfYhEeS_IItBSQ7YYQ" name="GROUP_PROC_CALLED">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_IaD9sPYhEeS_IItBSQ7YYQ" name="BIT" primitiveType="INTEGER"/>
+    </columns>
+    <columns xmi:id="_m3ymIPVKEeSVNdhsfEu13g" name="EXTERNAL_CUSTOMER_ID">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_VSAlwPVLEeSVNdhsfEu13g" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_nA3poPVKEeSVNdhsfEu13g" name="IS_EXISTING_CUSTOMER">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_NAnXUPVLEeSVNdhsfEu13g" name="BIT" primitiveType="INTEGER"/>
+    </columns>
+    <columns xmi:id="_m5QlwPVKEeSVNdhsfEu13g" name="CUSTOMER_BATCH_ID">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_Kl4nAPVbEeSVNdhsfEu13g" name="INT" primitiveType="INTEGER"/>
+    </columns>
+    <columns xmi:id="_m616IPVKEeSVNdhsfEu13g" name="EXTERNAL_SAVING_ID">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_VItf0PVLEeSVNdhsfEu13g" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_m8YLMPVKEeSVNdhsfEu13g" name="SAVING_BATCH_ID">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_LAWVcPVbEeSVNdhsfEu13g" name="INT" primitiveType="INTEGER"/>
+    </columns>
+    <columns xmi:id="_m95OIPVKEeSVNdhsfEu13g" name="EXTERNAL_LOAN_ID" defaultValue="">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_USbYEPVLEeSVNdhsfEu13g" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="20"/>
+    </columns>
+    <columns xmi:id="_m_V_oPVKEeSVNdhsfEu13g" name="LOAN_BATCH_ID">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_LVQ1gPVbEeSVNdhsfEu13g" name="INT" primitiveType="INTEGER"/>
+    </columns>
+    <columns xmi:id="_W7x_8PVLEeSVNdhsfEu13g" name="CREATED_AT">
+      <containedType xsi:type="SQLDataTypes:DateDataType" xmi:id="_Z97iUPVLEeSVNdhsfEu13g" name="DATETIME" primitiveType="DATE"/>
+    </columns>
+    <columns xmi:id="_W9ZJgPVLEeSVNdhsfEu13g" name="UPDATED_AT">
+      <containedType xsi:type="SQLDataTypes:DateDataType" xmi:id="_aZMiAPVLEeSVNdhsfEu13g" name="DATETIME" primitiveType="DATE"/>
+    </columns>
+    <columns xmi:id="_jseIYPe1EeSbx91BdoOP6g" name="ERROR_DESCRIPTION">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_lm-GMPe1EeSbx91BdoOP6g" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="4000"/>
+    </columns>
+    <constraints xsi:type="SQLConstraints:PrimaryKey" xmi:id="_ZIXfwfgeEeS2i-Blcm6GdQ" name="QG_GROUP_LOAN_DETAILS_PK" members="_mzEeMPVKEeSVNdhsfEu13g"/>
+  </SQLTables:PersistentTable>
+  <SQLTables:PersistentTable xmi:id="_IJ-8MPeTEeSEGcqAgiUQyA" name="QG_GROUP_LOAN_EVENTS" schema="_ByDr8Ca9EeSw04JoTilubA">
+    <columns xmi:id="_J_XJcPeTEeSEGcqAgiUQyA" name="ID" nullable="false" defaultValue="">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_NX06EPeTEeSEGcqAgiUQyA" name="INT" primitiveType="INTEGER"/>
+      <identitySpecifier xmi:id="_NqTxMPeTEeSEGcqAgiUQyA" startValue="1" increment="1" minimum="1" maximum="2147483647"/>
+    </columns>
+    <columns xmi:id="_KoY4UPeTEeSEGcqAgiUQyA" name="BATCH_ID" nullable="false">
+      <containedType xsi:type="SQLDataTypes:IntegerDataType" xmi:id="_PSAu0PeTEeSEGcqAgiUQyA" name="INT" primitiveType="INTEGER"/>
+    </columns>
+    <columns xmi:id="_3BZp0PozEeS6K64W_1DCoQ" name="BROKER_UUID" nullable="false">
+      <containedType xsi:type="SQLDataTypes:CharacterStringDataType" xmi:id="_463F0PozEeS6K64W_1DCoQ" name="VARCHAR" primitiveType="CHARACTER_VARYING" length="100"/>
+    </columns>
+    <constraints xsi:type="SQLConstraints:UniqueConstraint" xmi:id="_O7GiUPoSEeS6K64W_1DCoQ" name="QG_GROUP_LOAN_EVENTS__UN" members="_KoY4UPeTEeSEGcqAgiUQyA"/>
+    <constraints xsi:type="SQLConstraints:PrimaryKey" xmi:id="_aydK0PoSEeS6K64W_1DCoQ" name="QG_GROUP_LOAN_EVENTS_PK" members="_J_XJcPeTEeSEGcqAgiUQyA"/>
+  </SQLTables:PersistentTable>
+  <SQLConstraints:Index xmi:id="_dWlzsPgeEeS2i-Blcm6GdQ" name="QG_GROUP_LOAN_DETAILS_ID_IDX" Schema="_ByDr8Ca9EeSw04JoTilubA" table="_jNe3kfVKEeSVNdhsfEu13g">
+    <members xmi:id="_dXcIQPgeEeS2i-Blcm6GdQ" column="_mzEeMPVKEeSVNdhsfEu13g"/>
+  </SQLConstraints:Index>
+  <SQLConstraints:Index xmi:id="_q5YDQPgeEeS2i-Blcm6GdQ" name="IMAGE_UPLOAD_DTLS_ID_IDX" Schema="_ByDr8Ca9EeSw04JoTilubA" table="_1tIAUOtSEeS-DMeflfEb8A">
+    <members xmi:id="_q5gmIPgeEeS2i-Blcm6GdQ" column="_A3MFAOtTEeS-DMeflfEb8A"/>
+  </SQLConstraints:Index>
+  <SQLConstraints:Index xmi:id="_z1XG0PgeEeS2i-Blcm6GdQ" name="QG_GROUP_LOAN_DETAILS_ID_IDX1" Schema="_ByDr8Ca9EeSw04JoTilubA" table="_jNe3kfVKEeSVNdhsfEu13g">
+    <members xmi:id="_2MevMPgeEeS2i-Blcm6GdQ" column="_m3ymIPVKEeSVNdhsfEu13g"/>
+    <members xmi:id="_2MjnsPgeEeS2i-Blcm6GdQ" column="_m5QlwPVKEeSVNdhsfEu13g"/>
+  </SQLConstraints:Index>
+  <SQLConstraints:Index xmi:id="_8NQl4PgeEeS2i-Blcm6GdQ" name="QG_GROUP_LOAN_DETAILS_ID_IDX2" Schema="_ByDr8Ca9EeSw04JoTilubA" unique="true" table="_jNe3kfVKEeSVNdhsfEu13g">
+    <members xmi:id="_9iQp8PgeEeS2i-Blcm6GdQ" column="_m_V_oPVKEeSVNdhsfEu13g"/>
+  </SQLConstraints:Index>
+  <SQLConstraints:Index xmi:id="_U_KZQPgfEeS2i-Blcm6GdQ" name="IMAGE_UPLOAD_DTLS_ID_IDX1" Schema="_ByDr8Ca9EeSw04JoTilubA" table="_1tIAUOtSEeS-DMeflfEb8A">
+    <members xmi:id="_W5oh4PgfEeS2i-Blcm6GdQ" column="_A6i7AOtTEeS-DMeflfEb8A"/>
+    <members xmi:id="_W5qXEPgfEeS2i-Blcm6GdQ" column="_BaAeMOtTEeS-DMeflfEb8A"/>
+  </SQLConstraints:Index>
+  <SQLConstraints:Index xmi:id="_YSsmkPgfEeS2i-Blcm6GdQ" name="IMAGE_UPLOAD_DTLS_ID_IDX2" Schema="_ByDr8Ca9EeSw04JoTilubA" table="_1tIAUOtSEeS-DMeflfEb8A">
+    <members xmi:id="_aq-FgPgfEeS2i-Blcm6GdQ" column="_A6i7AOtTEeS-DMeflfEb8A"/>
+    <members xmi:id="_arCW8PgfEeS2i-Blcm6GdQ" column="_y9f7EPe4EeSbx91BdoOP6g"/>
+  </SQLConstraints:Index>
+</xmi:XMI>

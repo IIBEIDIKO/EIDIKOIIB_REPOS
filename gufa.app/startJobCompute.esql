@@ -1,0 +1,414 @@
+PATH com.quantiguous.iib;
+
+DECLARE ns91 NAMESPACE 'http://www.quantiguous.com/gufa/dfdl/entityCenter.xsd';
+DECLARE ns6 NAMESPACE 'http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd';
+
+CREATE PROCEDURE START_JOB
+(
+	IN PI_JOB_ID CHARACTER,
+	OUT PO_FAULT_CODE CHARACTER,
+	OUT PO_FAULT_TEXT CHARACTER
+)
+RETURNS FLOAT
+LANGUAGE DATABASE
+EXTERNAL NAME "*.pk_qg_gufa_service.start_job";
+
+CREATE COMPUTE MODULE retriveRecords
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE processID CHARACTER;
+		DECLARE entity ROW;
+		DECLARE rs ROW;
+		DECLARE I INTEGER;
+		DECLARE custRecordNum INTEGER 1;
+		DECLARE lquery CHARACTER;
+		DECLARE S INTEGER;
+		DECLARE lCount INTEGER 0;
+		DECLARE lFirstRecord BOOLEAN;
+		DECLARE lCreditResult INTEGER;
+		DECLARE lExceptionMsg CHARACTER;
+		DECLARE lPrefix CHARACTER '--- !omap';
+		DECLARE lColumn CHARACTER 'base';
+		DECLARE batchSize INTEGER;
+		
+		SET processID = InputLocalEnvironment.HTTP.Input.QueryString.processID;
+		SET batchSize = InputLocalEnvironment.HTTP.Input.QueryString.batchSize;
+		SET Environment.Variables.processID = processID;
+		SET Environment.Variables.processID = batchSize;
+		SET Environment.Variables.CodedCharSetId = InputRoot.Properties.CodedCharSetId;
+
+		-- center
+		SET entity.rows[] = SELECT CENTERS.ID, CENTERS.EXTERNAL_ID FROM Database.CENTERS WHERE CENTERS.INTERNAL_ID IS NULL AND CENTERS.PROCESS_ID = processID AND CENTERS.SKIPPED = 0;
+		SET S = CARDINALITY(entity.rows[]);
+		SET I = 1;
+		IF (S > 0) THEN			       
+			WHILE I <= S DO
+				SET OutputLocalEnvironment.Variables.ganasevaEntityID = entity.rows[I].ID;
+				SET OutputLocalEnvironment.Variables.ganasevaExternalID = entity.rows[I].EXTERNAL_ID;
+				SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'CENTER';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessName = 'HO-PROCESS-02';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+				IF I =1 THEN
+					SET OutputLocalEnvironment.Variables.procCallRequired = TRUE;
+				ELSE
+					SET OutputLocalEnvironment.Variables.procCallRequired = FALSE;
+				END IF;
+				PROPAGATE;
+				SET I = I + 1;
+			END WHILE;
+		END IF;
+
+		-- new customer
+		SET entity.rows[] = SELECT CUSTOMERS.ID, CUSTOMERS.EXTERNAL_ID, CUSTOMERS.TREAT_AS_EXISTING FROM Database.CUSTOMERS WHERE CUSTOMERS.INTERNAL_ID IS NULL AND CUSTOMERS.PROCESS_ID = processID AND CUSTOMERS.SKIPPED = 0 AND CUSTOMERS.TREAT_AS_EXISTING = 0;		       
+		SET S = CARDINALITY(entity.rows[]);
+		SET I = 1;
+		IF (S > 0) THEN			       
+			WHILE I <= S DO
+				SET OutputLocalEnvironment.Variables.ganasevaEntityID = entity.rows[I].ID;
+				SET OutputLocalEnvironment.Variables.ganasevaExternalID = entity.rows[I].EXTERNAL_ID;
+				SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'CUSTOMER';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessName = 'HO-PROCESS-CU';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+				IF (I = 1 OR batchSize = 1 )THEN
+					SET OutputLocalEnvironment.Variables.procCallRequired = TRUE;
+				ELSE
+					SET OutputLocalEnvironment.Variables.procCallRequired = FALSE;
+				END IF;
+				PROPAGATE;
+				SET I = I + 1;
+			END WHILE;
+		END IF;
+		
+		
+		--  & existing customer
+		SET entity.rows[] = SELECT CUSTOMERS.ID, CUSTOMERS.EXTERNAL_ID, CUSTOMERS.TREAT_AS_EXISTING FROM Database.CUSTOMERS WHERE CUSTOMERS.INTERNAL_ID IS NULL AND CUSTOMERS.PROCESS_ID = processID AND CUSTOMERS.SKIPPED = 0 AND CUSTOMERS.TREAT_AS_EXISTING = 1;		       
+		SET S = CARDINALITY(entity.rows[]);
+		SET I = 1;
+		IF (S > 0) THEN			       
+			WHILE I <= S DO
+				SET OutputLocalEnvironment.Variables.ganasevaEntityID = entity.rows[I].ID;
+				SET OutputLocalEnvironment.Variables.ganasevaExternalID = entity.rows[I].EXTERNAL_ID;
+				SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'EXISTINGCUSTOMER';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessName = 'HO-PROCESS-CE';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+				IF (I = 1 OR batchSize = 1 )THEN
+					SET OutputLocalEnvironment.Variables.procCallRequired = TRUE;
+				ELSE
+					SET OutputLocalEnvironment.Variables.procCallRequired = FALSE;
+				END IF;
+				PROPAGATE;
+				SET I = I + 1;
+			END WHILE;
+		END IF;
+
+		-- saving
+		SET entity.rows[] = SELECT SAVINGS.ID, SAVINGS.EXTERNAL_ID, SAVINGS.EXTERNAL_CUSTOMER_ID FROM Database.SAVINGS WHERE SAVINGS.INTERNAL_ID IS NULL AND SAVINGS.PROCESS_ID = processID AND SAVINGS.SKIPPED = 0;		       
+		SET S = CARDINALITY(entity.rows[]);
+		SET I = 1;
+		SET lFirstRecord = TRUE; -- setting the value to tru so that whichever first record get propagated have the call proc elemnt value as true
+		IF (S > 0) THEN			       
+			WHILE I <= S DO
+				SET OutputLocalEnvironment.Variables.ganasevaEntityID = entity.rows[I].ID;
+				SET OutputLocalEnvironment.Variables.ganasevaExternalID = entity.rows[I].EXTERNAL_ID;
+				SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'SAVING';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessName = 'HO-PROCESS-A0';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+				-- need to check if customer has paased credit check and process only if it is passed
+				SET lCreditResult = isCreditPass(entity.rows[I].EXTERNAL_CUSTOMER_ID, processID);
+				IF lCreditResult = 0 THEN
+					IF (lFirstRecord OR batchSize = 1)  THEN
+						SET OutputLocalEnvironment.Variables.procCallRequired = TRUE;
+						SET lFirstRecord = FALSE;
+					ELSE
+						SET OutputLocalEnvironment.Variables.procCallRequired = FALSE;
+					END IF;
+					PROPAGATE;
+				ELSEIF lCreditResult = 1 THEN
+					SET lExceptionMsg = 'Credit check for the external customer ID is in failed state. Please skip the record or make sure credit check has paased for the customer';
+					UPDATE Database.SAVINGS AS A
+					SET RECORD_ERRORS = convertToYaml(lPrefix,lColumn,lExceptionMsg),
+					STATUS = 'FAILED'
+			 		WHERE A.ID = entity.rows[I].ID;
+				ELSE
+					SET lExceptionMsg = 'No records found for the external customer ID in current integration job for credit check. Please skip the record or make sure credit check has paased for the customer';
+					UPDATE Database.SAVINGS AS A
+					SET RECORD_ERRORS = convertToYaml(lPrefix,lColumn,lExceptionMsg),
+					STATUS = 'FAILED'
+			 		WHERE A.ID = entity.rows[I].ID;
+				END IF;
+				SET I = I + 1;
+			END WHILE;
+		END IF;
+		
+		-- group 
+		SET entity.rows[] = SELECT GROUPS.ID, GROUPS.EXTERNAL_ID FROM Database.GROUPS WHERE GROUPS.INTERNAL_ID IS NULL AND GROUPS.PROCESS_ID = processID AND GROUPS.SKIPPED = 0;		       
+		SET S = CARDINALITY(entity.rows[]);
+		SET I = 1;
+		IF (S > 0) THEN			       
+			WHILE I <= S DO
+				SET OutputLocalEnvironment.Variables.ganasevaEntityID = entity.rows[I].ID;
+				SET OutputLocalEnvironment.Variables.ganasevaExternalID = entity.rows[I].EXTERNAL_ID;
+				SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'GROUP';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessName = 'HO-PROCESS-04';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+				IF (I = 1 OR batchSize = 1 )THEN
+					SET OutputLocalEnvironment.Variables.procCallRequired = TRUE;
+				ELSE
+					SET OutputLocalEnvironment.Variables.procCallRequired = FALSE;
+				END IF;
+				PROPAGATE;
+				SET I = I + 1;
+			END WHILE;
+		END IF;
+		
+		-- loan 
+		SET entity.rows[] = SELECT LOANS.ID, LOANS.EXTERNAL_ID, LOANS.EXTERNAL_CUSTOMER_ID FROM Database.LOANS WHERE LOANS.INTERNAL_ID IS NULL AND LOANS.PROCESS_ID = processID AND LOANS.SKIPPED = 0;	       
+		SET S = CARDINALITY(entity.rows[]);
+		SET I = 1;
+		SET lFirstRecord = TRUE; -- setting the value to tru so that whichever first record get propagated have the call proc elemnt value as true
+		IF (S > 0) THEN			       
+			WHILE I <= S DO
+				SET OutputLocalEnvironment.Variables.ganasevaEntityID = entity.rows[I].ID;
+				SET OutputLocalEnvironment.Variables.ganasevaExternalID = entity.rows[I].EXTERNAL_ID;
+				SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'LOAN';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessName = 'HO-PROCESS-01';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+				-- need to check if customer has paased credit check and process only if it is passed
+				SET lCreditResult = isCreditPass(entity.rows[I].EXTERNAL_CUSTOMER_ID, processID);
+				IF lCreditResult = 0 THEN
+					IF (lFirstRecord OR batchSize = 1) THEN
+						SET OutputLocalEnvironment.Variables.procCallRequired = TRUE;
+						SET lFirstRecord = FALSE;
+					ELSE
+						SET OutputLocalEnvironment.Variables.procCallRequired = FALSE;
+					END IF;
+					PROPAGATE;
+				ELSEIF lCreditResult = 1 THEN
+					SET lExceptionMsg = 'Credit check for the external customer ID is in failed state. Please skip the record or make sure credit check has paased for the customer';
+					UPDATE Database.LOANS AS A
+					SET RECORD_ERRORS = convertToYaml(lPrefix,lColumn,lExceptionMsg),
+					STATUS = 'FAILED'
+					WHERE A.ID = entity.rows[I].ID;
+				ELSE
+					SET lExceptionMsg = 'No records found for the external customer ID in current integration job for credit check. Please skip the record or make sure credit check has paased for the customer';
+					UPDATE Database.LOANS AS A
+					SET RECORD_ERRORS = convertToYaml(lPrefix,lColumn,lExceptionMsg),
+					STATUS = 'FAILED'
+					WHERE A.ID = entity.rows[I].ID;
+				END IF;
+				SET I = I + 1;
+			END WHILE;
+		END IF;
+		
+		--  IMAGE
+		SET entity.rows[] = SELECT CUSTOMER_IMAGES.ID, CUSTOMER_IMAGES.EXTERNAL_ID, CUSTOMER_IMAGES.IMAGE_TYPE FROM Database.CUSTOMER_IMAGES WHERE CUSTOMER_IMAGES.STATUS <> 'SUCCESS' AND CUSTOMER_IMAGES.PROCESS_ID = processID AND CUSTOMER_IMAGES.SKIPPED = 0;	       
+		SET S = CARDINALITY(entity.rows[]);
+		SET I = 1;
+		IF (S > 0) THEN			       
+			WHILE I <= S DO
+				SET OutputLocalEnvironment.Variables.ganasevaEntityID = entity.rows[I].ID;
+				SET OutputLocalEnvironment.Variables.ganasevaExternalID = entity.rows[I].EXTERNAL_ID;
+				SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'IMAGE';
+				SET OutputLocalEnvironment.Variables.ganasevaProcessName = entity.rows[I].IMAGE_TYPE;
+				SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+				PROPAGATE;
+				SET I = I + 1;
+			END WHILE;
+		END IF;
+				
+		-- last message to update the stataus of integration job
+		
+		SET OutputLocalEnvironment.Variables.ganasevaEntityID = processID;
+		SET OutputLocalEnvironment.Variables.ganasevaExternalID = processID;
+		SET OutputLocalEnvironment.Variables.ganasevaEntityName = 'UPDATE_JOB';
+		SET OutputLocalEnvironment.Variables.ganasevaProcessName = 'NONE';
+		SET OutputLocalEnvironment.Variables.ganasevaProcessID = processID;
+		PROPAGATE;
+		RETURN FALSE;
+
+	END;
+	
+	CREATE FUNCTION isCreditPass(IN piExternalCustomerID CHARACTER, IN piProcessID CHARACTER) RETURNS INTEGER
+	BEGIN
+		DECLARE lCreditPassFail ROW;
+		SET lCreditPassFail = THE(SELECT ITEM CUSTOMERS.CREDIT_PASS_FAIL FROM Database.CUSTOMERS WHERE CUSTOMERS.EXTERNAL_ID = piExternalCustomerID AND CUSTOMERS.PROCESS_ID = piProcessID);
+		--lCreditPassFail  '0' Rejected
+		--lCreditPassFail  '1' Success
+		--lCreditPassFail  '2' Failed
+		--lCreditPassFail  '3' Pending
+		IF lCreditPassFail IN (1,4) THEN
+			RETURN 0;
+		ELSEIF lCreditPassFail IN( 0 , 2 ,3 ) THEN
+			RETURN 1;
+		ELSE
+			-- in case there is no record for customer, it means something has failed and we should not let the loan to be created.
+			RETURN 2;
+		END IF;
+
+	END;
+
+END MODULE;
+
+CREATE COMPUTE MODULE updateBatchID
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		-- this is for selecting the entity record from entity table
+		SET OutputRoot.XMLNSC.entityID = OutputLocalEnvironment.Variables.ganasevaEntityID;
+		
+		IF OutputLocalEnvironment.Variables.ganasevaEntityName = 'CUSTOMER' THEN
+			IF OutputLocalEnvironment.Variables.procCallRequired = TRUE THEN
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = getNextBatchID('HO_CU_BATCHID');
+				SET Environment.Variables.ganasevaCustomerBatchID = OutputLocalEnvironment.Variables.ganasevaBatchID; 
+			ELSE
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = Environment.Variables.ganasevaCustomerBatchID;
+			END IF;
+		ELSEIF OutputLocalEnvironment.Variables.ganasevaEntityName = 'SAVING' THEN
+			IF OutputLocalEnvironment.Variables.procCallRequired = TRUE THEN
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = getNextBatchID('HO_A0_BATCHID');
+				SET Environment.Variables.ganasevaSavingBatchID = OutputLocalEnvironment.Variables.ganasevaBatchID; 
+			ELSE
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = Environment.Variables.ganasevaSavingBatchID;
+			END IF;
+		ELSEIF OutputLocalEnvironment.Variables.ganasevaEntityName = 'LOAN' THEN
+			IF OutputLocalEnvironment.Variables.procCallRequired = TRUE THEN
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = getNextBatchID('HO_01_BATCHID');
+				SET Environment.Variables.ganasevaLoanBatchID = OutputLocalEnvironment.Variables.ganasevaBatchID; 
+			ELSE
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = Environment.Variables.ganasevaLoanBatchID;
+			END IF;
+		ELSEIF OutputLocalEnvironment.Variables.ganasevaEntityName = 'GROUP' THEN
+			IF OutputLocalEnvironment.Variables.procCallRequired = TRUE THEN
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = getNextBatchID('HO_04_BATCHID');
+				SET Environment.Variables.ganasevaGroupBatchID = OutputLocalEnvironment.Variables.ganasevaBatchID; 
+			ELSE
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = Environment.Variables.ganasevaGroupBatchID;
+			END IF;
+		ELSEIF OutputLocalEnvironment.Variables.ganasevaEntityName = 'CENTER' THEN
+			IF OutputLocalEnvironment.Variables.procCallRequired = TRUE THEN
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = getNextBatchID('HO_02_BATCHID');
+				SET Environment.Variables.ganasevaCenterBatchID = OutputLocalEnvironment.Variables.ganasevaBatchID; 
+			ELSE
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = Environment.Variables.ganasevaCenterBatchID;
+			END IF;
+		ELSEIF OutputLocalEnvironment.Variables.ganasevaEntityName = 'EXISTINGCUSTOMER' THEN
+			IF OutputLocalEnvironment.Variables.procCallRequired = TRUE THEN
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = getNextBatchID('HO_CE_BATCHID');
+				SET Environment.Variables.ganasevaExCustomerBatchID = OutputLocalEnvironment.Variables.ganasevaBatchID; 
+			ELSE
+				SET OutputLocalEnvironment.Variables.ganasevaBatchID = Environment.Variables.ganasevaExCustomerBatchID;
+			END IF;
+		ELSEIF OutputLocalEnvironment.Variables.ganasevaEntityName = 'IMAGE' THEN
+			SET OutputLocalEnvironment.Variables.ganasevaBatchID = 0;
+		END IF;
+		RETURN TRUE;
+	END;
+
+	CREATE FUNCTION getNextBatchID(piMnemonic CHARACTER) RETURNS INTEGER
+	BEGIN
+		DECLARE lBatchID CHARACTER;
+		
+		UPDATE Database.RCDSSYSPARAMS SET "VALUE" = RCDSSYSPARAMS.VALUE + 1 WHERE RCDSSYSPARAMS.MNEMONIC = piMnemonic;
+			
+		SET lBatchID = THE(SELECT ITEM RCDSSYSPARAMS.VALUE FROM Database.RCDSSYSPARAMS WHERE RCDSSYSPARAMS.MNEMONIC = piMnemonic);
+		
+		RETURN CAST(lBatchID AS INTEGER);
+	END;	
+	
+END MODULE;
+
+CREATE COMPUTE MODULE setSatartJobException
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE faultCode INT;
+        DECLARE faultText, faultInserts CHAR;
+		DECLARE lExceptionMsg CHARACTER;
+        
+		-- get the last exception, this is in most cases the root case
+		CALL getLastExceptionDetail(faultCode, faultText, faultInserts);
+		
+		-- create exception message which needs to be updated
+		SET lExceptionMsg = 'FaultCode> '||CAST(faultCode AS CHARACTER)||' FaultText> '||faultText||' FaultInserts> '||faultInserts;
+
+		UPDATE Database.INTEGRATION_JOBS AS A
+		SET IS_RUNNING = 0,
+		    IS_FAILED = 1,
+		    IS_SUCCESSFUL = 0,
+		    FAULT_TEXT = lExceptionMsg,
+		    UPDATED_AT = CURRENT_TIME,
+		    ENDED_AT = CURRENT_TIME
+		WHERE A.ID = Environment.Variables.processID;
+		RETURN TRUE;
+	END;
+	
+	CREATE PROCEDURE getLastExceptionDetail(OUT messageNumber INT, OUT messageText CHAR, OUT messageInserts CHAR)
+	BEGIN		
+		SET messageNumber = 0;
+		SET messageText = '';
+		SET messageInserts = '';
+		
+	-- Create a reference to the first child of the exception list
+		DECLARE ptrException REFERENCE TO InputExceptionList.*[1];
+	
+		-- keep looping while the moves to the child of exception list work
+	    WHILE lastmove(ptrException) DO
+	        -- store the current values for the error number and text
+	        IF ptrException.Number is not null THEN
+	        SET messageNumber = ptrException.Number;
+	        SET messageText = ptrException.Text;
+	
+	        SET messageInserts = '';
+	        DECLARE ptrInsert REFERENCE TO ptrException.Insert[1];
+	        WHILE lastmove(ptrInsert) DO
+	                IF ptrInsert.Text is not null THEN
+	                        SET messageInserts = messageInserts || ',' || ptrInsert.Text;
+	                END IF;
+	                MOVE ptrInsert NEXTSIBLING;
+	        END WHILE;
+	
+	        END IF;
+	        -- now move to the last child which should be the next exceptionlist
+	        MOVE ptrException LASTCHILD;
+	    END WHILE;
+	    
+	END;
+	
+END MODULE;
+
+CREATE COMPUTE MODULE startJob_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE retVal INT;
+		DECLARE faultCode, faultText CHAR;
+		DECLARE schemaName CHAR getProperty('GUFA','gufaSchemaName');
+		DECLARE dataSourceName CHAR getProperty('GUFA','gufaDataSourceName');
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		--SET OutputRoot = InputRoot;
+		-- this will validate the customer id and registered mobile and email associated with it and will return appropriate fault in case not present
+		CALL START_JOB
+			(
+				InputLocalEnvironment.HTTP.Input.QueryString.processID,
+				faultCode,
+				faultText
+			)
+			IN Database.{dataSourceName}.{schemaName} INTO retVal;	
+			
+		CASE 
+		WHEN CAST(retVal AS INT) = 0 THEN
+			SET OutputRoot.XMLNSC.status = 'JOB-INITIATED';
+			RETURN TRUE;
+		WHEN CAST(retVal AS INT) = 1 THEN
+			SET OutputRoot.XMLNSC.status = 'FAILED';
+			SET OutputLocalEnvironment.Destination.HTTP.ReplyStatusCode = faultCode;
+			PROPAGATE TO TERMINAL 'out1';
+		ELSE
+			SET Environment.Variables.faultSubcode = 'E' || CAST(retVal AS CHAR);
+			SET Environment.Variables.faultText = 'Unexpected return from procedure pk_qg_gufa_service.start_job';
+			PROPAGATE TO TERMINAL 'out1';
+		END CASE;
+		
+		RETURN FALSE;
+	END;
+	
+END MODULE;

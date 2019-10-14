@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/entityGroup.xsd" var="var3"/>
+    <input path="/localEnvironmentVariables.xsd" var="var5"/>
+    <input path="/localEnvironmentVariables.xsd" var="var6"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var"/>
+    <input path="/processCenter.xsd" var="var1"/>
+    <output path="db:table(/ganaseva.dbm,GANASEVADB,dbo,msl:db-name('[HO-GROUP-STAGING]'))" var="HOGROUPSTAGING"/>
+    <output path="/ganasevaEntity.xsd" var="var2"/>
+    <imports>
+        <import kind="esql" namespace="/helper.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="helper" uri="/helper.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="moveGroupToStaging">
+        <input namespace="http://www.quantiguous.com/gufa/dfdl/entityGroup.xsd" path="$var3/mb:msg(entityGroup,assembly,DFDL,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaBatchID" ref="var5" var="any"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaEntityID" ref="var5" var="any1"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaEntityName" ref="var5" var="any2"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaExternalCustomerID" ref="var5" var="any3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaExternalID" ref="var5" var="any4"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaProcessName" ref="var5" var="any5"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaProcessID" ref="var5" var="any6"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="procCallRequired" ref="var5" var="any7"/>
+        </input>
+        <output path="$HOGROUPSTAGING/db:insert(fn:false(),[ID],[BATCHID],[EXTERNALGROUPNO],[GROUPNAME],[GROUPTYPE],[MINNUMBER],[MAXNUMBERS],[FORMATIONDATE],[DAYOFPERIOD],[MEETINGTIME],[MEETINGFREQUENCY],[EXTERNALCENTERID],[CENTERNAME],[MAXCENTERLIMIT],[DISTANCEFROMBRANCH],[BRANCHCODE],[VILLAGECENSUSCODE],[OPERATINGREGIONCODE],[DESCRIPTION],[COMMENTS],[STATUS],[BCPARTNERID],[UDF1],[UDF2],[UDF3],[UDF4],[UDF5],[UDF6],[UDF7],[UDF8],[UDF9],[UDF10],[UDF11],[UDF12],[UDF13],[UDF14],[UDF15],[UDF16],[UDF17],[UDF18],[UDF19],[UDF20],[UDF21],[UDF22],[UDF23],[UDF24],[UDF25],[UDF26],[UDF27],[UDF28],[UDF29],[UDF30],[ERROR_DESCRIPTION],[ERROR_STAGE],[IS-ERROR],[APPLICATION-DATE],[SYSTEM-DATE])" var="dbinsert"/>
+        <output namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="$var2/mb:msg(ganasevaEntity,assembly,XMLNSC,Properties)" var="MessageAssembly1"/>
+        <move>
+            <input path="$MessageAssembly/Properties"/>
+            <output path="$MessageAssembly1/Properties"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaBatchID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/batchID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaEntityID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/entityID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaEntityName[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/entityName"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaExternalID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/externalID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaProcessName[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/processName"/>
+        </move>
+        <foreach>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaBatchID[1]" var="ganasevaBatchID2"/>
+            <input auxiliary="true" path="$MessageAssembly/entityGroup" var="entityGroup2"/>
+            <output path="$dbinsert/."/>
+            <transaction>
+                <insert ref="dbinsert">
+                    <input path="$entityGroup2/." var="entityGroup3"/>
+                    <input path="$ganasevaBatchID2/." var="ganasevaBatchID3"/>
+                    <output path="."/>
+                    <function ref="xs:int">
+                        <input path="$ganasevaBatchID3/." var="ganasevaBatchID4"/>
+                        <output path="msl:db-name('[BATCHID]')"/>
+                        <param name="primitive" value="$ganasevaBatchID4"/>
+                    </function>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/external_center_id"/>
+                        <output path="msl:db-name('[EXTERNALCENTERID]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/center_name"/>
+                        <output path="msl:db-name('[CENTERNAME]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/group_name"/>
+                        <output path="msl:db-name('[GROUPNAME]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/group_type"/>
+                        <output path="msl:db-name('[GROUPTYPE]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/min_number"/>
+                        <output path="msl:db-name('[MINNUMBER]')"/>
+                    </move>
+                    <customFunction lang="esql" ref="helper:formatDateToString">
+                        <input path="$entityGroup3/group/formation_date" var="formation_date"/>
+                        <output path="msl:db-name('[FORMATIONDATE]')"/>
+                        <param name="piDate" value="$formation_date"/>
+                    </customFunction>
+                    <customFunction lang="esql" ref="helper:formatTime">
+                        <input path="$entityGroup3/group/meeting_time" var="meeting_time"/>
+                        <output path="msl:db-name('[MEETINGTIME]')"/>
+                        <param name="piHour" value="fn:hours-from-time($meeting_time)"/>
+                        <param name="piMinute" value="fn:minutes-from-time($meeting_time)"/>
+                    </customFunction>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/meeting_frequency"/>
+                        <output path="msl:db-name('[MEETINGFREQUENCY]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/distance_from_branch"/>
+                        <output path="msl:db-name('[DISTANCEFROMBRANCH]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/branch_code"/>
+                        <output path="msl:db-name('[BRANCHCODE]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/operating_region_code"/>
+                        <output path="msl:db-name('[OPERATINGREGIONCODE]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityGroup3/group/udf1"/>
+                        <output path="msl:db-name('[UDF1]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf2"/>
+                        <output path="msl:db-name('[UDF2]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf3"/>
+                        <output path="msl:db-name('[UDF3]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf4"/>
+                        <output path="msl:db-name('[UDF4]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf5"/>
+                        <output path="msl:db-name('[UDF5]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf6"/>
+                        <output path="msl:db-name('[UDF6]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf7"/>
+                        <output path="msl:db-name('[UDF7]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf8"/>
+                        <output path="msl:db-name('[UDF8]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf9"/>
+                        <output path="msl:db-name('[UDF9]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf10"/>
+                        <output path="msl:db-name('[UDF10]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf11"/>
+                        <output path="msl:db-name('[UDF11]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf12"/>
+                        <output path="msl:db-name('[UDF12]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf13"/>
+                        <output path="msl:db-name('[UDF13]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf14"/>
+                        <output path="msl:db-name('[UDF14]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf15"/>
+                        <output path="msl:db-name('[UDF15]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf16"/>
+                        <output path="msl:db-name('[UDF16]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf17"/>
+                        <output path="msl:db-name('[UDF17]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf18"/>
+                        <output path="msl:db-name('[UDF18]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf19"/>
+                        <output path="msl:db-name('[UDF19]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf20"/>
+                        <output path="msl:db-name('[UDF20]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf21"/>
+                        <output path="msl:db-name('[UDF21]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf22"/>
+                        <output path="msl:db-name('[UDF22]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf23"/>
+                        <output path="msl:db-name('[UDF23]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf24"/>
+                        <output path="msl:db-name('[UDF24]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf25"/>
+                        <output path="msl:db-name('[UDF25]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf26"/>
+                        <output path="msl:db-name('[UDF26]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf27"/>
+                        <output path="msl:db-name('[UDF27]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf28"/>
+                        <output path="msl:db-name('[UDF28]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf29"/>
+                        <output path="msl:db-name('[UDF29]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entityGroup3/group/udf30"/>
+                        <output path="msl:db-name('[UDF30]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entityGroup3/group/external_id"/>
+                        <output path="msl:db-name('[EXTERNALGROUPNO]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityGroup3/group/max_number"/>
+                        <output path="msl:db-name('[MAXNUMBERS]')"/>
+                    </move>
+                    <move>
+                        <input path="$entityGroup3/group/maximum_center_limit"/>
+                        <output path="msl:db-name('[MAXCENTERLIMIT]')"/>
+                    </move>
+                    <assign value="1">
+                        <output path="msl:db-name('[DAYOFPERIOD]')"/>
+                    </assign>
+                    <assign value="SIMS">
+                        <output path="msl:db-name('[DESCRIPTION]')"/>
+                    </assign>
+                    <assign value="1">
+                        <output path="msl:db-name('[STATUS]')"/>
+                    </assign>
+                    <assign value="Good">
+                        <output path="msl:db-name('[COMMENTS]')"/>
+                    </assign>
+                </insert>
+                <return>
+                    <input path="$var/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/ganasevaProcessID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/processID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/procCallRequired[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/procCallRequired"/>
+        </move>
+    </mappingDeclaration>
+</mappingRoot>

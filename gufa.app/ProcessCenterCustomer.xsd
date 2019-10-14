@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:csv="http://www.ibm.com/dfdl/CommaSeparatedFormat" xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:ibmDfdlExtn="http://www.ibm.com/dfdl/extensions" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions">
+
+
+        <xsd:include schemaLocation="processCenter.xsd"/>
+    <xsd:import namespace="http://www.ibm.com/dfdl/CommaSeparatedFormat" schemaLocation="IBMdefined/CommaSeparatedFormat.xsd"/>
+        <xsd:element ibmSchExtn:docRoot="true" name="processCustomer">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="newCustomer"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+    <xsd:annotation>
+		<xsd:appinfo source="http://www.ogf.org/dfdl/">
+			<dfdl:format documentFinalTerminatorCanBeMissing="yes" encoding="{$dfdl:encoding}" escapeSchemeRef="csv:CSVEscapeScheme" ref="csv:CommaSeparatedFormat"/>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+
+
+
+</xsd:schema>

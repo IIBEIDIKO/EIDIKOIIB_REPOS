@@ -1,0 +1,114 @@
+PATH com.quantiguous.iib;
+
+DECLARE ns12 NAMESPACE 'http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd';
+
+CREATE PROCEDURE GET_JOB_STATUS
+(
+	IN PI_PROCESS_ID CHARACTER
+)
+RETURNS CHAR
+LANGUAGE DATABASE
+EXTERNAL NAME "*.pk_qg_gufa_service.get_job_status";
+
+
+CREATE COMPUTE MODULE setEntitySuccess
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lInterval	INTERVAL;
+		DECLARE lSeconds FLOAT;
+		DECLARE lEntity CHARACTER;
+		
+		-- we alse need to update the time in seconds taken by the Ganseva to process the request	
+		SET lInterval = (CAST(CURRENT_TIMESTAMP AS TIMESTAMP) - CAST(Environment.Variables.startTimeStamp AS TIMESTAMP)) SECOND;		
+		SET lSeconds = CAST(lInterval AS FLOAT);
+
+		UPDATE Database.INTEGRATION_JOB_HISTORIES AS A
+		   SET UPDATED_AT = CURRENT_TIMESTAMP,
+		       GANASEVA_EXECUTION_TIME = (A.GANASEVA_EXECUTION_TIME + lSeconds)
+		 WHERE A.INTEGRATION_PROCESS_ID =  Environment.Variables.processID
+		   AND A.ID = (SELECT MAX(INTEGRATION_JOB_HISTORIES.ID) FROM Database.INTEGRATION_JOB_HISTORIES WHERE INTEGRATION_JOB_HISTORIES.INTEGRATION_PROCESS_ID =  Environment.Variables.processID );
+
+		IF Environment.Variables.entityName = 'IMAGE' THEN	
+			UPDATE Database.CUSTOMER_IMAGES AS D
+			   SET STATUS = 'SUCCESS',
+			       RECORD_ERRORS = NULL,
+				   UPDATED_AT = CURRENT_TIMESTAMP
+			 WHERE D.ID = Environment.Variables.entityID;
+		ELSE
+			-- set the entity table in variable to be used in update statement at the end
+			IF Environment.Variables.entityName = 'CENTER' THEN
+				SET lEntity = 'CENTERS';
+			ELSEIF Environment.Variables.entityName = 'CUSTOMER' THEN
+				SET lEntity = 'CUSTOMERS';
+			ELSEIF Environment.Variables.entityName = 'EXISTINGCUSTOMER' THEN
+				SET lEntity = 'CUSTOMERS';
+			ELSEIF Environment.Variables.entityName = 'GROUP' THEN	
+				SET lEntity = 'GROUPS';
+			ELSEIF Environment.Variables.entityName = 'SAVING' THEN
+				SET lEntity = 'SAVINGS';
+			ELSEIF Environment.Variables.entityName = 'LOAN' THEN	
+				SET lEntity = 'LOANS';
+			END IF;
+			-- common statement to update the success in entity tables
+			UPDATE Database.{lEntity} AS D
+			   SET INTERNAL_ID = InputLocalEnvironment.Variables.internalID,
+			       RECORD_ERRORS = NULL,
+				   UPDATED_AT = CURRENT_TIMESTAMP,
+				   INTEGRATION_TIME = CAST(lSeconds AS DECIMAL),
+				   STATUS = 'SUCCESS'
+			 WHERE D.ID = Environment.Variables.entityID;
+		END IF;
+
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE updateJobStatus
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE retVal CHARACTER;
+		DECLARE lSuccessful, lFail INTEGER;
+		DECLARE lFailureMessage CHARACTER;
+		DECLARE schemaName CHAR getProperty('GUFA','gufaSchemaName');
+		DECLARE dataSourceName CHAR getProperty('GUFA','gufaDataSourceName');
+		
+		CALL GET_JOB_STATUS
+			(
+				InputRoot.XMLNSC.ns12:ganasevaEntity.entityID
+			)
+			IN Database.{dataSourceName}.{schemaName} INTO retVal;	
+			
+		CASE 
+		WHEN retVal = 'SUCCESS' THEN
+			SET lSuccessful = 1;
+			SET lFail = 0;
+			SET lFailureMessage = NULL;
+		WHEN retVal = 'FAILED' THEN
+			SET lSuccessful = 0;
+			SET lFail = 1;
+			SET lFailureMessage = 'One of the entities have failed plase check summary page.';
+		ELSE
+			SET lSuccessful = 0;
+			SET lFail = 1;
+			SET lFailureMessage = 'Unexpected return from procedure pk_qg_gufa_service.get_job_status';
+		END CASE;
+		
+		UPDATE Database.INTEGRATION_JOBS AS A
+		   SET IS_RUNNING = 0,
+		       IS_FAILED = lFail,
+		       IS_SUCCESSFUL = lSuccessful,
+		       FAULT_TEXT = lFailureMessage,
+		       UPDATED_AT = CURRENT_TIME,
+		       ENDED_AT = CURRENT_TIME
+		 WHERE A.ID = Environment.Variables.entityID;
+		 
+		UPDATE Database.INTEGRATION_JOB_HISTORIES AS A
+		   SET IS_FAILED = lFail,
+		       IS_SUCCESSFUL = lSuccessful,
+		       UPDATED_AT = CURRENT_TIME,
+		       COMPLETED_AT = CURRENT_TIME
+		 WHERE A.INTEGRATION_PROCESS_ID = Environment.Variables.entityID
+		   AND A.ID = (SELECT MAX(INTEGRATION_JOB_HISTORIES.ID) FROM Database.INTEGRATION_JOB_HISTORIES WHERE INTEGRATION_JOB_HISTORIES.INTEGRATION_PROCESS_ID = Environment.Variables.entityID );
+		RETURN TRUE;
+	END;
+END MODULE;

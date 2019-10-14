@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/entitySaving.xsd" var="var4"/>
+    <input path="/localEnvironmentVariables.xsd" var="var3"/>
+    <input path="/localEnvironmentVariables.xsd" var="var5"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var6"/>
+    <output path="db:table(/ganaseva.dbm,GANASEVADB,dbo,msl:db-name('[HO-SAVING-STAGING]'))" var="HOSAVINGSTAGING"/>
+    <output path="/ganasevaEntity.xsd" var="var2"/>
+    <imports>
+        <import kind="esql" namespace="/helper.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="helper" uri="/helper.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="moveSavingToStaging">
+        <input namespace="http://www.quantiguous.com/gufa/dfdl/entitySaving.xsd" path="$var4/mb:msg(entitySaving,assembly,DFDL,LocalEnvironment,Properties)">
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaBatchID" ref="var3" var="any"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaEntityID" ref="var3" var="any1"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaEntityName" ref="var3" var="any2"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaExternalCustomerID" ref="var3" var="any3"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaExternalID" ref="var3" var="any4"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaProcessName" ref="var3" var="any5"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaProcessID" ref="var3" var="any6"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="procCallRequired" ref="var3" var="any7"/>
+        </input>
+        <output path="$HOSAVINGSTAGING/db:insert(fn:false(),[ID],[BATCHID],[EXTERNALACCOUNTNO],[EXTERNALCUSTOMERID],[ACCOUNTTYPE],[PRODUCTCODE],[INITIALDEPOSIT],[PAYMENTMODE],[COMMENTS],[ORIGINATOR],[APPROVER],[COLLECTOR],[ACCOUNTOPENINGDATE],[NOMINEETITLE],[NOMINEENAME],[NOMINEEADDRESS1],[NOMINEEADDRESS2],[NOMINEEADDRESS3],[RELATION],[NOMINEEDOB],[NOMINEEAGE],[NOMINEEGENDER],[NOMINEESTATE],[NOMINEECITY],[NOMINEEPINCODE],[NOMINEEPANNO],[MINOR],[GUARDIANTITLE],[GUARDIANNAME],[GUARDIANDOB],[GUARDIANGENDER],[GUARDIANADDR1],[GUARDIANADDR2],[GUARDIANADDR3],[GUARDIANSTATE],[GUARDIANCITY],[GUARDIANRELATION],[GUARDIANPHNO],[GUARDIANPINCODE],[BCPARTNERID],[UDF1],[UDF2],[UDF3],[UDF4],[UDF5],[UDF6],[UDF7],[UDF8],[UDF9],[UDF10],[UDF11],[UDF12],[UDF13],[UDF14],[UDF15],[UDF16],[UDF17],[UDF18],[UDF19],[UDF20],[UDF21],[UDF22],[UDF23],[UDF24],[UDF25],[UDF26],[UDF27],[UDF28],[UDF29],[UDF30],[ERROR_DESCRIPTION],[ERROR_STAGE],[IS-ERROR],[APPLICATION-DATE],[SYSTEM-DATE])" var="dbinsert"/>
+        <output namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="$var2/mb:msg(ganasevaEntity,assembly,XMLNSC,Properties)" var="MessageAssembly1"/>
+        <move>
+            <input path="Properties"/>
+            <output path="$MessageAssembly1/Properties"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaBatchID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/batchID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaEntityID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/entityID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaEntityName[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/entityName"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaExternalCustomerID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/externalCustomerID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaExternalID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/externalID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaProcessName[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/processName"/>
+        </move>
+        <join>
+            <input path="LocalEnvironment/Variables/ganasevaBatchID[1]" var="ganasevaBatchID"/>
+            <input path="entitySaving" var="entitySaving"/>
+            <output path="$dbinsert/."/>
+            <transaction>
+                <insert ref="dbinsert">
+                    <input path="$entitySaving/." var="entitySaving1"/>
+                    <input path="$ganasevaBatchID/." var="ganasevaBatchID1"/>
+                    <output path="."/>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/external_customer_id"/>
+                        <output path="msl:db-name('[EXTERNALCUSTOMERID]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/account_type"/>
+                        <output path="msl:db-name('[ACCOUNTTYPE]')"/>
+                    </move>
+                    <customFunction lang="esql" ref="helper:formatDateToString">
+                        <input path="$entitySaving1/saving/account_opening_date" var="account_opening_date"/>
+                        <output path="msl:db-name('[ACCOUNTOPENINGDATE]')"/>
+                        <param name="piDate" value="$account_opening_date"/>
+                    </customFunction>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/nominee_title"/>
+                        <output path="msl:db-name('[NOMINEETITLE]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/nominee_name"/>
+                        <output path="msl:db-name('[NOMINEENAME]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/nominee_gender"/>
+                        <output path="msl:db-name('[NOMINEEGENDER]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_title"/>
+                        <output path="msl:db-name('[GUARDIANTITLE]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_name"/>
+                        <output path="msl:db-name('[GUARDIANNAME]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/collector"/>
+                        <output path="msl:db-name('[COLLECTOR]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/approver"/>
+                        <output path="msl:db-name('[APPROVER]')"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf1"/>
+                        <output path="msl:db-name('[UDF1]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf2"/>
+                        <output path="msl:db-name('[UDF2]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf3"/>
+                        <output path="msl:db-name('[UDF3]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf4"/>
+                        <output path="msl:db-name('[UDF4]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf5"/>
+                        <output path="msl:db-name('[UDF5]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf6"/>
+                        <output path="msl:db-name('[UDF6]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf7"/>
+                        <output path="msl:db-name('[UDF7]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf8"/>
+                        <output path="msl:db-name('[UDF8]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf9"/>
+                        <output path="msl:db-name('[UDF9]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf10"/>
+                        <output path="msl:db-name('[UDF10]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf11"/>
+                        <output path="msl:db-name('[UDF11]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf12"/>
+                        <output path="msl:db-name('[UDF12]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf13"/>
+                        <output path="msl:db-name('[UDF13]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf14"/>
+                        <output path="msl:db-name('[UDF14]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf15"/>
+                        <output path="msl:db-name('[UDF15]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf16"/>
+                        <output path="msl:db-name('[UDF16]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf17"/>
+                        <output path="msl:db-name('[UDF17]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf18"/>
+                        <output path="msl:db-name('[UDF18]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf19"/>
+                        <output path="msl:db-name('[UDF19]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf20"/>
+                        <output path="msl:db-name('[UDF20]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf21"/>
+                        <output path="msl:db-name('[UDF21]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf22"/>
+                        <output path="msl:db-name('[UDF22]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/udf23"/>
+                        <output path="msl:db-name('[UDF23]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf24"/>
+                        <output path="msl:db-name('[UDF24]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf25"/>
+                        <output path="msl:db-name('[UDF25]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf26"/>
+                        <output path="msl:db-name('[UDF26]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf27"/>
+                        <output path="msl:db-name('[UDF27]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf28"/>
+                        <output path="msl:db-name('[UDF28]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf29"/>
+                        <output path="msl:db-name('[UDF29]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move automap="true">
+                        <input path="$entitySaving1/saving/udf30"/>
+                        <output path="msl:db-name('[UDF30]')"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/external_id"/>
+                        <output path="msl:db-name('[EXTERNALACCOUNTNO]')"/>
+                    </move>
+                    <function ref="xs:int">
+                        <input path="$ganasevaBatchID1/." var="ganasevaBatchID2"/>
+                        <output path="msl:db-name('[BATCHID]')"/>
+                        <param name="primitive" value="$ganasevaBatchID2"/>
+                    </function>
+                    <move>
+                        <input path="$entitySaving1/saving/saving_product_code"/>
+                        <output path="msl:db-name('[PRODUCTCODE]')"/>
+                    </move>
+                    <assign value="0">
+                        <output path="msl:db-name('[INITIALDEPOSIT]')"/>
+                    </assign>
+                    <assign value="1">
+                        <output path="msl:db-name('[PAYMENTMODE]')"/>
+                    </assign>
+                    <assign value="GOOD">
+                        <output path="msl:db-name('[COMMENTS]')"/>
+                    </assign>
+                    <move>
+                        <input path="$entitySaving1/saving/collector"/>
+                        <output path="msl:db-name('[ORIGINATOR]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/nominee_address_line1"/>
+                        <output path="msl:db-name('[NOMINEEADDRESS1]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/nominee_address_line2"/>
+                        <output path="msl:db-name('[NOMINEEADDRESS2]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/nominee_address_line3"/>
+                        <output path="msl:db-name('[NOMINEEADDRESS3]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/nominee_city_code"/>
+                        <output path="msl:db-name('[NOMINEECITY]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/nominee_state_code"/>
+                        <output path="msl:db-name('[NOMINEESTATE]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/nominee_pin"/>
+                        <output path="msl:db-name('[NOMINEEPINCODE]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/nominee_relation"/>
+                        <output path="msl:db-name('[RELATION]')"/>
+                    </move>
+                    <customFunction lang="esql" ref="helper:formatDateToString">
+                        <input path="$entitySaving1/saving/nominee_date_of_birth" var="nominee_date_of_birth1"/>
+                        <output path="msl:db-name('[NOMINEEDOB]')"/>
+                        <param name="piDate" value="$nominee_date_of_birth1"/>
+                    </customFunction>
+                    <customFunction lang="esql" ref="helper:getAge">
+                        <input path="$entitySaving1/saving/nominee_date_of_birth" var="nominee_date_of_birth"/>
+                        <output path="msl:db-name('[NOMINEEAGE]')"/>
+                        <param name="picurrentDate" value="current-date()"/>
+                        <param name="piDOB" value="$nominee_date_of_birth"/>
+                    </customFunction>
+                    <move>
+                        <input path="$entitySaving1/saving/minor"/>
+                        <output path="msl:db-name('[MINOR]')"/>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_address_line1"/>
+                        <output path="msl:db-name('[GUARDIANADDR1]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_address_line2"/>
+                        <output path="msl:db-name('[GUARDIANADDR2]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_address_line3"/>
+                        <output path="msl:db-name('[GUARDIANADDR3]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_city_code"/>
+                        <output path="msl:db-name('[GUARDIANCITY]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_state_code"/>
+                        <output path="msl:db-name('[GUARDIANSTATE]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_relation"/>
+                        <output path="msl:db-name('[GUARDIANRELATION]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_phone_no"/>
+                        <output path="msl:db-name('[GUARDIANPHNO]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <if>
+                        <input path="$entitySaving1/saving/guardian_dob" var="guardian_dob"/>
+                        <output path="msl:db-name('[GUARDIANDOB]')"/>
+                        <test lang="xpath">fn:exists($guardian_dob)</test>
+                        <customFunction lang="esql" ref="helper:formatDateToString">
+                            <input path="$guardian_dob/." var="guardian_dob"/>
+                            <output path="."/>
+                            <param name="piDate" value="$guardian_dob"/>
+                        </customFunction>
+                    </if>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_gender"/>
+                        <output path="msl:db-name('[GUARDIANGENDER]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$entitySaving1/saving/guardian_pin"/>
+                        <output path="msl:db-name('[GUARDIANPINCODE]')"/>
+                        <policy>
+                            <missingSource dbColumn="exclude"/>
+                            <emptySource dbColumn="exclude"/>
+                            <nilSource dbColumn="exclude"/>
+                        </policy>
+                    </move>
+                </insert>
+                <return>
+                    <input path="$var6/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </join>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaProcessID[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/processID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/procCallRequired[1]"/>
+            <output path="$MessageAssembly1/ganasevaEntity/procCallRequired"/>
+        </move>
+    </mappingDeclaration>
+</mappingRoot>

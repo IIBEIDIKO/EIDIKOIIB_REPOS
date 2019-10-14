@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:equifax_invokeEquifax.subflow="equifax/invokeEquifax.subflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="callEquifax.subflow"
+    nsPrefix="callEquifax.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" useDefaults="true" udpSupport="true">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="callEquifax" bundleName="callEquifax" pluginId="gufa.app"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj16/callEquifax.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj30/callEquifax.gif"/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="56,285">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="callEquifax" pluginId="gufa.app"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output" location="807,288">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Output" bundleName="callEquifax" pluginId="gufa.app"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="132,285" transaction="commit" computeExpression="esql://routine/#setEquifaxDetails.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="setEquifaxMessageHeader"/>
+      </nodes>
+      <nodes xmi:type="equifax_invokeEquifax.subflow:FCMComposite_1" xmi:id="FCMComposite_1_8" location="467,287">
+        <translation xmi:type="utility:ConstantString" string="invokeEquifax"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="314,286" dataSource="GUFA_AUDIT" transaction="commit" computeExpression="esql://routine/#logEquifaxRequest.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="logEquifaxRequest"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="616,287" dataSource="GUFA_AUDIT" transaction="commit" computeExpression="esql://routine/#buildResponseForCustomer.Main" computeMode="destination">
+        <translation xmi:type="utility:ConstantString" string="LogEquifaxResponse"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_3" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_32" targetNode="OutTerminal.Output" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

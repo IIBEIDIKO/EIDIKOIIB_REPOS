@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0" xmlns:map="default">
+    <input path="/processCenter.xsd" var="var"/>
+    <input path="/localEnvironmentVariables.xsd" var="var1"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var2"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,LOANS)" var="LOANS1"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,INCOMING_FILE_RECORDS)" var="INCOMINGFILERECORDS"/>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="processCenter_LOANS">
+        <input path="$var/mb:msg(processCenter,assembly,DFDL,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="createdBy" ref="var1" var="any"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="entityID" ref="var1" var="any1"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="errorInYamlForm" ref="var1" var="any2"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileID" ref="var1" var="any3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileRecordID" ref="var1" var="any4"/>
+        </input>
+        <output path="$LOANS1/db:insert(fn:false(),ID,EXTERNAL_ID,EXTERNAL_CUSTOMER_ID,EXTERNAL_CENTER_ID,EXTERNAL_GROUP_ID,LOAN_PRODUCT_CODE,LOAN_AMOUNT,DISBURSEMENT_MODE,NO_OF_INSTALLMENTS,REPAYMENT_FREQUENCY,LOAN_CYCLE,BARCODE_NO,LOAN_START_DATE,REPAYMENT_START_DATE,COLLECTOR,APPROVER,CREATED_BY,CREATED_AT,STATUS,INTERNAL_ID,PROCESS_ID,UPDATED_AT,RECORD_ERRORS,INCOMING_FILE_ID,UPDATED_BY,SKIPPED,EXPECTED_DISBURSAL_DATE,UDF1,UDF2,UDF3,UDF4,UDF5,UDF6,UDF7,UDF8,UDF9,UDF10,UDF11,UDF12,UDF13,UDF14,UDF15,UDF16,UDF17,UDF18,UDF19,UDF20,UDF21,UDF22,UDF23,UDF24,UDF25,UDF26,UDF27,UDF28,UDF29,UDF30,RECORD_NUMBER,BC_BRANCH_CODE,IS_TOP_UP,LOAN_PURPOSE,PSL_CODE,HOSPITAL_CASH,PREPAID_CHARGES,BANKNAME,IFSCCODE,BANKACCOUNTNUMBER)" var="dbinsert1"/>
+        <output path="$INCOMINGFILERECORDS/db:insert(fn:false(),ID,INCOMING_FILE_ID,RECORD_NO,ENTITY_ID,ENTITY_NAME,RECORD_TXT,RECORD_ERRORS,CREATED_BY,CREATED_AT,IS_VALID)" var="dbinsert2"/>
+        <foreach>
+            <input path="$MessageAssembly/processCenter/loan" var="loan1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record4"/>
+            <output path="$dbinsert1/."/>
+            <transaction>
+                <insert ref="dbinsert1">
+                    <input path="$loan1/." var="loan2"/>
+                    <input path="$errorInYamlForm/.[1]" var="errorInYamlForm1"/>
+                    <input path="$createdBy1/.[1]" var="createdBy3"/>
+                    <input path="$incomingFileID1/.[1]" var="incomingFileID3"/>
+                    <input path="$entityID1/.[1]" var="entityID3"/>
+                    <input path="$Record4/." var="Record5"/>
+                    <output path="."/>
+                    <move automap="true">
+                        <input path="$loan2/external_id"/>
+                        <output path="EXTERNAL_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/external_customer_id"/>
+                        <output path="EXTERNAL_CUSTOMER_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/external_center_id"/>
+                        <output path="EXTERNAL_CENTER_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/external_group_id"/>
+                        <output path="EXTERNAL_GROUP_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/loan_product_code"/>
+                        <output path="LOAN_PRODUCT_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/loan_amount"/>
+                        <output path="LOAN_AMOUNT"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/disbursement_mode"/>
+                        <output path="DISBURSEMENT_MODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/no_of_installments"/>
+                        <output path="NO_OF_INSTALLMENTS"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/repayment_frequency"/>
+                        <output path="REPAYMENT_FREQUENCY"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/loan_cycle" var="loan_cycle"/>
+                        <output path="LOAN_CYCLE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/barcode_no"/>
+                        <output path="BARCODE_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/loan_start_date"/>
+                        <output path="LOAN_START_DATE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/repayment_start_date"/>
+                        <output path="REPAYMENT_START_DATE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/collector"/>
+                        <output path="COLLECTOR"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/approver"/>
+                        <output path="APPROVER"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$createdBy3/.[1]"/>
+                        <output path="CREATED_BY"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$incomingFileID3/.[1]"/>
+                        <output path="INCOMING_FILE_ID"/>
+                    </move>
+                    <move>
+                        <input path="$errorInYamlForm1/.[1]"/>
+                        <output path="RECORD_ERRORS"/>
+                    </move>
+                    <move>
+                        <input path="$entityID3/.[1]"/>
+                        <output path="ID"/>
+                    </move>
+                    <function ref="fn:current-dateTime">
+                        <output path="UPDATED_AT"/>
+                    </function>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                    <assign value="0">
+                        <output path="SKIPPED"/>
+                    </assign>
+                    <move automap="true">
+                        <input path="$loan2/udf1"/>
+                        <output path="UDF1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf2"/>
+                        <output path="UDF2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf3"/>
+                        <output path="UDF3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf4"/>
+                        <output path="UDF4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf5"/>
+                        <output path="UDF5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf6"/>
+                        <output path="UDF6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf7"/>
+                        <output path="UDF7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf8"/>
+                        <output path="UDF8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf9"/>
+                        <output path="UDF9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf10"/>
+                        <output path="UDF10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf11"/>
+                        <output path="UDF11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf12"/>
+                        <output path="UDF12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf13"/>
+                        <output path="UDF13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf14"/>
+                        <output path="UDF14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf15"/>
+                        <output path="UDF15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf16"/>
+                        <output path="UDF16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf17"/>
+                        <output path="UDF17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf18"/>
+                        <output path="UDF18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf19"/>
+                        <output path="UDF19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf20"/>
+                        <output path="UDF20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf21"/>
+                        <output path="UDF21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf22"/>
+                        <output path="UDF22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf23"/>
+                        <output path="UDF23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf24"/>
+                        <output path="UDF24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf25"/>
+                        <output path="UDF25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf26"/>
+                        <output path="UDF26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf27"/>
+                        <output path="UDF27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf28"/>
+                        <output path="UDF28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf29"/>
+                        <output path="UDF29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$loan2/udf30"/>
+                        <output path="UDF30"/>
+                    </move>
+                    <function ref="xs:int">
+                        <input path="$Record5/." var="Record3"/>
+                        <output path="RECORD_NUMBER"/>
+                        <param name="primitive" value="$Record3"/>
+                    </function>
+                    <move>
+                        <input path="$loan2/expected_disbursal_date"/>
+                        <output path="EXPECTED_DISBURSAL_DATE"/>
+                    </move>
+                    <if>
+                        <input path="$errorInYamlForm1/.[1]" var="errorInYamlForm2"/>
+                        <output path="STATUS"/>
+                        <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm2, 'A')) &gt; 0</test>
+                        <assign value="FAILED">
+                            <output path="."/>
+                        </assign>
+                    </if>
+                    <move>
+                        <input path="$loan2/bc_branch_code"/>
+                        <output path="BC_BRANCH_CODE"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/is_top_up"/>
+                        <output path="IS_TOP_UP"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/psl_code"/>
+                        <output path="PSL_CODE"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/loan_purpose"/>
+                        <output path="LOAN_PURPOSE"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/hospital_cash"/>
+                        <output path="HOSPITAL_CASH"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/prepaid_charges"/>
+                        <output path="PREPAID_CHARGES"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/bankname"/>
+                        <output path="BANKNAME"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/ifsccode"/>
+                        <output path="IFSCCODE"/>
+                    </move>
+                    <move>
+                        <input path="$loan2/bankaccountnumber"/>
+                        <output path="BANKACCOUNTNUMBER"/>
+                    </move>
+                </insert>
+                <return>
+                    <input path="$var2/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+        <foreach>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/incomingFileRecordID[1]" var="incomingFileRecordID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm3"/>
+            <output path="$dbinsert2/."/>
+            <transaction>
+                <insert ref="dbinsert2">
+                    <input path="$incomingFileRecordID/.[1]" var="incomingFileRecordID1"/>
+                    <input path="$Record/." var="Record1"/>
+                    <input path="$createdBy/.[1]" var="createdBy2"/>
+                    <input path="$entityID/.[1]" var="entityID2"/>
+                    <input path="$incomingFileID/.[1]" var="incomingFileID2"/>
+                    <input path="$errorInYamlForm3/.[1]" var="errorInYamlForm5"/>
+                    <output path="."/>
+                    <move>
+                        <input path="$incomingFileRecordID1/.[1]" var="incomingFileRecordID2"/>
+                        <output path="ID"/>
+                    </move>
+                    <function ref="xs:int">
+                        <input path="$Record1/." var="Record2"/>
+                        <output path="RECORD_NO"/>
+                        <param name="primitive" value="$Record2"/>
+                    </function>
+                    <move>
+                        <input path="$incomingFileID2/.[1]"/>
+                        <output path="INCOMING_FILE_ID"/>
+                    </move>
+                    <move>
+                        <input path="$entityID2/.[1]" var="entityID4"/>
+                        <output path="ENTITY_ID"/>
+                    </move>
+                    <move>
+                        <input path="$createdBy2/.[1]" var="createdBy4"/>
+                        <output path="CREATED_BY"/>
+                    </move>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                    <assign value="LOAN">
+                        <output path="ENTITY_NAME"/>
+                    </assign>
+                    <condition>
+                        <if>
+                            <input path="$errorInYamlForm5/.[1]" var="errorInYamlForm6"/>
+                            <output path="IS_VALID"/>
+                            <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm6, 'A')) = 0</test>
+                            <assign value="1">
+                                <output path="."/>
+                            </assign>
+                        </if>
+                        <else>
+                            <output path="IS_VALID"/>
+                            <assign value="0">
+                                <output path="."/>
+                            </assign>
+                        </else>
+                    </condition>
+                </insert>
+                <return>
+                    <input path="$var2/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+    </mappingDeclaration>
+</mappingRoot>

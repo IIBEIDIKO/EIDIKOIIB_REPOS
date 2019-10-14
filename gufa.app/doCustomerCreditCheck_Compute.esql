@@ -1,0 +1,49 @@
+PATH com.quantiguous.iib; 
+
+
+
+CREATE COMPUTE MODULE updateCustomerRecord
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		UPDATE Database.CUSTOMERS AS A
+		SET CREDIT_PASS_FAIL = InputLocalEnvironment.Variables.creditPass
+		WHERE A.ID = Environment.Variables.entityID;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+
+
+
+
+CREATE COMPUTE MODULE setEquifaxParamatersInEnv
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE I INTEGER 1;
+		DECLARE T INTEGER;
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+
+		SET rs.rows[] = SELECT * FROM Database.EQUIFAX_VALIDATIONS;
+		
+		SET T = CARDINALITY(rs.rows[]);
+		WHILE I <= T DO	
+			IF rs.rows[I].VALIDATION_NAME = 'NO_OF_INSTITUTIONS' THEN
+				SET Environment.Variables.noOfInstitutions = CAST(rs.rows[I].VALIDATION_VALUE AS INTEGER);
+			ELSEIF rs.rows[I].VALIDATION_NAME = 'OVERDUE_AMOUNT' THEN
+				SET Environment.Variables.overDueAmount = CAST(rs.rows[I].VALIDATION_VALUE AS INTEGER);
+			ELSEIF rs.rows[I].VALIDATION_NAME = 'WRITE_OFF_AMOUNT' THEN
+				SET Environment.Variables.writeOffAmount = CAST(rs.rows[I].VALIDATION_VALUE AS INTEGER);
+			ELSEIF rs.rows[I].VALIDATION_NAME = 'PAST_DUE_AMOUNT' THEN
+				SET Environment.Variables.pastDueAmount = CAST(rs.rows[I].VALIDATION_VALUE AS INTEGER);
+			ELSEIF rs.rows[I].VALIDATION_NAME = 'DO_EQUIFAX_CHECK' THEN
+				SET Environment.Variables.doEquifaxCheck = rs.rows[I].VALIDATION_VALUE;
+			ELSEIF rs.rows[I].VALIDATION_NAME = 'CB_CHECK_VALIDITY' THEN
+				SET Environment.Variables.cbCheckValidityPeriod = rs.rows[I].VALIDATION_VALUE;
+			END IF;
+			SET I = I + 1;
+		END WHILE;	
+		RETURN TRUE;
+	END;
+END MODULE;

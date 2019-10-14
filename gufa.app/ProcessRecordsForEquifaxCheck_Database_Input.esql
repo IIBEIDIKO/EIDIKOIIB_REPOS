@@ -1,0 +1,82 @@
+PATH com.quantiguous.iib;
+
+CREATE DATABASEEVENT MODULE processRecordsForEquifaxCheck
+	 CREATE PROCEDURE ReadEvents( IN NewEvents REFERENCE )
+	 BEGIN
+		DECLARE EXIT HANDLER FOR SQLSTATE LIKE 'D%'
+		BEGIN
+			RESIGNAL; /* pass the error back to the node */
+		END;
+		DECLARE brokerUUID CHAR getBrokerUUID1();
+		DECLARE rs ROW;
+		DECLARE I, rowCount INT;
+	  
+		SET rs.rows[] = PASSTHRU('SELECT PENDING_EQUIFAX_CUSTOMERS.ID AS ID,
+		                        PENDING_EQUIFAX_CUSTOMERS.CUSTOMER_ID AS CUSTOMER_ID,
+		                        CUSTOMERS.EXTERNAL_ID AS EXTERNAL_ID,
+		                        CUSTOMERS.CREATED_BY AS CREATED_BY,
+		                        CUSTOMERS.IS_RENEWAL_LOAN AS IS_RENEWAL_LOAN		                        
+		                        FROM PENDING_EQUIFAX_CUSTOMERS, CUSTOMERS
+		                        WHERE PENDING_EQUIFAX_CUSTOMERS.BROKER_UUID = ? AND 
+		                        PENDING_EQUIFAX_CUSTOMERS.CUSTOMER_ID = CUSTOMERS.ID AND
+		                    	PENDING_EQUIFAX_CUSTOMERS.CREATED_AT < SYSDATE AND
+		                    	CUSTOMERS.CREDIT_PASS_FAIL = ?' values(brokerUUID,3));
+		
+		SET rowCount = CARDINALITY(rs.rows[]);
+		
+		SET I = 1;
+		 WHILE ( I <= rowCount ) DO 
+			SET NewEvents.Event[I].Key = rs.rows[I].ID;
+			SET NewEvents.Event[I].Usr.ID = CAST(rs.rows[I].ID AS INT);
+			SET NewEvents.Event[I].Usr.CUSTOMER_ID = CAST(rs.rows[I].CUSTOMER_ID AS INT);
+			SET NewEvents.Event[I].Usr.EXTERNAL_ID = CAST(rs.rows[I].EXTERNAL_ID AS CHAR);
+			SET NewEvents.Event[I].Usr.CREATED_BY = CAST(rs.rows[I].CREATED_BY AS INT);
+			SET NewEvents.Event[I].Usr.IS_RENEWAL_LOAN = CAST(COALESCE(rs.rows[I].IS_RENEWAL_LOAN,0) AS INT);		
+			SET I = I +  1; 
+		END WHILE;			
+	END;
+
+
+	CREATE PROCEDURE BuildMessage(IN DispatchedEvent REFERENCE)
+	BEGIN
+		DECLARE EXIT HANDLER FOR SQLSTATE LIKE 'D%'
+		BEGIN
+			RESIGNAL; /* pass the error back to the node */
+		END;
+		
+		SET Root.XMLNSC.entityID = DispatchedEvent.Usr.CUSTOMER_ID;
+        SET LocalEnvironment.Variables.entityID = DispatchedEvent.Usr.CUSTOMER_ID ;
+        SET Environment.Variables.entityID = DispatchedEvent.Usr.CUSTOMER_ID ;
+     
+		SET Environment.Variables.createdBy = DispatchedEvent.Usr.CREATED_BY;
+		SET Environment.Variables.customerExternalID = DispatchedEvent.Usr.EXTERNAL_ID;  
+		IF DispatchedEvent.Usr.IS_RENEWAL_LOAN = 1 THEN
+		   SET Environment.Variables.isRenewalLoan = 'Y';
+		ELSE 
+		   SET Environment.Variables.isRenewalLoan = 'N';
+		END IF;
+		SET Environment.Variables.isByJob     = 'Y';  
+
+		RETURN;
+	END;
+
+	CREATE PROCEDURE EndEvent(IN DispatchedEvent REFERENCE)
+	BEGIN
+		DECLARE EXIT HANDLER FOR SQLSTATE LIKE 'D%'
+		BEGIN
+			RESIGNAL; /* pass the error back to the node */
+		END;
+
+
+		RETURN;
+	END;
+
+
+	CREATE PROCEDURE HandleDatabaseError( IN FunctionName CHARACTER )
+	BEGIN
+		/* Throw a different exception; this could be changed. */
+		DECLARE message CHARACTER 'Exception occured calling Database Input Node function: ' || FunctionName;
+		THROW USER EXCEPTION VALUES( SQLCODE, SQLSTATE, SQLNATIVEERROR, SQLERRORTEXT, message );
+	END;
+
+END MODULE;

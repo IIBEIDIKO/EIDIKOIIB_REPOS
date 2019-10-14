@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmMSLMapping.msgnode="ComIbmMSLMapping.msgnode" xmlns:ComIbmValidate.msgnode="ComIbmValidate.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:insertUnparsedRecord.subflow="insertUnparsedRecord.subflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="validateAndAddExistingCustomer.subflow"
+    nsPrefix="validateAndAddExistingCustomer.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" useDefaults="true" udpSupport="true">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="validateAndAddExistingCustomer" bundleName="validateAndAddExistingCustomer" pluginId="gufa.app"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj16/validateAndAddExistingCustomer.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj30/validateAndAddExistingCustomer.gif"/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="63,168">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="validateAndAddExistingCustomer" pluginId="gufa.app"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output" location="870,275">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Output" bundleName="validateAndAddExistingCustomer" pluginId="gufa.app"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="186,269" dataSource="GANASEVADB" computeExpression="esql://routine/#validateRegion.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="validateRegion"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="116,177" computeExpression="esql://routine/#catchFacetException.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="catchFacetValidation"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="470,270" computeExpression="esql://routine/#setCustomerExternalIdInEnv.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="setCustomerExternalIdInEnv"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="273,311" dataSource="GUFA" computeExpression="esql://routine/#addSequenceID.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="addSequenceID &amp; checkExistingScoreValidity"/>
+      </nodes>
+      <nodes xmi:type="ComIbmValidate.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="87,265" domain="DFDL" type="{}:processCenter" validateMaster="contentAndValue">
+        <translation xmi:type="utility:ConstantString" string="validateEntity"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="675,271" mappingExpression="msl://{default}#processCenter_EXISTINGCUSTOMERS" validateFailureAction="exceptionList">
+        <translation xmi:type="utility:ConstantString" string="addCustomerRecord"/>
+      </nodes>
+      <nodes xmi:type="insertUnparsedRecord.subflow:FCMComposite_1" xmi:id="FCMComposite_1_7" location="808,168">
+        <translation xmi:type="utility:ConstantString" string="insertAsUnparsedRecord"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.match" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_5" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="OutTerminal.Output" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.buildError1"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

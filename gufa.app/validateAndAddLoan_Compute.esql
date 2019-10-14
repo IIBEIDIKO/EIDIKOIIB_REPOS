@@ -1,0 +1,31 @@
+
+
+CREATE COMPUTE MODULE validateAndAddLoan_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- CALL CopyMessageHeaders();
+		-- CALL CopyEntireMessage();
+	DECLARE bankname CHARACTER InputRoot.DFDL.processCenter.loan.bankname;
+	DECLARE ifsccode CHARACTER InputRoot.DFDL.processCenter.loan.ifsccode;
+	DECLARE bankaccountnumber CHARACTER InputRoot.DFDL.processCenter.loan.bankaccountnumber;
+	
+	
+--	UPDATE Database.LOANS AS L SET BANKNAME = bankname,IFSCCODE=ifsccode,BANKACCOUNTNUMBER=bankaccountnumber  WHERE L. = InputBody.Message.Company
+		
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

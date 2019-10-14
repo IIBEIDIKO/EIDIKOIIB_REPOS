@@ -1,0 +1,126 @@
+CREATE COMPUTE MODULE serializeMappingExceptionRecord_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+ 		SET OutputLocalEnvironment.Variables.serializedRecord = CAST(ASBITSTREAM(InputRoot.DFDL.processCenter) AS CHARACTER CCSID InputRoot.Properties.CodedCharSetId);
+		SET Environment.Variables.unparsedEntity = Environment.Variables.entity;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+
+CREATE COMPUTE MODULE serializeUnparsedRecord
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE serializedRecord CHARACTER;
+		DECLARE inCCSID INT;
+		DECLARE inEncoding INT;
+		DECLARE blobMsg BLOB;
+
+		-- first the unparsed record will be converted into a blob
+		SET inCCSID = CAST(InputRoot.Properties.CodedCharSetId AS INT);
+		SET inEncoding = CAST(InputRoot.Properties.Encoding AS INT);
+		SET serializedRecord = CAST(ASBITSTREAM(InputRoot.DFDL.processCenter.unparsedRecord) AS CHARACTER CCSID InputRoot.Properties.CodedCharSetId);
+		SET blobMsg = CAST(serializedRecord AS BLOB CCSID inCCSID ENCODING inEncoding);
+		
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment.Variables.serializedRecord = serializedRecord;
+
+		-- now we need to create DFDL model for blob msg with new message model
+		IF CONTAINS(serializedRecord, 'CENTER~') THEN
+			SET Environment.Variables.unparsedEntity = 'CENTER';
+			CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL')
+			PARSE(blobMsg ENCODING inEncoding CCSID inCCSID SET '' TYPE '{http://www.quantiguous.com/gufa/dfdl/entityCenter.xsd}:entityCenter' OPTIONS RootBitStream);
+			PROPAGATE TO LABEL 'entityCenter1';
+		ELSEIF CONTAINS(serializedRecord, 'NEWCUSTOMER~') THEN
+			SET Environment.Variables.unparsedEntity = 'CUSTOMER';
+			CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL')
+			PARSE(blobMsg ENCODING inEncoding CCSID inCCSID SET '' TYPE '{http://www.quantiguous.com/gufa/dfdl/entityCustomer.xsd}:entityCustomer' OPTIONS RootBitStream);
+			PROPAGATE TO LABEL 'entityCustomer1';
+		ELSEIF CONTAINS(serializedRecord, 'EXISTINGCUSTOMER~') THEN
+			SET Environment.Variables.unparsedEntity = 'EXISTINGCUSTOMER';
+			CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL')
+			PARSE(blobMsg ENCODING inEncoding CCSID inCCSID SET '' TYPE '{http://www.quantiguous.com/gufa/dfdl/entityExistingCustomer.xsd}:entityExistingCustomer' OPTIONS RootBitStream);
+			PROPAGATE TO LABEL 'entityExistingCustomer1';
+		ELSEIF CONTAINS(serializedRecord, 'SAVING~') THEN
+			SET Environment.Variables.unparsedEntity = 'SAVING';
+			CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL')
+			PARSE(blobMsg ENCODING inEncoding CCSID inCCSID SET '' TYPE '{http://www.quantiguous.com/gufa/dfdl/entitySaving.xsd}:entitySaving' OPTIONS RootBitStream);
+			PROPAGATE TO LABEL 'entitySaving1';
+		ELSEIF CONTAINS(serializedRecord, 'GROUP~') THEN
+			SET Environment.Variables.unparsedEntity = 'GROUP';
+			CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL')
+			PARSE(blobMsg ENCODING inEncoding CCSID inCCSID SET '' TYPE '{http://www.quantiguous.com/gufa/dfdl/entityGroup.xsd}:entityGroup' OPTIONS RootBitStream);
+			PROPAGATE TO LABEL 'entityGroup1';
+		ELSEIF CONTAINS(serializedRecord, 'LOAN~') THEN
+			SET Environment.Variables.unparsedEntity = 'LOAN';
+			CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL')
+			PARSE(blobMsg ENCODING inEncoding CCSID inCCSID SET '' TYPE '{http://www.quantiguous.com/gufa/dfdl/entityLoan.xsd}:entityLoan' OPTIONS RootBitStream);
+			PROPAGATE TO LABEL 'entityLoan1';
+		ELSE
+			SET Environment.Variables.unparsedEntity = 'UNKNOWN';
+			PROPAGATE TO LABEL 'unknown';
+		END IF;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE buildErrorForUnparsedRecord
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lColumn CHARACTER 'base';
+		DECLARE lError  CHARACTER;
+		DECLARE lPrefix CHARACTER '--- !omap';
+		DECLARE faultCode INT;
+        DECLARE faultText, faultInserts CHAR;
+        
+		-- get the last exception, this is in most cases the root case
+		CALL getLastExceptionDetail(faultCode, faultText, faultInserts);
+		
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputRoot.XMLNSC.ns6:ganasevaEntity.entityName = 'UNPARSED';
+		
+		-- build the error message for base column
+		IF Environment.Variables.unparsedEntity = 'UNKNOWN' THEN
+			SET lError = 'None of the initiator found on the record';
+		ELSE
+			SET lError = faultInserts;
+		END IF;
+		SET OutputLocalEnvironment.Variables.errorDescription = lError;
+		RETURN TRUE;
+	END;
+	
+	CREATE PROCEDURE getLastExceptionDetail(OUT messageNumber INT, OUT messageText CHAR, OUT messageInserts CHAR)
+	BEGIN		
+		SET messageNumber = 0;
+		SET messageText = '';
+		SET messageInserts = '';
+		
+	-- Create a reference to the first child of the exception list
+		DECLARE ptrException REFERENCE TO InputExceptionList.*[1];
+	
+		-- keep looping while the moves to the child of exception list work
+	    WHILE lastmove(ptrException) DO
+	        -- store the current values for the error number and text
+	        IF ptrException.Number is not null THEN
+	        SET messageNumber = ptrException.Number;
+	        SET messageText = ptrException.Text;
+	
+	        SET messageInserts = '';
+	        DECLARE ptrInsert REFERENCE TO ptrException.Insert[1];
+	        WHILE lastmove(ptrInsert) DO
+	                IF ptrInsert.Text is not null THEN
+	                        SET messageInserts = messageInserts || ',' || ptrInsert.Text;
+	                END IF;
+	                MOVE ptrInsert NEXTSIBLING;
+	        END WHILE;
+	
+	        END IF;
+	        -- now move to the last child which should be the next exceptionlist
+	        MOVE ptrException LASTCHILD;
+	    END WHILE;
+	    
+	END;
+	
+END MODULE;

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmMQOutput.msgnode="ComIbmMQOutput.msgnode" xmlns:ComIbmMSLMapping.msgnode="ComIbmMSLMapping.msgnode" xmlns:ComIbmRoute.msgnode="ComIbmRoute.msgnode" xmlns:ComIbmTrace.msgnode="ComIbmTrace.msgnode" xmlns:ComIbmWSInput.msgnode="ComIbmWSInput.msgnode" xmlns:ComIbmWSReply.msgnode="ComIbmWSReply.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow"
+    xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="startJob.msgflow" nsPrefix="startJob.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="startJob" bundleName="startJob" pluginId="gufa.app"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj16/startJob.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj30/startJob.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmWSInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="-74,31" URLSpecifier="/GUFATESTING" parseQueryString="true" faultFormat="SOAP 1.2">
+        <translation xmi:type="utility:ConstantString" string="HTTP Input"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="24,27" pattern="${Root}&#xA;${LocalEnvironment}">
+        <translation xmi:type="utility:ConstantString" string="Trace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="144,65" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#retriveRecords.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="fetchRecordsForJob"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="1061,30" queueName="OUT" destinationQueueManagerName="SAMPLE">
+        <translation xmi:type="utility:ConstantString" string="GUFA.MAIN"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSReply.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="371,-51">
+        <translation xmi:type="utility:ConstantString" string="jobInitiatedReply"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="819,206" mappingExpression="msl://{default}#moveCustomerToStaging">
+        <translation xmi:type="utility:ConstantString" string="moveCustomerToStaging"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="232,260" dataSource="GANASEVADB" transaction="commit" computeExpression="esql://routine/#updateBatchID.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="updateBatchID"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="868,405" mappingExpression="msl://{default}#moveCenterToStaging">
+        <translation xmi:type="utility:ConstantString" string="moveCenterToStaging"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="848,340" mappingExpression="msl://{default}#moveLoanToStaging">
+        <translation xmi:type="utility:ConstantString" string="moveLoanToStaging"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="837,279" mappingExpression="msl://{default}#moveSavingToStaging">
+        <translation xmi:type="utility:ConstantString" string="moveSavingToStaging"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="910,470" mappingExpression="msl://{default}#moveGroupToStaging">
+        <translation xmi:type="utility:ConstantString" string="moveGroupToStaging"/>
+      </nodes>
+      <nodes xmi:type="ComIbmRoute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_21" location="432,29">
+        <outTerminals terminalNodeID="Match" dynamic="true" label="Match"/>
+        <outTerminals terminalNodeID="customerToStaging" dynamic="true" label="customerToStaging"/>
+        <outTerminals terminalNodeID="centerToStaging" dynamic="true" label="centerToStaging"/>
+        <outTerminals terminalNodeID="loanToStaging" dynamic="true" label="loanToStaging"/>
+        <outTerminals terminalNodeID="savingToStaging" dynamic="true" label="savingToStaging"/>
+        <outTerminals terminalNodeID="groupToStaging" dynamic="true" label="groupToStaging"/>
+        <outTerminals terminalNodeID="imageToStaging" dynamic="true" label="imageToStaging"/>
+        <outTerminals terminalNodeID="existingCustomerToStaging" dynamic="true" label="existingCustomerToStaging"/>
+        <outTerminals terminalNodeID="updateJob" dynamic="true" label="updateJob"/>
+        <translation xmi:type="utility:ConstantString" string="Route"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'CUSTOMER'" routingOutputTerminal="customerToStaging"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'CENTER'" routingOutputTerminal="centerToStaging"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'LOAN'" routingOutputTerminal="loanToStaging"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'SAVING'" routingOutputTerminal="savingToStaging"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'GROUP'" routingOutputTerminal="groupToStaging"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'IMAGE'" routingOutputTerminal="imageToStaging"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'EXISTINGCUSTOMER'" routingOutputTerminal="existingCustomerToStaging"/>
+        <filterTable filterPattern="$LocalEnvironment/Variables/ganasevaEntityName = 'UPDATE_JOB'" routingOutputTerminal="updateJob"/>
+        <nsMappingTable nsPrefix="gan" namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_14" location="385,166" pattern="${Root}&#xA;${LocalEnvironment}">
+        <translation xmi:type="utility:ConstantString" string="Trace1"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="7,254" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setSatartJobException.Main">
+        <translation xmi:type="utility:ConstantString" string="catchException"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_13" location="-31,156" pattern="${Root}&#xA;${Environment}&#xA;${LocalEnvironment}&#xA;${ExceptionList}">
+        <translation xmi:type="utility:ConstantString" string="Trace2"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_16" location="476,465" mappingExpression="msl://{default}#startJob_createGroupDFDL">
+        <translation xmi:type="utility:ConstantString" string="createGroupDFDL"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_19" location="510,400" mappingExpression="msl://{default}#startJob_createCenterDFDL">
+        <translation xmi:type="utility:ConstantString" string="createCenterDFDL"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_15" location="546,335" mappingExpression="msl://{default}#startJob_createLoanDFDL">
+        <translation xmi:type="utility:ConstantString" string="createLoanDFDL"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_20" location="564,274" mappingExpression="msl://{default}#startJob_createSavingDFDL">
+        <translation xmi:type="utility:ConstantString" string="createSavingDFDL"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_22" location="567,201" mappingExpression="msl://{default}#startJob_createCustomerDFDL">
+        <translation xmi:type="utility:ConstantString" string="createCustomerDFDL"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_17" location="699,-86" mappingExpression="msl://{default}#startJob_moveImageToStaging">
+        <translation xmi:type="utility:ConstantString" string="moveImageToStaging"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_23" location="562,134" mappingExpression="msl://{default}#startJob_createExistingCustomerDFDL">
+        <translation xmi:type="utility:ConstantString" string="createExistingCustomerDFDL"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_24" location="788,138" mappingExpression="msl://{default}#moveExistingCustomerToStaging">
+        <translation xmi:type="utility:ConstantString" string="moveExistingCustomerToStaging"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_18" location="725,205" dataSource="GUFA" computeExpression="esql://routine/#formatUDFs.Main">
+        <translation xmi:type="utility:ConstantString" string="formatUDFCustomer"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_25" location="725,278" dataSource="GUFA" computeExpression="esql://routine/#formatUDFs.Main">
+        <translation xmi:type="utility:ConstantString" string="formatUDFSaving"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_26" location="727,339" dataSource="GUFA" computeExpression="esql://routine/#formatUDFs.Main">
+        <translation xmi:type="utility:ConstantString" string="formatUDFLoan"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_27" location="733,404" dataSource="GUFA" computeExpression="esql://routine/#formatUDFs.Main">
+        <translation xmi:type="utility:ConstantString" string="formatUDFCenter"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_28" location="734,469" dataSource="GUFA" computeExpression="esql://routine/#formatUDFs.Main">
+        <translation xmi:type="utility:ConstantString" string="formatUDFGroup"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_29" location="56,161" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#getUDFDetails.Main">
+        <translation xmi:type="utility:ConstantString" string="getUDFDetails"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_30" location="701,62" dataSource="GUFA" computeExpression="esql://routine/#formatUDFs.Main">
+        <translation xmi:type="utility:ConstantString" string="formatUDFCustomer1"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMSLMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_32" location="690,-4" mappingExpression="msl://{default}#startJob_sendUpdateJobMessage">
+        <translation xmi:type="utility:ConstantString" string="sendUpdateJobMessage"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_31" location="126,-38" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#startJob_Compute.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="startJob"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSReply.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_35" location="488,-102">
+        <translation xmi:type="utility:ConstantString" string="jobInitiationFailedReply"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_20" targetNode="FCMComposite_1_14" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_21" targetNode="FCMComposite_1_21" sourceNode="FCMComposite_1_14" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_15" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_17" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_18" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_12" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_13" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_13" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_23" targetNode="FCMComposite_1_16" sourceNode="FCMComposite_1_21" sourceTerminalName="groupToStaging" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_28" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_21" sourceTerminalName="centerToStaging" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_15" sourceNode="FCMComposite_1_21" sourceTerminalName="loanToStaging" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_20" sourceNode="FCMComposite_1_21" sourceTerminalName="savingToStaging" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_22" sourceNode="FCMComposite_1_21" sourceTerminalName="customerToStaging" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_16" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_17" sourceNode="FCMComposite_1_21" sourceTerminalName="imageToStaging" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_19" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_17" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_26" targetNode="FCMComposite_1_23" sourceNode="FCMComposite_1_21" sourceTerminalName="existingCustomerToStaging" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_30" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_24" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_31" targetNode="FCMComposite_1_18" sourceNode="FCMComposite_1_22" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_33" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_18" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_34" targetNode="FCMComposite_1_25" sourceNode="FCMComposite_1_20" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_35" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_25" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_36" targetNode="FCMComposite_1_26" sourceNode="FCMComposite_1_15" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_37" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_26" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_38" targetNode="FCMComposite_1_27" sourceNode="FCMComposite_1_19" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_39" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_27" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_40" targetNode="FCMComposite_1_28" sourceNode="FCMComposite_1_16" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_41" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_28" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_43" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_46" targetNode="FCMComposite_1_30" sourceNode="FCMComposite_1_23" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_47" targetNode="FCMComposite_1_24" sourceNode="FCMComposite_1_30" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_32" sourceNode="FCMComposite_1_21" sourceTerminalName="updateJob" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_22" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_32" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_24" targetNode="FCMComposite_1_29" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_31" sourceNode="FCMComposite_1_29" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_48" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_49" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_31" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_50" targetNode="FCMComposite_1_35" sourceNode="FCMComposite_1_31" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

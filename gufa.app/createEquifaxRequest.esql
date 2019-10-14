@@ -1,0 +1,32 @@
+DECLARE ns NAMESPACE 'http://services.equifax.com/eport/ws/schemas/1.0';
+
+CREATE COMPUTE MODULE createEquifaxRequestForNewCustomer
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET rs.rows[] = SELECT * FROM Database.GUFA.CUSTOMERS AS A WHERE A.ID = InputLocalEnvironment.Variables.entityID;
+		
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:CustRefField = rs.rows[1].EXTERNAL_ID||''||rs.rows[1].BARCODE_NO;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestAccountDetails.ns:BranchIDMFI = rs.rows[1].BRANCH_CODE;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:TransactionAmount = 10000.00;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:FullName = rs.rows[1].CUSTOMER_NAME;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:InquiryPurpose 	= '0E';
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:AddrLine1 = rs.rows[1].ADDRESS_LINE1 ||''||rs.rows[1].ADDRESS_LINE2||''||rs.rows[1].ADDRESS_LINE3||''||rs.rows[1].CITY_CODE||''||rs.rows[1].STATE_CODE||''||CAST(rs.rows[1].PIN AS CHARACTER);
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:State = getEquifaxStateCode(rs.rows[1].STATE_CODE);
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:Postal = rs.rows[1].PIN;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:DOB = CAST(rs.rows[1].DATE_OF_BIRTH AS DATE);
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:Gender = rs.rows[1].GENDER;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:NationalIdCard = rs.rows[1].AADHAR_NO;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:RationCard = rs.rows[1].RATION_CARD_NO;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:PANId = rs.rows[1].pan_NO;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:VoterId = rs.rows[1].VOTER_ID;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:MobilePhone = rs.rows[1].MOBILE_NO;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:FamilyDetails.ns:AdditionalNameInfo.ns:AdditionalName = rs.rows[1].CUSTOMER_NAME;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:FamilyDetails.ns:AdditionalNameInfo.ns:AdditionalNameType = 'O';
+	
+		RETURN TRUE;
+		
+	END;
+END MODULE;

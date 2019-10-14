@@ -1,0 +1,1551 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0" xmlns:map="default">
+    <input path="/localEnvironmentVariables.xsd" var="var"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,CUSTOMERS))" var="GUFA"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,LOANS))" var="GUFA1"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,SAVINGS))" var="GUFA2"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,GROUPS))" var="GUFA3"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,CENTERS))" var="GUFA4"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,CUSTOMERS))" var="GUFA5"/>
+    <output path="/fileExtract.xsd" var="var1"/>
+    <output path="/fileExtract.xsd" var="var2"/>
+    <output path="/fileExtract.xsd" var="var3"/>
+    <output path="/fileExtract.xsd" var="var4"/>
+    <output path="/fileExtract.xsd" var="var5"/>
+    <output path="/fileExtract.xsd" var="var6"/>
+    <imports>
+        <import kind="esql" namespace="/helper.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="helper" uri="/helper.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="getCenterExtractMapping">
+        <input path="$var/mb:msg(externalID,assembly,XMLNSC,Properties)" var="MessageAssembly"/>
+        <input path="$GUFA/db:select(fn:false(),ResultSet(GUFA/CUSTOMERS/ID,GUFA/CUSTOMERS/EXTERNAL_ID,GUFA/CUSTOMERS/EXTERNAL_CENTER_ID,GUFA/CUSTOMERS/TITLE,GUFA/CUSTOMERS/CUSTOMER_NAME,GUFA/CUSTOMERS/ADDRESS_LINE1,GUFA/CUSTOMERS/ADDRESS_LINE2,GUFA/CUSTOMERS/ADDRESS_LINE3,GUFA/CUSTOMERS/CITY_CODE,GUFA/CUSTOMERS/STATE_CODE,GUFA/CUSTOMERS/PIN,GUFA/CUSTOMERS/DATE_OF_BIRTH,GUFA/CUSTOMERS/MOBILE_NO,GUFA/CUSTOMERS/CASTE,GUFA/CUSTOMERS/GENDER,GUFA/CUSTOMERS/MARITAL_STATUS,GUFA/CUSTOMERS/NATIONALITY,GUFA/CUSTOMERS/RELIGION,GUFA/CUSTOMERS/MOTHER_TONGUE,GUFA/CUSTOMERS/BRANCH_CODE,GUFA/CUSTOMERS/OPERATING_REGION_CODE,GUFA/CUSTOMERS/AADHAR_NO,GUFA/CUSTOMERS/PENSION_CARD_NO,GUFA/CUSTOMERS/RATION_CARD_NO,GUFA/CUSTOMERS/VOTER_ID,GUFA/CUSTOMERS/PAN_NO,GUFA/CUSTOMERS/BARCODE_NO,GUFA/CUSTOMERS/AADHAR_SEEDING_CONSENT,GUFA/CUSTOMERS/HEALTH,GUFA/CUSTOMERS/OCCUPATION,GUFA/CUSTOMERS/EDUCATIONAL_QUALIFICATION,GUFA/CUSTOMERS/CATEGORY,GUFA/CUSTOMERS/LANGUAGE,GUFA/CUSTOMERS/CARD_ISSUANCE_FLAG,GUFA/CUSTOMERS/BC_BRANCH_CODE,GUFA/CUSTOMERS/COLLECTOR,GUFA/CUSTOMERS/APPROVER,GUFA/CUSTOMERS/CREATED_BY,GUFA/CUSTOMERS/CREATED_AT,GUFA/CUSTOMERS/STATUS,GUFA/CUSTOMERS/CREDIT_PASS_FAIL,GUFA/CUSTOMERS/INTERNAL_ID,GUFA/CUSTOMERS/PROCESS_ID,GUFA/CUSTOMERS/UPDATED_AT,GUFA/CUSTOMERS/RECORD_ERRORS,GUFA/CUSTOMERS/INCOMING_FILE_ID,GUFA/CUSTOMERS/SKIPPED,GUFA/CUSTOMERS/UDF1,GUFA/CUSTOMERS/UDF2,GUFA/CUSTOMERS/UDF3,GUFA/CUSTOMERS/UDF4,GUFA/CUSTOMERS/UDF5,GUFA/CUSTOMERS/UDF6,GUFA/CUSTOMERS/UDF7,GUFA/CUSTOMERS/UDF8,GUFA/CUSTOMERS/UDF9,GUFA/CUSTOMERS/UDF10,GUFA/CUSTOMERS/UDF11,GUFA/CUSTOMERS/UDF12,GUFA/CUSTOMERS/UDF13,GUFA/CUSTOMERS/UDF14,GUFA/CUSTOMERS/UDF15,GUFA/CUSTOMERS/UDF16,GUFA/CUSTOMERS/UDF17,GUFA/CUSTOMERS/UDF18,GUFA/CUSTOMERS/UDF19,GUFA/CUSTOMERS/UDF20,GUFA/CUSTOMERS/UDF21,GUFA/CUSTOMERS/UDF22,GUFA/CUSTOMERS/UDF23,GUFA/CUSTOMERS/UDF24,GUFA/CUSTOMERS/UDF25,GUFA/CUSTOMERS/UDF26,GUFA/CUSTOMERS/UDF27,GUFA/CUSTOMERS/UDF28,GUFA/CUSTOMERS/UDF29,GUFA/CUSTOMERS/UDF30,GUFA/CUSTOMERS/SPOUSE_NAME,GUFA/CUSTOMERS/SPOUSE_DOB,GUFA/CUSTOMERS/NOMINEE_NAME,GUFA/CUSTOMERS/NOMINEE_RELATION,GUFA/CUSTOMERS/DONT_GET_RATING,GUFA/CUSTOMERS/BANK_NAME,GUFA/CUSTOMERS/BANK_ACCOUNT_NO,GUFA/CUSTOMERS/BANK_BRANCH_NAME),db:where('GUFA.CUSTOMERS.EXTERNAL_CENTER_ID =  ?  AND GUFA.CUSTOMERS.INCOMING_FILE_ID IS NULL AND LENGTH(GUFA.CUSTOMERS.RECORD_ERRORS) &lt;=14 AND GUFA.CUSTOMERS.TREAT_AS_EXISTING = 0','?'=$MessageAssembly/externalID))" var="dbselect"/>
+        <input path="$GUFA1/db:select(fn:false(),ResultSet(GUFA/LOANS/ID,GUFA/LOANS/EXTERNAL_ID,GUFA/LOANS/EXTERNAL_CUSTOMER_ID,GUFA/LOANS/EXTERNAL_CENTER_ID,GUFA/LOANS/EXTERNAL_GROUP_ID,GUFA/LOANS/LOAN_PRODUCT_CODE,GUFA/LOANS/LOAN_AMOUNT,GUFA/LOANS/DISBURSEMENT_MODE,GUFA/LOANS/NO_OF_INSTALLMENTS,GUFA/LOANS/REPAYMENT_FREQUENCY,GUFA/LOANS/LOAN_CYCLE,GUFA/LOANS/BARCODE_NO,GUFA/LOANS/LOAN_START_DATE,GUFA/LOANS/REPAYMENT_START_DATE,GUFA/LOANS/COLLECTOR,GUFA/LOANS/APPROVER,GUFA/LOANS/CREATED_BY,GUFA/LOANS/CREATED_AT,GUFA/LOANS/STATUS,GUFA/LOANS/INTERNAL_ID,GUFA/LOANS/PROCESS_ID,GUFA/LOANS/UPDATED_AT,GUFA/LOANS/RECORD_ERRORS,GUFA/LOANS/INCOMING_FILE_ID,GUFA/LOANS/UPDATED_BY,GUFA/LOANS/SKIPPED,GUFA/LOANS/EXPECTED_DISBURSAL_DATE,GUFA/LOANS/UDF1,GUFA/LOANS/UDF2,GUFA/LOANS/UDF3,GUFA/LOANS/UDF4,GUFA/LOANS/UDF5,GUFA/LOANS/UDF6,GUFA/LOANS/UDF7,GUFA/LOANS/UDF8,GUFA/LOANS/UDF9,GUFA/LOANS/UDF10,GUFA/LOANS/UDF11,GUFA/LOANS/UDF12,GUFA/LOANS/UDF13,GUFA/LOANS/UDF14,GUFA/LOANS/UDF15,GUFA/LOANS/UDF16,GUFA/LOANS/UDF17,GUFA/LOANS/UDF18,GUFA/LOANS/UDF19,GUFA/LOANS/UDF20,GUFA/LOANS/UDF21,GUFA/LOANS/UDF22,GUFA/LOANS/UDF23,GUFA/LOANS/UDF24,GUFA/LOANS/UDF25,GUFA/LOANS/UDF26,GUFA/LOANS/UDF27,GUFA/LOANS/UDF28,GUFA/LOANS/UDF29,GUFA/LOANS/UDF30,GUFA/LOANS/BC_BRANCH_CODE,GUFA/LOANS/IS_TOP_UP,GUFA/LOANS/LOAN_PURPOSE,GUFA/LOANS/PSL_CODE,GUFA/LOANS/HOSPITAL_CASH,GUFA/LOANS/PREPAID_CHARGES),db:where('GUFA.LOANS.EXTERNAL_CENTER_ID =  ? AND GUFA.LOANS.INCOMING_FILE_ID IS NULL AND LENGTH(GUFA.LOANS.RECORD_ERRORS) &lt;=14','?'=$MessageAssembly/externalID))" var="dbselect1"/>
+        <input path="$GUFA2/db:select(fn:false(),ResultSet(GUFA/SAVINGS/ID,GUFA/SAVINGS/EXTERNAL_ID,GUFA/SAVINGS/EXTERNAL_CUSTOMER_ID,GUFA/SAVINGS/EXTERNAL_CENTER_ID,GUFA/SAVINGS/ACCOUNT_TYPE,GUFA/SAVINGS/SAVING_PRODUCT_CODE,GUFA/SAVINGS/PRODUCT_NAME,GUFA/SAVINGS/ACCOUNT_OPENING_DATE,GUFA/SAVINGS/NOMINEE_TITLE,GUFA/SAVINGS/NOMINEE_NAME,GUFA/SAVINGS/NOMINEE_RELATION,GUFA/SAVINGS/NOMINEE_DOB,GUFA/SAVINGS/NOMINEE_GENDER,GUFA/SAVINGS/NOMINEE_ADDRESS_LINE1,GUFA/SAVINGS/NOMINEE_ADDRESS_LINE2,GUFA/SAVINGS/NOMINEE_ADDRESS_LINE3,GUFA/SAVINGS/NOMINEE_CITY_CODE,GUFA/SAVINGS/NOMINEE_STATE_CODE,GUFA/SAVINGS/NOMINEE_PIN,GUFA/SAVINGS/MINOR,GUFA/SAVINGS/CREATED_BY,GUFA/SAVINGS/COLLECTOR,GUFA/SAVINGS/APPROVER,GUFA/SAVINGS/CREATED_AT,GUFA/SAVINGS/STATUS,GUFA/SAVINGS/INTERNAL_ID,GUFA/SAVINGS/PROCESS_ID,GUFA/SAVINGS/UPDATED_AT,GUFA/SAVINGS/RECORD_ERRORS,GUFA/SAVINGS/INCOMING_FILE_ID,GUFA/SAVINGS/UPDATED_BY,GUFA/SAVINGS/SKIPPED,GUFA/SAVINGS/GUARDIAN_TITLE,GUFA/SAVINGS/GUARDIAN_NAME,GUFA/SAVINGS/GUARDIAN_DOB,GUFA/SAVINGS/GUARDIAN_GENDER,GUFA/SAVINGS/GUARDIAN_ADDRESS_LINE1,GUFA/SAVINGS/GUARDIAN_ADDRESS_LINE2,GUFA/SAVINGS/GUARDIAN_ADDRESS_LINE3,GUFA/SAVINGS/GUARDIAN_STATE_CODE,GUFA/SAVINGS/GUARDIAN_CITY_CODE,GUFA/SAVINGS/GUARDIAN_RELATION,GUFA/SAVINGS/GUARDIAN_PHONE_NO,GUFA/SAVINGS/GUARDIAN_PIN,GUFA/SAVINGS/UDF1,GUFA/SAVINGS/UDF2,GUFA/SAVINGS/UDF3,GUFA/SAVINGS/UDF4,GUFA/SAVINGS/UDF5,GUFA/SAVINGS/UDF6,GUFA/SAVINGS/UDF7,GUFA/SAVINGS/UDF8,GUFA/SAVINGS/UDF9,GUFA/SAVINGS/UDF10,GUFA/SAVINGS/UDF11,GUFA/SAVINGS/UDF12,GUFA/SAVINGS/UDF13,GUFA/SAVINGS/UDF14,GUFA/SAVINGS/UDF15,GUFA/SAVINGS/UDF16,GUFA/SAVINGS/UDF17,GUFA/SAVINGS/UDF18,GUFA/SAVINGS/UDF19,GUFA/SAVINGS/UDF20,GUFA/SAVINGS/UDF21,GUFA/SAVINGS/UDF22,GUFA/SAVINGS/UDF23,GUFA/SAVINGS/UDF24,GUFA/SAVINGS/UDF25,GUFA/SAVINGS/UDF26,GUFA/SAVINGS/UDF27,GUFA/SAVINGS/UDF28,GUFA/SAVINGS/UDF29,GUFA/SAVINGS/UDF30),db:where('GUFA.SAVINGS.EXTERNAL_CENTER_ID =  ?  AND GUFA.SAVINGS.INCOMING_FILE_ID IS NULL AND LENGTH(GUFA.SAVINGS.RECORD_ERRORS) &lt;=14','?'=$MessageAssembly/externalID))" var="dbselect2"/>
+        <input path="$GUFA3/db:select(fn:false(),ResultSet(GUFA/GROUPS/ID,GUFA/GROUPS/EXTERNAL_ID,GUFA/GROUPS/EXTERNAL_CENTER_ID,GUFA/GROUPS/CENTER_NAME,GUFA/GROUPS/MAXIMUM_CENTER_LIMIT,GUFA/GROUPS/GROUP_NAME,GUFA/GROUPS/GROUP_TYPE,GUFA/GROUPS/MIN_NUMBER,GUFA/GROUPS/MAX_NUMBER,GUFA/GROUPS/FORMATION_DATE,GUFA/GROUPS/MEETING_TIME,GUFA/GROUPS/MEETING_FREQUENCY,GUFA/GROUPS/DISTANCE_FROM_BRANCH,GUFA/GROUPS/BRANCH_CODE,GUFA/GROUPS/OPERATING_REGION_CODE,GUFA/GROUPS/CREATED_BY,GUFA/GROUPS/CREATED_AT,GUFA/GROUPS/STATUS,GUFA/GROUPS/INTERNAL_ID,GUFA/GROUPS/PROCESS_ID,GUFA/GROUPS/UPDATED_AT,GUFA/GROUPS/RECORD_ERRORS,GUFA/GROUPS/INCOMING_FILE_ID,GUFA/GROUPS/UPDATED_BY,GUFA/GROUPS/SKIPPED,GUFA/GROUPS/UDF1,GUFA/GROUPS/UDF2,GUFA/GROUPS/UDF3,GUFA/GROUPS/UDF4,GUFA/GROUPS/UDF5,GUFA/GROUPS/UDF6,GUFA/GROUPS/UDF7,GUFA/GROUPS/UDF8,GUFA/GROUPS/UDF9,GUFA/GROUPS/UDF10,GUFA/GROUPS/UDF11,GUFA/GROUPS/UDF12,GUFA/GROUPS/UDF13,GUFA/GROUPS/UDF14,GUFA/GROUPS/UDF15,GUFA/GROUPS/UDF16,GUFA/GROUPS/UDF17,GUFA/GROUPS/UDF18,GUFA/GROUPS/UDF19,GUFA/GROUPS/UDF20,GUFA/GROUPS/UDF21,GUFA/GROUPS/UDF22,GUFA/GROUPS/UDF23,GUFA/GROUPS/UDF24,GUFA/GROUPS/UDF25,GUFA/GROUPS/UDF26,GUFA/GROUPS/UDF27,GUFA/GROUPS/UDF28,GUFA/GROUPS/UDF29,GUFA/GROUPS/UDF30),db:where('GUFA.GROUPS.EXTERNAL_CENTER_ID =  ?  AND GUFA.GROUPS.INCOMING_FILE_ID IS NULL AND LENGTH(GUFA.GROUPS.RECORD_ERRORS) &lt;=14','?'=$MessageAssembly/externalID))" var="dbselect3"/>
+        <input path="$GUFA4/db:select(fn:false(),ResultSet(GUFA/CENTERS/ID,GUFA/CENTERS/EXTERNAL_ID,GUFA/CENTERS/CENTER_NAME,GUFA/CENTERS/FORMATION_DATE,GUFA/CENTERS/SERVICING_AGENT,GUFA/CENTERS/MAXIMUM_INDIVIDUALS,GUFA/CENTERS/MEETING_TIME,GUFA/CENTERS/ADDRESS_LINE1,GUFA/CENTERS/ADDRESS_LINE2,GUFA/CENTERS/ADDRESS_LINE3,GUFA/CENTERS/CITY_CODE,GUFA/CENTERS/STATE_CODE,GUFA/CENTERS/PIN,GUFA/CENTERS/OPERATING_REGION_CODE,GUFA/CENTERS/BRANCH_CODE,GUFA/CENTERS/DESCRIPTION,GUFA/CENTERS/PHONE_NO,GUFA/CENTERS/CREATED_BY,GUFA/CENTERS/CREATED_AT,GUFA/CENTERS/STATUS,GUFA/CENTERS/INTERNAL_ID,GUFA/CENTERS/UPDATED_AT,GUFA/CENTERS/RECORD_ERRORS,GUFA/CENTERS/INCOMING_FILE_ID,GUFA/CENTERS/UPDATED_BY,GUFA/CENTERS/SKIPPED,GUFA/CENTERS/PROCESS_ID,GUFA/CENTERS/PRIMARY_CONTACT,GUFA/CENTERS/SECONDARY_CONTACT,GUFA/CENTERS/SECONDARY_PHONE_NO,GUFA/CENTERS/UDF1,GUFA/CENTERS/UDF2,GUFA/CENTERS/UDF3,GUFA/CENTERS/UDF4,GUFA/CENTERS/UDF5,GUFA/CENTERS/UDF6,GUFA/CENTERS/UDF7,GUFA/CENTERS/UDF8,GUFA/CENTERS/UDF9,GUFA/CENTERS/UDF10,GUFA/CENTERS/UDF11,GUFA/CENTERS/UDF12,GUFA/CENTERS/UDF13,GUFA/CENTERS/UDF14,GUFA/CENTERS/UDF15,GUFA/CENTERS/UDF16,GUFA/CENTERS/UDF17,GUFA/CENTERS/UDF18,GUFA/CENTERS/UDF19,GUFA/CENTERS/UDF20,GUFA/CENTERS/UDF21,GUFA/CENTERS/UDF22,GUFA/CENTERS/UDF23,GUFA/CENTERS/UDF24,GUFA/CENTERS/UDF25,GUFA/CENTERS/UDF26,GUFA/CENTERS/UDF27,GUFA/CENTERS/UDF28,GUFA/CENTERS/UDF29,GUFA/CENTERS/UDF30),db:where('GUFA.CENTERS.EXTERNAL_ID =  ?  AND GUFA.CENTERS.INCOMING_FILE_ID IS NULL AND LENGTH(GUFA.CENTERS.RECORD_ERRORS) &lt;=14','?'=$MessageAssembly/externalID))" var="dbselect4"/>
+        <input path="$GUFA5/db:select(fn:false(),ResultSet(GUFA/CUSTOMERS/ID,GUFA/CUSTOMERS/EXTERNAL_ID,GUFA/CUSTOMERS/EXTERNAL_CENTER_ID,GUFA/CUSTOMERS/TITLE,GUFA/CUSTOMERS/CUSTOMER_NAME,GUFA/CUSTOMERS/ADDRESS_LINE1,GUFA/CUSTOMERS/ADDRESS_LINE2,GUFA/CUSTOMERS/ADDRESS_LINE3,GUFA/CUSTOMERS/CITY_CODE,GUFA/CUSTOMERS/STATE_CODE,GUFA/CUSTOMERS/PIN,GUFA/CUSTOMERS/DATE_OF_BIRTH,GUFA/CUSTOMERS/MOBILE_NO,GUFA/CUSTOMERS/CASTE,GUFA/CUSTOMERS/GENDER,GUFA/CUSTOMERS/MARITAL_STATUS,GUFA/CUSTOMERS/NATIONALITY,GUFA/CUSTOMERS/RELIGION,GUFA/CUSTOMERS/MOTHER_TONGUE,GUFA/CUSTOMERS/BRANCH_CODE,GUFA/CUSTOMERS/OPERATING_REGION_CODE,GUFA/CUSTOMERS/AADHAR_NO,GUFA/CUSTOMERS/PENSION_CARD_NO,GUFA/CUSTOMERS/RATION_CARD_NO,GUFA/CUSTOMERS/VOTER_ID,GUFA/CUSTOMERS/PAN_NO,GUFA/CUSTOMERS/BARCODE_NO,GUFA/CUSTOMERS/AADHAR_SEEDING_CONSENT,GUFA/CUSTOMERS/HEALTH,GUFA/CUSTOMERS/OCCUPATION,GUFA/CUSTOMERS/EDUCATIONAL_QUALIFICATION,GUFA/CUSTOMERS/CATEGORY,GUFA/CUSTOMERS/LANGUAGE,GUFA/CUSTOMERS/CARD_ISSUANCE_FLAG,GUFA/CUSTOMERS/BC_BRANCH_CODE,GUFA/CUSTOMERS/COLLECTOR,GUFA/CUSTOMERS/APPROVER,GUFA/CUSTOMERS/CREATED_BY,GUFA/CUSTOMERS/CREATED_AT,GUFA/CUSTOMERS/STATUS,GUFA/CUSTOMERS/CREDIT_PASS_FAIL,GUFA/CUSTOMERS/INTERNAL_ID,GUFA/CUSTOMERS/PROCESS_ID,GUFA/CUSTOMERS/UPDATED_AT,GUFA/CUSTOMERS/RECORD_ERRORS,GUFA/CUSTOMERS/INCOMING_FILE_ID,GUFA/CUSTOMERS/SKIPPED,GUFA/CUSTOMERS/UDF1,GUFA/CUSTOMERS/UDF2,GUFA/CUSTOMERS/UDF3,GUFA/CUSTOMERS/UDF4,GUFA/CUSTOMERS/UDF5,GUFA/CUSTOMERS/UDF6,GUFA/CUSTOMERS/UDF7,GUFA/CUSTOMERS/UDF8,GUFA/CUSTOMERS/UDF9,GUFA/CUSTOMERS/UDF10,GUFA/CUSTOMERS/UDF11,GUFA/CUSTOMERS/UDF12,GUFA/CUSTOMERS/UDF13,GUFA/CUSTOMERS/UDF14,GUFA/CUSTOMERS/UDF15,GUFA/CUSTOMERS/UDF16,GUFA/CUSTOMERS/UDF17,GUFA/CUSTOMERS/UDF18,GUFA/CUSTOMERS/UDF19,GUFA/CUSTOMERS/UDF20,GUFA/CUSTOMERS/UDF21,GUFA/CUSTOMERS/UDF22,GUFA/CUSTOMERS/UDF23,GUFA/CUSTOMERS/UDF24,GUFA/CUSTOMERS/UDF25,GUFA/CUSTOMERS/UDF26,GUFA/CUSTOMERS/UDF27,GUFA/CUSTOMERS/UDF28,GUFA/CUSTOMERS/UDF29,GUFA/CUSTOMERS/UDF30,GUFA/CUSTOMERS/SPOUSE_NAME,GUFA/CUSTOMERS/SPOUSE_DOB,GUFA/CUSTOMERS/NOMINEE_NAME,GUFA/CUSTOMERS/NOMINEE_RELATION,GUFA/CUSTOMERS/RECORD_NUMBER,GUFA/CUSTOMERS/TREAT_AS_EXISTING,GUFA/CUSTOMERS/DONT_GET_RATING,GUFA/CUSTOMERS/BANK_NAME,GUFA/CUSTOMERS/BANK_ACCOUNT_NO,GUFA/CUSTOMERS/BANK_BRANCH_NAME),db:where('GUFA.CUSTOMERS.EXTERNAL_CENTER_ID =  ?    AND GUFA.CUSTOMERS.INCOMING_FILE_ID IS NULL AND LENGTH(GUFA.CUSTOMERS.RECORD_ERRORS) &lt;=14 AND GUFA.CUSTOMERS.TREAT_AS_EXISTING = 1','?'=$MessageAssembly/externalID))" var="dbselect5"/>
+        <output path="$var1/mb:msg(fileExtract,assembly,DFDL,Properties)" var="MessageAssembly1"/>
+        <output path="$var2/mb:msg(fileExtract,assembly,DFDL,Properties)" var="MessageAssembly2"/>
+        <output path="$var3/mb:msg(fileExtract,assembly,DFDL,Properties)" var="MessageAssembly3"/>
+        <output path="$var4/mb:msg(fileExtract,assembly,DFDL,Properties)" var="MessageAssembly4"/>
+        <output path="$var5/mb:msg(fileExtract,assembly,DFDL,Properties)" var="MessageAssembly5"/>
+        <output path="$var6/mb:msg(fileExtract,assembly,DFDL,Properties)" var="MessageAssembly6"/>
+        <select ref="dbselect">
+            <input path="$dbselect/ResultSet"/>
+            <output path="$MessageAssembly1/."/>
+            <foreach>
+                <input path="." var="ResultSet"/>
+                <output path="."/>
+                <local>
+                    <input path="$ResultSet/."/>
+                    <output path="fileExtract/recordCustomer/newCustomer"/>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/EXTERNAL_ID"/>
+                        <output path="external_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/EXTERNAL_CENTER_ID"/>
+                        <output path="external_center_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/TITLE"/>
+                        <output path="title"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CUSTOMER_NAME"/>
+                        <output path="customer_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/ADDRESS_LINE1"/>
+                        <output path="address_line1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/ADDRESS_LINE2"/>
+                        <output path="address_line2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/ADDRESS_LINE3"/>
+                        <output path="address_line3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CITY_CODE"/>
+                        <output path="city_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/STATE_CODE"/>
+                        <output path="state_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/PIN"/>
+                        <output path="pin"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/CUSTOMERS/DATE_OF_BIRTH" var="DATEOFBIRTH"/>
+                        <output path="date_of_birth"/>
+                        <param name="primitive" value="$DATEOFBIRTH"/>
+                    </function>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/MOBILE_NO"/>
+                        <output path="mobile_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CASTE"/>
+                        <output path="caste"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/GENDER"/>
+                        <output path="gender"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/MARITAL_STATUS"/>
+                        <output path="marital_status"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/NATIONALITY"/>
+                        <output path="nationality"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/RELIGION"/>
+                        <output path="religion"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/MOTHER_TONGUE"/>
+                        <output path="mother_tongue"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/BRANCH_CODE"/>
+                        <output path="branch_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/OPERATING_REGION_CODE"/>
+                        <output path="operating_region_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/AADHAR_NO"/>
+                        <output path="aadhar_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/PENSION_CARD_NO"/>
+                        <output path="pension_card_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/RATION_CARD_NO"/>
+                        <output path="ration_card_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/VOTER_ID"/>
+                        <output path="voter_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/PAN_NO"/>
+                        <output path="pan_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/BARCODE_NO"/>
+                        <output path="barcode_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/AADHAR_SEEDING_CONSENT"/>
+                        <output path="aadhar_seeding_consent"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/HEALTH"/>
+                        <output path="health"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/OCCUPATION"/>
+                        <output path="occupation"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/EDUCATIONAL_QUALIFICATION"/>
+                        <output path="educational_qualification"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CATEGORY"/>
+                        <output path="category"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/LANGUAGE"/>
+                        <output path="language"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CARD_ISSUANCE_FLAG"/>
+                        <output path="card_issuance_flag"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/BC_BRANCH_CODE"/>
+                        <output path="bc_branch_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/COLLECTOR"/>
+                        <output path="collector"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/APPROVER"/>
+                        <output path="approver"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF1"/>
+                        <output path="udf1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF2"/>
+                        <output path="udf2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF3"/>
+                        <output path="udf3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF4"/>
+                        <output path="udf4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF5"/>
+                        <output path="udf5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF6"/>
+                        <output path="udf6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF7"/>
+                        <output path="udf7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF8"/>
+                        <output path="udf8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF9"/>
+                        <output path="udf9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF10"/>
+                        <output path="udf10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF11"/>
+                        <output path="udf11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF12"/>
+                        <output path="udf12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF13"/>
+                        <output path="udf13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF14"/>
+                        <output path="udf14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF15"/>
+                        <output path="udf15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF16"/>
+                        <output path="udf16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF17"/>
+                        <output path="udf17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF18"/>
+                        <output path="udf18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF19"/>
+                        <output path="udf19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF20"/>
+                        <output path="udf20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF21"/>
+                        <output path="udf21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF22"/>
+                        <output path="udf22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF23"/>
+                        <output path="udf23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF24"/>
+                        <output path="udf24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF25"/>
+                        <output path="udf25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF26"/>
+                        <output path="udf26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF27"/>
+                        <output path="udf27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF28"/>
+                        <output path="udf28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF29"/>
+                        <output path="udf29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF30"/>
+                        <output path="udf30"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/SPOUSE_NAME"/>
+                        <output path="spouse_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/NOMINEE_NAME" var="NOMINEENAME"/>
+                        <output path="nominee_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/NOMINEE_RELATION"/>
+                        <output path="nominee_relation"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/DONT_GET_RATING"/>
+                        <output path="dont_get_rating"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/BANK_NAME"/>
+                        <output path="bank_name"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/BANK_ACCOUNT_NO"/>
+                        <output path="bank_account_no"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/BANK_BRANCH_NAME"/>
+                        <output path="bank_branch_name"/>
+                    </move>
+                </local>
+                <assign value="{}:fileExtract">
+                    <output path="Properties/MessageType"/>
+                </assign>
+            </foreach>
+        </select>
+        <select ref="dbselect4">
+            <input path="$dbselect4/ResultSet"/>
+            <output path="$MessageAssembly2/."/>
+            <foreach>
+                <input path="." var="ResultSet1"/>
+                <output path="."/>
+                <local>
+                    <input path="$ResultSet1/."/>
+                    <output path="fileExtract/recordCenters/center"/>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/EXTERNAL_ID"/>
+                        <output path="external_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/CENTER_NAME"/>
+                        <output path="center_name"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/CENTERS/FORMATION_DATE" var="FORMATIONDATE"/>
+                        <output path="formation_date"/>
+                        <param name="primitive" value="$FORMATIONDATE"/>
+                    </function>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/SERVICING_AGENT"/>
+                        <output path="servicing_agent"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/MAXIMUM_INDIVIDUALS"/>
+                        <output path="maximum_individuals"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/MEETING_TIME"/>
+                        <output path="meeting_time"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/ADDRESS_LINE1"/>
+                        <output path="address_line1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/ADDRESS_LINE2"/>
+                        <output path="address_line2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/ADDRESS_LINE3"/>
+                        <output path="address_line3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/CITY_CODE"/>
+                        <output path="city_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/STATE_CODE"/>
+                        <output path="state_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/PIN"/>
+                        <output path="pin"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/OPERATING_REGION_CODE"/>
+                        <output path="operating_region_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/BRANCH_CODE"/>
+                        <output path="branch_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/DESCRIPTION"/>
+                        <output path="description"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/PHONE_NO"/>
+                        <output path="phone_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/PRIMARY_CONTACT"/>
+                        <output path="primary_contact"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/SECONDARY_CONTACT"/>
+                        <output path="secondary_contact"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/SECONDARY_PHONE_NO"/>
+                        <output path="secondary_phone_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF1"/>
+                        <output path="udf1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF2"/>
+                        <output path="udf2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF3"/>
+                        <output path="udf3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF4"/>
+                        <output path="udf4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF5"/>
+                        <output path="udf5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF6"/>
+                        <output path="udf6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF7"/>
+                        <output path="udf7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF8"/>
+                        <output path="udf8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF9"/>
+                        <output path="udf9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF10"/>
+                        <output path="udf10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF11"/>
+                        <output path="udf11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF12"/>
+                        <output path="udf12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF13"/>
+                        <output path="udf13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF14"/>
+                        <output path="udf14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF15"/>
+                        <output path="udf15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF16"/>
+                        <output path="udf16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF17"/>
+                        <output path="udf17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF18"/>
+                        <output path="udf18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF19"/>
+                        <output path="udf19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF20"/>
+                        <output path="udf20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF21"/>
+                        <output path="udf21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF22"/>
+                        <output path="udf22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF23"/>
+                        <output path="udf23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF24"/>
+                        <output path="udf24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF25"/>
+                        <output path="udf25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF26"/>
+                        <output path="udf26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF27"/>
+                        <output path="udf27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF28"/>
+                        <output path="udf28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF29"/>
+                        <output path="udf29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CENTERS/UDF30"/>
+                        <output path="udf30"/>
+                    </move>
+                </local>
+                <assign value="{}:fileExtract">
+                    <output path="Properties/MessageType"/>
+                </assign>
+            </foreach>
+        </select>
+        <select ref="dbselect3">
+            <input path="$dbselect3/ResultSet"/>
+            <output path="$MessageAssembly3/."/>
+            <foreach>
+                <input path="." var="ResultSet4"/>
+                <output path="."/>
+                <local>
+                    <input path="$ResultSet4/."/>
+                    <output path="fileExtract/recordGroup/group"/>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/EXTERNAL_ID"/>
+                        <output path="external_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/EXTERNAL_CENTER_ID"/>
+                        <output path="external_center_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/CENTER_NAME"/>
+                        <output path="center_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/MAXIMUM_CENTER_LIMIT"/>
+                        <output path="maximum_center_limit"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/GROUP_NAME"/>
+                        <output path="group_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/GROUP_TYPE"/>
+                        <output path="group_type"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/MIN_NUMBER"/>
+                        <output path="min_number"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/MAX_NUMBER"/>
+                        <output path="max_number"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/GROUPS/FORMATION_DATE" var="FORMATIONDATE1"/>
+                        <output path="formation_date"/>
+                        <param name="primitive" value="$FORMATIONDATE1"/>
+                    </function>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/MEETING_TIME"/>
+                        <output path="meeting_time"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/MEETING_FREQUENCY"/>
+                        <output path="meeting_frequency"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/DISTANCE_FROM_BRANCH"/>
+                        <output path="distance_from_branch"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/BRANCH_CODE"/>
+                        <output path="branch_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/OPERATING_REGION_CODE"/>
+                        <output path="operating_region_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF1"/>
+                        <output path="udf1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF2"/>
+                        <output path="udf2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF3"/>
+                        <output path="udf3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF4"/>
+                        <output path="udf4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF5"/>
+                        <output path="udf5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF6"/>
+                        <output path="udf6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF7"/>
+                        <output path="udf7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF8"/>
+                        <output path="udf8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF9"/>
+                        <output path="udf9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF10"/>
+                        <output path="udf10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF11"/>
+                        <output path="udf11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF12"/>
+                        <output path="udf12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF13"/>
+                        <output path="udf13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF14"/>
+                        <output path="udf14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF15"/>
+                        <output path="udf15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF16"/>
+                        <output path="udf16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF17"/>
+                        <output path="udf17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF18"/>
+                        <output path="udf18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF19"/>
+                        <output path="udf19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF20"/>
+                        <output path="udf20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF21"/>
+                        <output path="udf21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF22"/>
+                        <output path="udf22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF23"/>
+                        <output path="udf23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF24"/>
+                        <output path="udf24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF25"/>
+                        <output path="udf25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF26"/>
+                        <output path="udf26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF27"/>
+                        <output path="udf27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF28"/>
+                        <output path="udf28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF29"/>
+                        <output path="udf29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/GROUPS/UDF30"/>
+                        <output path="udf30"/>
+                    </move>
+                </local>
+            </foreach>
+        </select>
+        <select ref="dbselect1">
+            <input path="$dbselect1/ResultSet"/>
+            <output path="$MessageAssembly4/."/>
+            <foreach>
+                <input path="." var="ResultSet2"/>
+                <output path="."/>
+                <local>
+                    <input path="$ResultSet2/."/>
+                    <output path="fileExtract/recordLoans/loan"/>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/EXTERNAL_ID"/>
+                        <output path="external_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/EXTERNAL_CUSTOMER_ID"/>
+                        <output path="external_customer_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/EXTERNAL_CENTER_ID"/>
+                        <output path="external_center_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/EXTERNAL_GROUP_ID"/>
+                        <output path="external_group_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/LOAN_PRODUCT_CODE"/>
+                        <output path="loan_product_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/LOAN_AMOUNT"/>
+                        <output path="loan_amount"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/DISBURSEMENT_MODE"/>
+                        <output path="disbursement_mode"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/NO_OF_INSTALLMENTS"/>
+                        <output path="no_of_installments"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/REPAYMENT_FREQUENCY"/>
+                        <output path="repayment_frequency"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/LOAN_CYCLE"/>
+                        <output path="loan_cycle"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/BARCODE_NO"/>
+                        <output path="barcode_no"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/LOANS/LOAN_START_DATE" var="LOANSTARTDATE"/>
+                        <output path="loan_start_date"/>
+                        <param name="primitive" value="$LOANSTARTDATE"/>
+                    </function>
+                    <function ref="xs:date">
+                        <input path="GUFA/LOANS/REPAYMENT_START_DATE" var="REPAYMENTSTARTDATE"/>
+                        <output path="repayment_start_date"/>
+                        <param name="primitive" value="$REPAYMENTSTARTDATE"/>
+                    </function>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/COLLECTOR"/>
+                        <output path="collector"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/APPROVER"/>
+                        <output path="approver"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/LOANS/EXPECTED_DISBURSAL_DATE" var="EXPECTEDDISBURSALDATE"/>
+                        <output path="expected_disbursal_date"/>
+                        <param name="primitive" value="$EXPECTEDDISBURSALDATE"/>
+                    </function>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF1"/>
+                        <output path="udf1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF2"/>
+                        <output path="udf2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF3"/>
+                        <output path="udf3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF4"/>
+                        <output path="udf4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF5"/>
+                        <output path="udf5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF6"/>
+                        <output path="udf6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF7"/>
+                        <output path="udf7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF8"/>
+                        <output path="udf8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF9"/>
+                        <output path="udf9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF10"/>
+                        <output path="udf10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF11"/>
+                        <output path="udf11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF12"/>
+                        <output path="udf12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF13"/>
+                        <output path="udf13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF14"/>
+                        <output path="udf14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF15"/>
+                        <output path="udf15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF16"/>
+                        <output path="udf16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF17"/>
+                        <output path="udf17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF18"/>
+                        <output path="udf18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF19"/>
+                        <output path="udf19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF20"/>
+                        <output path="udf20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF21"/>
+                        <output path="udf21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF22"/>
+                        <output path="udf22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF23"/>
+                        <output path="udf23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF24"/>
+                        <output path="udf24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF25"/>
+                        <output path="udf25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF26"/>
+                        <output path="udf26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF27"/>
+                        <output path="udf27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF28"/>
+                        <output path="udf28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF29"/>
+                        <output path="udf29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/LOANS/UDF30"/>
+                        <output path="udf30"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/LOANS/BC_BRANCH_CODE"/>
+                        <output path="bc_branch_code"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/LOANS/IS_TOP_UP"/>
+                        <output path="is_top_up"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/LOANS/LOAN_PURPOSE"/>
+                        <output path="loan_purpose"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/LOANS/PSL_CODE"/>
+                        <output path="psl_code"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/LOANS/HOSPITAL_CASH"/>
+                        <output path="hospital_cash"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/LOANS/PREPAID_CHARGES"/>
+                        <output path="prepaid_charges"/>
+                    </move>
+                </local>
+            </foreach>
+        </select>
+        <select ref="dbselect2">
+            <input path="$dbselect2/ResultSet"/>
+            <output path="$MessageAssembly5/."/>
+            <foreach>
+                <input path="." var="ResultSet3"/>
+                <output path="."/>
+                <local>
+                    <input path="$ResultSet3/."/>
+                    <output path="fileExtract/recordSavings/saving"/>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/EXTERNAL_ID"/>
+                        <output path="external_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/EXTERNAL_CUSTOMER_ID"/>
+                        <output path="external_customer_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/EXTERNAL_CENTER_ID"/>
+                        <output path="external_center_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/ACCOUNT_TYPE"/>
+                        <output path="account_type"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/SAVING_PRODUCT_CODE"/>
+                        <output path="saving_product_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/PRODUCT_NAME"/>
+                        <output path="product_name"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/SAVINGS/ACCOUNT_OPENING_DATE" var="ACCOUNTOPENINGDATE"/>
+                        <output path="account_opening_date"/>
+                        <param name="primitive" value="$ACCOUNTOPENINGDATE"/>
+                    </function>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_TITLE"/>
+                        <output path="nominee_title"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_NAME"/>
+                        <output path="nominee_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_RELATION"/>
+                        <output path="nominee_relation"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_GENDER"/>
+                        <output path="nominee_gender"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_ADDRESS_LINE1"/>
+                        <output path="nominee_address_line1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_ADDRESS_LINE2"/>
+                        <output path="nominee_address_line2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_ADDRESS_LINE3"/>
+                        <output path="nominee_address_line3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_CITY_CODE"/>
+                        <output path="nominee_city_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_STATE_CODE"/>
+                        <output path="nominee_state_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/NOMINEE_PIN"/>
+                        <output path="nominee_pin"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/COLLECTOR"/>
+                        <output path="collector"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/APPROVER"/>
+                        <output path="approver"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/GUARDIAN_TITLE"/>
+                        <output path="guardian_title"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/GUARDIAN_NAME"/>
+                        <output path="guardian_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF1"/>
+                        <output path="udf1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF2"/>
+                        <output path="udf2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF3"/>
+                        <output path="udf3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF4"/>
+                        <output path="udf4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF5"/>
+                        <output path="udf5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF6"/>
+                        <output path="udf6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF7"/>
+                        <output path="udf7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF8"/>
+                        <output path="udf8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF9"/>
+                        <output path="udf9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF10"/>
+                        <output path="udf10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF11"/>
+                        <output path="udf11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF12"/>
+                        <output path="udf12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF13"/>
+                        <output path="udf13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF14"/>
+                        <output path="udf14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF15"/>
+                        <output path="udf15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF16"/>
+                        <output path="udf16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF17"/>
+                        <output path="udf17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF18"/>
+                        <output path="udf18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF19"/>
+                        <output path="udf19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF20"/>
+                        <output path="udf20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF21"/>
+                        <output path="udf21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF22"/>
+                        <output path="udf22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF23"/>
+                        <output path="udf23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF24"/>
+                        <output path="udf24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF25"/>
+                        <output path="udf25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF26"/>
+                        <output path="udf26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF27"/>
+                        <output path="udf27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF28"/>
+                        <output path="udf28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF29"/>
+                        <output path="udf29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/SAVINGS/UDF30"/>
+                        <output path="udf30"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/SAVINGS/NOMINEE_DOB" var="NOMINEEDOB"/>
+                        <output path="nominee_date_of_birth"/>
+                        <param name="primitive" value="$NOMINEEDOB"/>
+                    </function>
+                    <move>
+                        <input path="GUFA/SAVINGS/MINOR"/>
+                        <output path="minor"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_ADDRESS_LINE1"/>
+                        <output path="guardian_address_line1"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_ADDRESS_LINE3"/>
+                        <output path="guardian_address_line3"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_CITY_CODE"/>
+                        <output path="guardian_city_code"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_STATE_CODE"/>
+                        <output path="guardian_state_code"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_PIN"/>
+                        <output path="guardian_pin"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_ADDRESS_LINE2"/>
+                        <output path="guardian_address_line2"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_DOB"/>
+                        <output path="guardian_dob"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_GENDER"/>
+                        <output path="guardian_gender"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_RELATION"/>
+                        <output path="guardian_relation"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/SAVINGS/GUARDIAN_PHONE_NO"/>
+                        <output path="guardian_phone_no"/>
+                    </move>
+                </local>
+            </foreach>
+        </select>
+        <select ref="dbselect5">
+            <input path="$dbselect5/ResultSet"/>
+            <output path="$MessageAssembly6/."/>
+            <foreach>
+                <input path="." var="ResultSet5"/>
+                <output path="."/>
+                <local>
+                    <input path="$ResultSet5/."/>
+                    <output path="fileExtract/recordExistingCustomer/existingCustomer"/>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/EXTERNAL_ID"/>
+                        <output path="external_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/EXTERNAL_CENTER_ID"/>
+                        <output path="external_center_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/TITLE"/>
+                        <output path="title"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CUSTOMER_NAME"/>
+                        <output path="customer_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/ADDRESS_LINE1"/>
+                        <output path="address_line1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/ADDRESS_LINE2"/>
+                        <output path="address_line2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/ADDRESS_LINE3"/>
+                        <output path="address_line3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CITY_CODE"/>
+                        <output path="city_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/STATE_CODE"/>
+                        <output path="state_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/PIN"/>
+                        <output path="pin"/>
+                    </move>
+                    <function ref="xs:date">
+                        <input path="GUFA/CUSTOMERS/DATE_OF_BIRTH" var="DATEOFBIRTH1"/>
+                        <output path="date_of_birth"/>
+                        <param name="primitive" value="$DATEOFBIRTH1"/>
+                    </function>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/MOBILE_NO"/>
+                        <output path="mobile_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CASTE"/>
+                        <output path="caste"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/GENDER"/>
+                        <output path="gender"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/MARITAL_STATUS"/>
+                        <output path="marital_status"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/NATIONALITY"/>
+                        <output path="nationality"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/RELIGION"/>
+                        <output path="religion"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/MOTHER_TONGUE"/>
+                        <output path="mother_tongue"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/BRANCH_CODE"/>
+                        <output path="branch_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/OPERATING_REGION_CODE"/>
+                        <output path="operating_region_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/AADHAR_NO"/>
+                        <output path="aadhar_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/PENSION_CARD_NO"/>
+                        <output path="pension_card_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/RATION_CARD_NO"/>
+                        <output path="ration_card_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/VOTER_ID"/>
+                        <output path="voter_id"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/PAN_NO"/>
+                        <output path="pan_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/BARCODE_NO"/>
+                        <output path="barcode_no"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/AADHAR_SEEDING_CONSENT"/>
+                        <output path="aadhar_seeding_consent"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/HEALTH"/>
+                        <output path="health"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/OCCUPATION"/>
+                        <output path="occupation"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/EDUCATIONAL_QUALIFICATION"/>
+                        <output path="educational_qualification"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CATEGORY"/>
+                        <output path="category"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/LANGUAGE"/>
+                        <output path="language"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/CARD_ISSUANCE_FLAG"/>
+                        <output path="card_issuance_flag"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/BC_BRANCH_CODE"/>
+                        <output path="bc_branch_code"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/COLLECTOR"/>
+                        <output path="collector"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/APPROVER"/>
+                        <output path="approver"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF1"/>
+                        <output path="udf1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF2"/>
+                        <output path="udf2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF3"/>
+                        <output path="udf3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF4"/>
+                        <output path="udf4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF5"/>
+                        <output path="udf5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF6"/>
+                        <output path="udf6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF7"/>
+                        <output path="udf7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF8"/>
+                        <output path="udf8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF9"/>
+                        <output path="udf9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF10"/>
+                        <output path="udf10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF11"/>
+                        <output path="udf11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF12"/>
+                        <output path="udf12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF13"/>
+                        <output path="udf13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF14"/>
+                        <output path="udf14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF15"/>
+                        <output path="udf15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF16"/>
+                        <output path="udf16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF17"/>
+                        <output path="udf17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF18"/>
+                        <output path="udf18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF19"/>
+                        <output path="udf19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF20"/>
+                        <output path="udf20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF21"/>
+                        <output path="udf21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF22"/>
+                        <output path="udf22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF23"/>
+                        <output path="udf23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF24"/>
+                        <output path="udf24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF25"/>
+                        <output path="udf25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF26"/>
+                        <output path="udf26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF27"/>
+                        <output path="udf27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF28"/>
+                        <output path="udf28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF29"/>
+                        <output path="udf29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/UDF30"/>
+                        <output path="udf30"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/SPOUSE_NAME"/>
+                        <output path="spouse_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/NOMINEE_NAME"/>
+                        <output path="nominee_name"/>
+                    </move>
+                    <move automap="true">
+                        <input path="GUFA/CUSTOMERS/NOMINEE_RELATION"/>
+                        <output path="nominee_relation"/>
+                    </move>
+                    <if>
+                        <input path="GUFA/CUSTOMERS/SPOUSE_DOB" var="SPOUSEDOB"/>
+                        <output path="spouse_date_of_birth"/>
+                        <test lang="xpath">$SPOUSEDOB is not null</test>
+                        <function ref="xs:date">
+                            <input path="$SPOUSEDOB/." var="SPOUSEDOB"/>
+                            <output path="."/>
+                            <param name="primitive" value="$SPOUSEDOB"/>
+                        </function>
+                    </if>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/DONT_GET_RATING"/>
+                        <output path="dont_get_rating"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/BANK_NAME"/>
+                        <output path="bank_name"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/BANK_ACCOUNT_NO"/>
+                        <output path="bank_account_no"/>
+                    </move>
+                    <move>
+                        <input path="GUFA/CUSTOMERS/BANK_BRANCH_NAME"/>
+                        <output path="bank_branch_name"/>
+                    </move>
+                </local>
+            </foreach>
+        </select>
+    </mappingDeclaration>
+</mappingRoot>

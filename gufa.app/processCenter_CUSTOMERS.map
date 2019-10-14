@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/processCenter.xsd" var="var"/>
+    <input path="/localEnvironmentVariables.xsd" var="var1"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var3"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,CUSTOMERS)" var="CUSTOMERS"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,INCOMING_FILE_RECORDS)" var="INCOMINGFILERECORDS"/>
+    <output path="/localEnvironmentVariables.xsd" var="var2"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,PENDING_EQUIFAX_CUSTOMERS)" var="PENDINGEQUIFAXCUSTOMERS"/>
+    <imports>
+        <import kind="esql" namespace="/com/quantiguous/iib/UDPManager.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="UDPManager" uri="/com/quantiguous/iib/UDPManager.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="processCenter_CUSTOMERS">
+        <input path="$var/mb:msg(processCenter,assembly,DFDL,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="errorInYamlForm" ref="var1" var="any"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="sequenceID" var="any1"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileID" ref="var1" var="any2"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="entityID" ref="var1" var="any3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileRecordID" ref="var1" var="any4"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="createdBy" ref="var1" var="any5"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="creditPassFail" ref="var1" var="any6"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="customerCreditRatingID" ref="var1" var="any7"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="pendingEquifaxId" ref="var1" var="any8"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="lastEquifaxCallAt" ref="var1" var="any9"/>
+        </input>
+        <output path="$CUSTOMERS/db:insert(fn:false(),ID,EXTERNAL_ID,EXTERNAL_CENTER_ID,TITLE,CUSTOMER_NAME,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,CITY_CODE,STATE_CODE,PIN,DATE_OF_BIRTH,MOBILE_NO,CASTE,GENDER,MARITAL_STATUS,NATIONALITY,RELIGION,MOTHER_TONGUE,BRANCH_CODE,OPERATING_REGION_CODE,AADHAR_NO,PENSION_CARD_NO,RATION_CARD_NO,VOTER_ID,PAN_NO,BARCODE_NO,AADHAR_SEEDING_CONSENT,HEALTH,OCCUPATION,EDUCATIONAL_QUALIFICATION,CATEGORY,LANGUAGE,CARD_ISSUANCE_FLAG,BC_BRANCH_CODE,COLLECTOR,APPROVER,CREATED_BY,CREATED_AT,STATUS,CREDIT_PASS_FAIL,INTERNAL_ID,PROCESS_ID,UPDATED_AT,RECORD_ERRORS,INCOMING_FILE_ID,SKIPPED,UDF1,UDF2,UDF3,UDF4,UDF5,UDF6,UDF7,UDF8,UDF9,UDF10,UDF11,UDF12,UDF13,UDF14,UDF15,UDF16,UDF17,UDF18,UDF19,UDF20,UDF21,UDF22,UDF23,UDF24,UDF25,UDF26,UDF27,UDF28,UDF29,UDF30,SPOUSE_NAME,SPOUSE_DOB,NOMINEE_NAME,NOMINEE_RELATION,RECORD_NUMBER,TREAT_AS_EXISTING,CUSTOMER_CREDIT_RATING_ID,LAST_EQUIFAX_CALL_AT,DONT_GET_RATING,BANK_NAME,BANK_ACCOUNT_NO,BANK_BRANCH_NAME,IS_RENEWAL_LOAN)" var="dbinsert"/>
+        <output path="$INCOMINGFILERECORDS/db:insert(fn:false(),ID,INCOMING_FILE_ID,RECORD_NO,ENTITY_ID,ENTITY_NAME,RECORD_TXT,RECORD_ERRORS,CREATED_BY,CREATED_AT,IS_VALID)" var="dbinsert1"/>
+        <output path="$var2/mb:msg(entityID,assembly,XMLNSC,LocalEnvironment,Properties)" var="MessageAssembly1"/>
+        <output path="$PENDINGEQUIFAXCUSTOMERS/db:insert(fn:false(),ID,BROKER_UUID,CUSTOMER_ID,CREATED_AT)" var="dbinsert2"/>
+        <foreach>
+            <input path="$MessageAssembly/processCenter/newCustomer" var="newCustomer"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Name" var="Name"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/creditPassFail[1]" var="creditPassFail"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record4"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/lastEquifaxCallAt[1]" var="lastEquifaxCallAt"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/customerCreditRatingID[1]" var="customerCreditRatingID"/>
+            <output path="$dbinsert/."/>
+            <transaction>
+                <insert ref="dbinsert">
+                    <input path="$newCustomer/." var="newCustomer"/>
+                    <input path="$Name/." var="Name"/>
+                    <input path="$errorInYamlForm/." var="errorInYamlForm1"/>
+                    <input path="$incomingFileID/." var="incomingFileID1"/>
+                    <input path="$entityID/." var="entityID1"/>
+                    <input path="$createdBy/." var="createdBy1"/>
+                    <input path="$creditPassFail/." var="creditPassFail1"/>
+                    <input path="$Record4/." var="Record5"/>
+                    <input path="$lastEquifaxCallAt/." var="lastEquifaxCallAt1"/>
+                    <input path="$customerCreditRatingID/." var="customerCreditRatingID1"/>
+                    <output path="."/>
+                    <move automap="true">
+                        <input path="$newCustomer/external_id"/>
+                        <output path="EXTERNAL_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/external_center_id"/>
+                        <output path="EXTERNAL_CENTER_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/title"/>
+                        <output path="TITLE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/customer_name"/>
+                        <output path="CUSTOMER_NAME"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/date_of_birth"/>
+                        <output path="DATE_OF_BIRTH"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/mobile_no"/>
+                        <output path="MOBILE_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/caste"/>
+                        <output path="CASTE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/gender"/>
+                        <output path="GENDER"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/marital_status"/>
+                        <output path="MARITAL_STATUS"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/nationality"/>
+                        <output path="NATIONALITY"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/religion"/>
+                        <output path="RELIGION"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/mother_tongue"/>
+                        <output path="MOTHER_TONGUE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/branch_code"/>
+                        <output path="BRANCH_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/operating_region_code"/>
+                        <output path="OPERATING_REGION_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/aadhar_no"/>
+                        <output path="AADHAR_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/pension_card_no"/>
+                        <output path="PENSION_CARD_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/ration_card_no"/>
+                        <output path="RATION_CARD_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/voter_id"/>
+                        <output path="VOTER_ID"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/pan_no"/>
+                        <output path="PAN_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/barcode_no"/>
+                        <output path="BARCODE_NO"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/aadhar_seeding_consent"/>
+                        <output path="AADHAR_SEEDING_CONSENT"/>
+                    </move>
+                    <function ref="xs:string">
+                        <input path="$newCustomer/health" var="health"/>
+                        <output path="HEALTH"/>
+                        <param name="primitive" value="$health"/>
+                    </function>
+                    <if>
+                        <input path="$newCustomer/occupation" var="occupation"/>
+                        <output path="OCCUPATION"/>
+                        <test lang="xpath">not(fn:nilled($occupation))</test>
+                        <move automap="true">
+                            <input path="$occupation/."/>
+                            <output path="."/>
+                        </move>
+                    </if>
+                    <move automap="true">
+                        <input path="$newCustomer/educational_qualification"/>
+                        <output path="EDUCATIONAL_QUALIFICATION"/>
+                    </move>
+                    <if>
+                        <input path="$newCustomer/category" var="category"/>
+                        <output path="CATEGORY"/>
+                        <test lang="xpath">not(fn:nilled($category))</test>
+                        <move automap="true">
+                            <input path="$category/."/>
+                            <output path="."/>
+                        </move>
+                    </if>
+                    <move>
+                        <input path="$newCustomer/language"/>
+                        <output path="LANGUAGE"/>
+                    </move>
+                    <if>
+                        <input path="$newCustomer/card_issuance_flag" var="card_issuance_flag"/>
+                        <output path="CARD_ISSUANCE_FLAG"/>
+                        <test lang="xpath">not(fn:nilled($card_issuance_flag))</test>
+                        <move>
+                            <input path="$card_issuance_flag/." var="card_issuance_flag"/>
+                            <output path="."/>
+                        </move>
+                    </if>
+                    <move automap="true">
+                        <input path="$newCustomer/bc_branch_code"/>
+                        <output path="BC_BRANCH_CODE"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/collector"/>
+                        <output path="COLLECTOR"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/approver"/>
+                        <output path="APPROVER"/>
+                    </move>
+                    <function ref="fn:current-dateTime">
+                        <output path="UPDATED_AT"/>
+                    </function>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                    <move>
+                        <input path="$errorInYamlForm1/."/>
+                        <output path="RECORD_ERRORS"/>
+                    </move>
+                    <move>
+                        <input path="$incomingFileID1/."/>
+                        <output path="INCOMING_FILE_ID"/>
+                    </move>
+                    <move>
+                        <input path="$entityID1/."/>
+                        <output path="ID"/>
+                    </move>
+                    <move>
+                        <input path="$createdBy1/."/>
+                        <output path="CREATED_BY"/>
+                    </move>
+                    <assign value="0">
+                        <output path="SKIPPED"/>
+                    </assign>
+                    <move>
+                        <input path="$newCustomer/address_line1"/>
+                        <output path="ADDRESS_LINE1"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/address_line2"/>
+                        <output path="ADDRESS_LINE2"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/address_line3"/>
+                        <output path="ADDRESS_LINE3"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/city_code"/>
+                        <output path="CITY_CODE"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/state_code"/>
+                        <output path="STATE_CODE"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/pin"/>
+                        <output path="PIN"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf1"/>
+                        <output path="UDF1"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf2"/>
+                        <output path="UDF2"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf3"/>
+                        <output path="UDF3"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf4"/>
+                        <output path="UDF4"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf5"/>
+                        <output path="UDF5"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf6"/>
+                        <output path="UDF6"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf7"/>
+                        <output path="UDF7"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf8"/>
+                        <output path="UDF8"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf9"/>
+                        <output path="UDF9"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf10"/>
+                        <output path="UDF10"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf11"/>
+                        <output path="UDF11"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf12"/>
+                        <output path="UDF12"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf13"/>
+                        <output path="UDF13"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf14"/>
+                        <output path="UDF14"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf15"/>
+                        <output path="UDF15"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf16"/>
+                        <output path="UDF16"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf17"/>
+                        <output path="UDF17"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf18"/>
+                        <output path="UDF18"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf19"/>
+                        <output path="UDF19"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf20"/>
+                        <output path="UDF20"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf21"/>
+                        <output path="UDF21"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf22"/>
+                        <output path="UDF22"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf23"/>
+                        <output path="UDF23"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf24"/>
+                        <output path="UDF24"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf25"/>
+                        <output path="UDF25"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf26"/>
+                        <output path="UDF26"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf27"/>
+                        <output path="UDF27"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf28"/>
+                        <output path="UDF28"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf29"/>
+                        <output path="UDF29"/>
+                    </move>
+                    <move automap="true">
+                        <input path="$newCustomer/udf30"/>
+                        <output path="UDF30"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/spouse_name"/>
+                        <output path="SPOUSE_NAME"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/spouse_date_of_birth" var="spouse_date_of_birth"/>
+                        <output path="SPOUSE_DOB"/>
+                        <policy>
+                            <missingSource dbColumn="null"/>
+                            <emptySource dbColumn="null"/>
+                            <nilSource dbColumn="null"/>
+                        </policy>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/nominee_name"/>
+                        <output path="NOMINEE_NAME"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/nominee_relation"/>
+                        <output path="NOMINEE_RELATION"/>
+                    </move>
+                    <move>
+                        <input path="$creditPassFail1/."/>
+                        <output path="CREDIT_PASS_FAIL"/>
+                    </move>
+                    <function ref="xs:int">
+                        <input path="$Record5/." var="Record3"/>
+                        <output path="RECORD_NUMBER"/>
+                        <param name="primitive" value="$Record3"/>
+                    </function>
+                    <assign value="0">
+                        <output path="TREAT_AS_EXISTING"/>
+                    </assign>
+                    <if>
+                        <input path="$errorInYamlForm1/." var="errorInYamlForm2"/>
+                        <output path="STATUS"/>
+                        <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm2, 'A')) &gt; 0</test>
+                        <assign value="FAILED">
+                            <output path="."/>
+                        </assign>
+                    </if>
+                    <function ref="fn:adjust-dateTime-to-timezone">
+                        <input path="$lastEquifaxCallAt1/." var="lastEquifaxCallAt2"/>
+                        <output path="LAST_EQUIFAX_CALL_AT"/>
+                        <param name="dateTime" value="$lastEquifaxCallAt2"/>
+                    </function>
+                    <move>
+                        <input path="$customerCreditRatingID1/."/>
+                        <output path="CUSTOMER_CREDIT_RATING_ID"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/dont_get_rating" var="dont_get_rating"/>
+                        <output path="DONT_GET_RATING"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/bank_name"/>
+                        <output path="BANK_NAME"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/bank_account_no"/>
+                        <output path="BANK_ACCOUNT_NO"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/bank_branch_name"/>
+                        <output path="BANK_BRANCH_NAME"/>
+                    </move>
+                    <move>
+                        <input path="$newCustomer/is_renewal_loan"/>
+                        <output path="IS_RENEWAL_LOAN"/>
+                    </move>
+                </insert>
+                <return>
+                    <input path="$var3/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+        <foreach>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/incomingFileRecordID[1]" var="incomingFileRecordID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy2"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID2"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID2"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorInYamlForm[1]" var="errorInYamlForm4"/>
+            <output path="$dbinsert1/."/>
+            <insert>
+                <input path="$incomingFileRecordID/." var="incomingFileRecordID1"/>
+                <input path="$createdBy2/." var="createdBy3"/>
+                <input path="$entityID2/." var="entityID3"/>
+                <input path="$incomingFileID2/." var="incomingFileID3"/>
+                <input path="$Record1/." var="Record2"/>
+                <input path="$errorInYamlForm4/." var="errorInYamlForm5"/>
+                <output path="."/>
+                <move>
+                    <input path="$incomingFileRecordID1/." var="incomingFileRecordID2"/>
+                    <output path="ID"/>
+                </move>
+                <move>
+                    <input path="$createdBy3/." var="createdBy4"/>
+                    <output path="CREATED_BY"/>
+                </move>
+                <move>
+                    <input path="$entityID3/." var="entityID4"/>
+                    <output path="ENTITY_ID"/>
+                </move>
+                <move>
+                    <input path="$incomingFileID3/." var="incomingFileID4"/>
+                    <output path="INCOMING_FILE_ID"/>
+                </move>
+                <function ref="xs:int">
+                    <input path="$Record2/." var="Record"/>
+                    <output path="RECORD_NO"/>
+                    <param name="primitive" value="$Record"/>
+                </function>
+                <assign value="CUSTOMER">
+                    <output path="ENTITY_NAME"/>
+                </assign>
+                <function ref="fn:current-dateTime">
+                    <output path="CREATED_AT"/>
+                </function>
+                <condition>
+                    <if>
+                        <input path="$errorInYamlForm5/." var="errorInYamlForm6"/>
+                        <output path="IS_VALID"/>
+                        <test lang="xpath">fn:string-length(fn:string-join($errorInYamlForm6, 'A')) = 0</test>
+                        <assign value="1">
+                            <output path="."/>
+                        </assign>
+                    </if>
+                    <else>
+                        <output path="IS_VALID"/>
+                        <assign value="0">
+                            <output path="."/>
+                        </assign>
+                    </else>
+                </condition>
+            </insert>
+        </foreach>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]"/>
+            <output path="$MessageAssembly1/entityID"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment"/>
+            <output path="$MessageAssembly1/LocalEnvironment"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/Properties"/>
+            <output path="$MessageAssembly1/Properties"/>
+        </move>
+        <foreach>
+            <input path="$MessageAssembly/LocalEnvironment/Variables/pendingEquifaxId" var="pendingEquifaxId"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/entityID[1]" var="entityID5"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/creditPassFail" var="creditPassFail2"/>
+            <output path="$dbinsert2/."/>
+            <test lang="xpath">$creditPassFail2 = 3</test>
+            <transaction>
+                <insert ref="dbinsert2">
+                    <input path="$pendingEquifaxId/." var="pendingEquifaxId1"/>
+                    <input path="$entityID5/." var="entityID6"/>
+                    <output path="."/>
+                    <move>
+                        <input path="$pendingEquifaxId1/." var="pendingEquifaxId2"/>
+                        <output path="ID"/>
+                    </move>
+                    <move>
+                        <input path="$entityID6/."/>
+                        <output path="CUSTOMER_ID"/>
+                    </move>
+                    <customFunction lang="esql" ref="UDPManager:getBrokerUUID1">
+                        <output path="BROKER_UUID"/>
+                    </customFunction>
+                    <function ref="fn:current-dateTime">
+                        <output path="CREATED_AT"/>
+                    </function>
+                </insert>
+                <return>
+                    <input path="$var3/DBInsertReturn"/>
+                </return>
+            </transaction>
+        </foreach>
+    </mappingDeclaration>
+</mappingRoot>

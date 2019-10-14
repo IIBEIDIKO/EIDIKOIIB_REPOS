@@ -1,0 +1,559 @@
+-- there will be some elements which cannot be handled by facet validation- all of them will come under this module
+CREATE COMPUTE MODULE otherValidations
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lValid BOOLEAN;
+		DECLARE lPrefix CHARACTER;
+		DECLARE lErrorInYaml CHARACTER;
+		
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		
+		IF LENGTH(OutputLocalEnvironment.Variables.errorInYamlForm) > 0 THEN
+			SET lPrefix = OutputLocalEnvironment.Variables.errorInYamlForm;
+		ELSE
+			SET lPrefix = '--- !omap';
+		END IF;
+
+		IF Environment.Variables.entity = 'CUSTOMER' THEN
+			IF	OutputRoot.DFDL.processCenter.newCustomer.card_issuance_flag IS NULL THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'card_issuance_flag','Card issuance flag cannot be null- valid values 0 & 1');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+		END IF;
+		SET OutputLocalEnvironment.Variables.errorInYamlForm = lErrorInYaml;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE validateRegion
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lValid BOOLEAN;
+		DECLARE lPrefix CHARACTER '--- !omap';
+		DECLARE lErrorInYaml CHARACTER;
+		DECLARE lInternalID CHARACTER;
+		
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		
+		IF LENGTH(OutputLocalEnvironment.Variables.errorInYamlForm) > 0 THEN
+			SET lPrefix = OutputLocalEnvironment.Variables.errorInYamlForm;
+		ELSE
+			SET lPrefix = '--- !omap';
+		END IF;
+		
+		IF Environment.Variables.entity = 'CENTER' THEN
+			
+			-- validate formation date
+			SET lValid = isGreaterThanCurrentDate(OutputRoot.DFDL.processCenter.center.formation_date);
+			IF lValid = TRUE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'formation_date','Formation date cannot be future date');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate State
+			SET lValid = validateState('900001',OutputRoot.DFDL.processCenter.center.state_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'state_code','State code not valid');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			-- validate City
+			
+			SET lValid = validateCity(OutputRoot.DFDL.processCenter.center.state_code,OutputRoot.DFDL.processCenter.center.city_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'city_code','City code not valid for the state');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate branch
+			SET lValid = validateBranch(OutputRoot.DFDL.processCenter.center.city_code,OutputRoot.DFDL.processCenter.center.branch_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'branch_code','Branch code not valid for the city');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate operating region
+			SET lValid = validateOperatingRegion(OutputRoot.DFDL.processCenter.center.branch_code,OutputRoot.DFDL.processCenter.center.operating_region_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'operating_region_code','Operating Region Code not valid for branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+		ELSEIF Environment.Variables.entity = 'CUSTOMER' THEN
+			-- validate collector
+			SET lValid = validateCollector(OutputRoot.DFDL.processCenter.newCustomer.branch_code, OutputRoot.DFDL.processCenter.newCustomer.collector);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'collector','Collector not valid for the branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate approver
+			SET lValid = validateApprover(OutputRoot.DFDL.processCenter.newCustomer.branch_code, OutputRoot.DFDL.processCenter.newCustomer.approver);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'approver','Approver not valid for the branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate State
+			SET lValid = validateState('900001',OutputRoot.DFDL.processCenter.newCustomer.state_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'state_code','State code not valid');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			-- validate City
+			
+			SET lValid = validateCity(OutputRoot.DFDL.processCenter.newCustomer.state_code,OutputRoot.DFDL.processCenter.newCustomer.city_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'city_code','City code not valid for the state');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate branch
+			SET lValid = validateBranch(OutputRoot.DFDL.processCenter.newCustomer.city_code,OutputRoot.DFDL.processCenter.newCustomer.branch_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'branch_code','Branch code not valid for the city');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate bc_branch_code
+			SET lValid = validateBCBranch(OutputRoot.DFDL.processCenter.newCustomer.branch_code,OutputRoot.DFDL.processCenter.newCustomer.bc_branch_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'bc_branch_code','BC Branch code not valid for the branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate operating region
+			SET lValid = validateOperatingRegion(OutputRoot.DFDL.processCenter.newCustomer.branch_code,OutputRoot.DFDL.processCenter.newCustomer.operating_region_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'operating_region_code','Operating Region Code not valid for branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate customer date of birth
+			SET lValid = isLessThanCurrentDate(OutputRoot.DFDL.processCenter.newCustomer.date_of_birth);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'date_of_birth','Date of birth should be less than today');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate customer spouse date of birth
+			IF OutputRoot.DFDL.processCenter.newCustomer.spouse_date_of_birth IS NOT NULL THEN
+				SET lValid = isLessThanCurrentDate(OutputRoot.DFDL.processCenter.newCustomer.spouse_date_of_birth);
+				IF lValid = FALSE THEN
+					SET lErrorInYaml =  convertToYaml(lPrefix,'spouse_dob','Date of birth should be less than today');
+					SET lPrefix = lErrorInYaml;
+				END IF;
+			END IF;
+		ELSEIF Environment.Variables.entity = 'EXISTINGCUSTOMER' THEN
+			
+			-- validate internal id and set it in the external id
+			SET lValid = validateInternalCustomerID(OutputRoot.DFDL.processCenter.existingCustomer.external_id, lInternalID);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'external_id','Internal id not present in RCDSCUSTOMERS table for the external id passed');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+
+			-- validate State
+			SET lValid = validateState('900001',OutputRoot.DFDL.processCenter.existingCustomer.state_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'state_code','State code not valid');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			-- validate City
+			
+			SET lValid = validateCity(OutputRoot.DFDL.processCenter.existingCustomer.state_code,OutputRoot.DFDL.processCenter.existingCustomer.city_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'city_code','City code not valid for the state');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate branch
+			SET lValid = validateBranch(OutputRoot.DFDL.processCenter.existingCustomer.city_code,OutputRoot.DFDL.processCenter.existingCustomer.branch_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'branch_code','Branch code not valid for the city');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate bc_branch_code
+			SET lValid = validateBCBranch(OutputRoot.DFDL.processCenter.existingCustomer.branch_code,OutputRoot.DFDL.processCenter.existingCustomer.bc_branch_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'bc_branch_code','BC Branch code not valid for the branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate operating region
+			SET lValid = validateOperatingRegion(OutputRoot.DFDL.processCenter.existingCustomer.branch_code,OutputRoot.DFDL.processCenter.existingCustomer.operating_region_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'operating_region_code','Operating Region Code not valid for branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate customer date of birth
+			SET lValid = isLessThanCurrentDate(OutputRoot.DFDL.processCenter.existingCustomer.date_of_birth);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'date_of_birth','Date of birth should be less than today');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate customer spouse date of birth
+			IF OutputRoot.DFDL.processCenter.existingCustomer.spouse_date_of_birth IS NOT NULL THEN
+				SET lValid = isLessThanCurrentDate(OutputRoot.DFDL.processCenter.existingCustomer.spouse_date_of_birth);
+				IF lValid = FALSE THEN
+					SET lErrorInYaml =  convertToYaml(lPrefix,'spouse_dob','Date of birth should be less than today');
+					SET lPrefix = lErrorInYaml;
+				END IF;
+			END IF;
+
+		ELSEIF Environment.Variables.entity = 'GROUP' THEN
+
+			-- validate formation date
+			SET lValid = isGreaterThanCurrentDate(OutputRoot.DFDL.processCenter.group.formation_date);
+			IF lValid = TRUE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'formation_date','Formation date cannot be future date');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate state code
+			SET lValid = isBranchValid(OutputRoot.DFDL.processCenter.group.branch_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'branch_code','Branch code does not exist');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+			-- validate state code for branch code
+			SET lValid = validateOperatingRegion(OutputRoot.DFDL.processCenter.group.branch_code, OutputRoot.DFDL.processCenter.group.operating_region_code);
+			IF lValid = FALSE THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'operating_region_code','Operating Region Code not valid for branch');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+			
+		ELSEIF Environment.Variables.entity = 'SAVING' THEN
+			
+			-- validate nominee date of birth
+			IF	OutputRoot.DFDL.processCenter.saving.nominee_date_of_birth IS NOT NULL THEN
+				SET lValid = isLessThanCurrentDate(OutputRoot.DFDL.processCenter.saving.nominee_date_of_birth);
+				IF lValid = FALSE THEN
+					SET lErrorInYaml =  convertToYaml(lPrefix,'nominee_dob','Date of birth should be less than today');
+					SET lPrefix = lErrorInYaml;
+				END IF;
+			END IF;
+			
+		ELSEIF Environment.Variables.entity = 'LOAN' THEN
+			
+			-- validate repayment start date > loan start date
+			IF OutputRoot.DFDL.processCenter.loan.loan_start_date > OutputRoot.DFDL.processCenter.loan.repayment_start_date THEN
+				SET lErrorInYaml =  convertToYaml(lPrefix,'repayment_start_date','Repayment start date cannot be less than loan start date');
+				SET lPrefix = lErrorInYaml;
+			END IF;
+
+		END IF;
+		IF lErrorInYaml IS NOT NULL THEN
+			SET OutputLocalEnvironment.Variables.errorInYamlForm = lErrorInYaml;
+		END IF;
+		
+		RETURN TRUE;
+	END;
+	
+	-- validate approver
+	CREATE FUNCTION validateApprover(IN piBranchCode CHARACTER, IN piApprover CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lCount INTEGER;
+		DECLARE lParentID INTEGER; 
+			
+		SET rs.rows[] = SELECT SAD_USERDETAILS.USR_ID, GEO_HIERARCHY_SETTING.GHS_CODE, SAD_USERDETAILS.USR_FULLNAME
+		                 FROM Database.UT_USER_PROFILEMAPPING, Database.SAD_USERDETAILS, Database.BANK_MASTER, Database.CSRTOBRANCHMAPPING, Database.GEO_HIERARCHY_SETTING
+		                WHERE CSRTOBRANCHMAPPING.USR_ID = SAD_USERDETAILS.USR_ID
+		                  AND UT_USER_PROFILEMAPPING.USERID = SAD_USERDETAILS.USR_ID
+		                  AND BANK_MASTER.BMS_ID = CSRTOBRANCHMAPPING.BRANCHCODE
+		                  AND GEO_HIERARCHY_SETTING.GHS_ID = BANK_MASTER.BMS_BASEBRANCH
+		                  AND UT_USER_PROFILEMAPPING.PROFILEID = '0005'  
+		                  AND BANK_MASTER.BMS_CODE = piBranchCode
+		                  AND SAD_USERDETAILS.USR_FULLNAME = piApprover
+						  AND SAD_USERDETAILS.USR_DELFLAG = 'X';
+		      			
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- validate collector
+	CREATE FUNCTION validateCollector(IN piBranchCode CHARACTER, IN piCollector CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lCount INTEGER;
+		DECLARE lParentID INTEGER; 
+		
+		SET rs.rows[] = SELECT SAD_USERDETAILS.USR_ID, GEO_HIERARCHY_SETTING.GHS_CODE, SAD_USERDETAILS.USR_FULLNAME
+		                 FROM Database.UT_USER_PROFILEMAPPING, Database.SAD_USERDETAILS, Database.BANK_MASTER, Database.CSRTOBRANCHMAPPING, Database.GEO_HIERARCHY_SETTING
+		                WHERE CSRTOBRANCHMAPPING.USR_ID = SAD_USERDETAILS.USR_ID
+		                  AND UT_USER_PROFILEMAPPING.USERID = SAD_USERDETAILS.USR_ID
+		                  AND BANK_MASTER.BMS_ID = CSRTOBRANCHMAPPING.BRANCHCODE
+		                  AND GEO_HIERARCHY_SETTING.GHS_ID = BANK_MASTER.BMS_BASEBRANCH
+		                  AND UT_USER_PROFILEMAPPING.PROFILEID = 'CSR'  
+		                  AND BANK_MASTER.BMS_CODE = piBranchCode
+		                  AND SAD_USERDETAILS.USR_FULLNAME = piCollector
+						  AND SAD_USERDETAILS.USR_DELFLAG = 'X';
+		      			
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	
+	-- validates state against the country
+	CREATE FUNCTION validateState(IN piCountryCode CHARACTER, IN piStateCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lCount INTEGER;
+		DECLARE lParentID INTEGER; 
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piCountryCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+						
+		SET lParentID = rs.rows[1].GHS_ID;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_CODE
+		      			FROM  Database.GEO_HIERARCHY_SETTING 
+		      			WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piStateCode
+		      			AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D' 
+		      			AND GEO_HIERARCHY_SETTING.GHS_PARENT= lParentID;
+		      			
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- validates city against the state
+	CREATE FUNCTION validateBCBranch(IN piBranchCode CHARACTER, IN piBCBranchCode INTEGER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lGHSID INTEGER;
+		
+		SET lGHSID = THE(SELECT ITEM GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piBranchCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D'); 
+		
+		SET rs.rows[] = SELECT BANK_MASTER.BMS_ID, BANK_MASTER.BMS_CODE, BANK_MASTER.BMS_NAME
+	        			FROM Database.BANK_MASTER
+	              		WHERE BANK_MASTER.BMS_BASEBRANCH = lGHSID
+	              		AND BANK_MASTER.BMS_CODE = piBCBranchCode
+	              		AND BANK_MASTER.BMS_DELFLAG <> 'D'
+	              		AND BANK_MASTER.BMS_PEBRANCH IS NOT NULL;
+		      			
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- validates city against the state
+	CREATE FUNCTION validateCity(IN piStateCode CHARACTER, IN piCityCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lCount INTEGER;
+		DECLARE lParentID INTEGER; 
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piStateCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+						
+		SET lParentID = rs.rows[1].GHS_ID;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_CODE
+		      			FROM  Database.GEO_HIERARCHY_SETTING 
+		      			WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piCityCode
+		      			AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D' 
+		      			AND GEO_HIERARCHY_SETTING.GHS_PARENT= lParentID;
+		      			
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- validates branch against the city
+	CREATE FUNCTION validateBranch(IN piCityCode CHARACTER, IN piBranchCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lCount INTEGER;
+		DECLARE lParentID INTEGER; 
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piCityCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+						
+		SET lParentID = rs.rows[1].GHS_ID;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_CODE
+		      			FROM  Database.GEO_HIERARCHY_SETTING 
+		      			WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piBranchCode
+		      			AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D' 
+		      			AND GEO_HIERARCHY_SETTING.GHS_PARENT= lParentID;
+		      			
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- validates operating regions against the branch
+	CREATE FUNCTION validateOperatingRegion(IN piBranchCode CHARACTER, IN piOperatingRegionCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE lCount INTEGER;
+		DECLARE lParentID INTEGER; 
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piBranchCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+						
+		SET lParentID = rs.rows[1].GHS_ID;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_CODE
+		      			FROM  Database.GEO_HIERARCHY_SETTING 
+		      			WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piOperatingRegionCode
+		      			AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D' 
+		      			AND GEO_HIERARCHY_SETTING.GHS_PARENT= lParentID;
+		      			
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- to check whether state exists or not
+	CREATE FUNCTION isStateValid(IN piStateCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piStateCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- to check whether city exists or not
+	CREATE FUNCTION isCityValid(IN piCityCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piCityCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- to check whether branch exists or not
+	CREATE FUNCTION isBranchValid(IN piBranchCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piBranchCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- to check whether operationg region exists or not
+	CREATE FUNCTION isOperatingRegionValid(IN piOperatingRegionCode CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		
+		SET rs.rows[] = SELECT GEO_HIERARCHY_SETTING.GHS_ID
+						FROM Database.GEO_HIERARCHY_SETTING
+						WHERE GEO_HIERARCHY_SETTING.GHS_CODE = piOperatingRegionCode
+						AND GEO_HIERARCHY_SETTING.GHS_DELFLAG <> 'D';
+
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+	-- This will check and return true if date passed is greater than or equal to current date
+	CREATE FUNCTION isLessThanCurrentDate(IN piDate DATE) 
+	RETURNS BOOLEAN
+	BEGIN
+		IF piDate < CURRENT_DATE THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+	
+		-- This will check and return true if date passed is greater than or equal to current date
+	CREATE FUNCTION isGreaterThanCurrentDate(IN piDate DATE) 
+	RETURNS BOOLEAN
+	BEGIN
+		IF piDate > CURRENT_DATE THEN
+			RETURN TRUE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;
+		-- This will check and return true if date passed is greater than or equal to current date
+	CREATE FUNCTION validateInternalCustomerID(IN piExternalID CHARACTER, OUT poExternalID CHARACTER) 
+	RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		
+		SET rs.rows[] = SELECT RCDSCUSTOMERS.CUSTOMERID
+						FROM Database.RCDSCUSTOMERS
+						WHERE RCDSCUSTOMERS.EXTERNALCUSTNO = piExternalID;
+
+		IF CARDINALITY(rs.rows[]) > 0 THEN
+			SET poExternalID = rs.rows[1].EXTERNALCUSTNO;
+			RETURN TRUE;
+		ELSE
+			SET poExternalID = NULL;
+			RETURN FALSE;
+		END IF;
+	END;
+	
+END MODULE;

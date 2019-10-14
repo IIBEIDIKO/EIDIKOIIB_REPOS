@@ -1,0 +1,89 @@
+PATH com.quantiguous.iib;
+CREATE PROCEDURE GET_MAPPING_DETAILS (IN  PI_ENTITY_NAME           CHAR,
+                                      IN  PI_EXTERNAL_ID           CHAR,
+                                      IN  PI_BC_BRANCH_CODE        INT,
+                                      IN  PI_FLAG_DONT_GET_RATING  CHAR,                                      
+                                      OUT PO_ENTITY_ID             INT,
+                                      OUT PO_FILE_RECORD_ID        INT,
+                                      OUT PO_EQUIFAX_ID            INT,
+                                      OUT PO_CREDIT_PASS           INT,
+                                      OUT PO_CUST_CREDIT_RATING_ID INT,
+                                      OUT PO_LAST_EQUIFACX_CALL_AT TIMESTAMP)
+LANGUAGE DATABASE
+EXTERNAL NAME "*.pk_qg_credit_check_helper.get_params_for_mapping";  
+
+
+CREATE COMPUTE MODULE catchFacetException
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE lColumn CHARACTER;
+		DECLARE lError  CHARACTER;
+		DECLARE lPrefix CHARACTER '--- !omap';
+		--InputExceptionList.RecoverableException.ParserException.Insert[2].Text;
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET lColumn = InputExceptionList.RecoverableException.ParserException.Insert[2].Text;
+		WHILE CONTAINS(lColumn,'/') DO
+			SET lColumn = SUBSTRING(lColumn AFTER '/');
+		END WHILE;
+		SET lError = SUBSTRING(InputExceptionList.RecoverableException.ParserException.Insert[1].Text AFTER '. ');
+		SET OutputLocalEnvironment.Variables.errorInYamlForm = convertToYaml(lPrefix,lColumn,lError);
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE addSequenceID
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs,ls ROW;
+		DECLARE T,lValidityPeriod INTEGER;
+		DECLARE I INTEGER 1;
+		DECLARE lDoEquifaxCheck,lQuery CHARACTER;
+		DECLARE schemaName CHAR getProperty(USER_DEFINED_SERVICE_NAME,PROPERTY_SCHEMA_NAME);
+		DECLARE dataSourceName CHAR getDataSourceName();
+		
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET Environment.Variables.entityID 							= OutputLocalEnvironment.Variables.entityID;
+		SET OutputLocalEnvironment.Variables.incomingFileID 		= Environment.Variables.incomingFileID;
+		SET OutputLocalEnvironment.Variables.createdBy 				= Environment.Variables.createdBy;
+		
+		 -- genarating ID for Pending equifax table
+		-- for equifax we need to set the credit check as passed in case it has been set to false in the admin section of GUFA
+		-- in case it is set to true we need to make sure that we send failure in the GUFA model so that the same can be updated to 
+		-- pass if equifax is a success otherwise it should remain as failed and customer creatin should happen
+		
+		CALL GET_MAPPING_DETAILS (Environment.Variables.entity,
+                                  COALESCE(InputRoot.DFDL.processCenter.newCustomer.external_id,InputRoot.DFDL.processCenter.existingCustomer.external_id),
+                                  COALESCE(InputRoot.DFDL.processCenter.newCustomer.bc_branch_code,InputRoot.DFDL.processCenter.existingCustomer.bc_branch_code),
+                                  COALESCE(InputRoot.DFDL.processCenter.newCustomer.dont_get_rating,InputRoot.DFDL.processCenter.existingCustomer.dont_get_rating),                              
+                                  OutputLocalEnvironment.Variables.entityID,
+                                  OutputLocalEnvironment.Variables.incomingFileRecordID,
+                                  OutputLocalEnvironment.Variables.pendingEquifaxId,
+                                  OutputLocalEnvironment.Variables.creditPassFail,
+                                  OutputLocalEnvironment.Variables.customerCreditRatingID,
+                                  OutputLocalEnvironment.Variables.lastEquifaxCallAt)IN Database.{dataSourceName}.{schemaName} ;
+		RETURN TRUE;
+	END;
+
+END MODULE;
+
+CREATE COMPUTE MODULE setCustomerExternalIdInEnv
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		-- we are keeping the flag false here as we need to ensure that we do not override the days check configured at admin
+		-- the only place where we will be overriding the days check will be in retry of equifax
+		-- setting default value for dont_get_rating field for customer and existing_customers 		
+		SET OutputLocalEnvironment.Variables.overrideExistingCheck = FALSE;
+		IF Environment.Variables.entity = 'CUSTOMER' THEN
+			SET Environment.Variables.customerExternalID = OutputRoot.DFDL.processCenter.newCustomer.external_id;
+			SET OutputRoot.DFDL.processCenter.newCustomer.dont_get_rating  = COALESCE(InputRoot.DFDL.processCenter.newCustomer.dont_get_rating,'0');			
+		ELSEIF Environment.Variables.entity = 'EXISTINGCUSTOMER' THEN
+			SET Environment.Variables.customerExternalID = OutputRoot.DFDL.processCenter.existingCustomer.external_id;
+			SET OutputRoot.DFDL.processCenter.existingCustomer.dont_get_rating  = COALESCE(InputRoot.DFDL.processCenter.existingCustomer.dont_get_rating,'0');			
+		END IF;
+		RETURN TRUE;
+	END;
+END MODULE;

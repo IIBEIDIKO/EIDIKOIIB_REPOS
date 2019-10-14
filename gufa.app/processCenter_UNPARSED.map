@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/ganasevaEntity.xsd" var="var1"/>
+    <input path="/localEnvironmentVariables.xsd" var="var"/>
+    <input path="/localEnvironmentVariables.xsd" var="var2"/>
+    <input path="jar:file://!com/ibm/msl/mapping/rdb/xsds/dbreturn.xsd" var="var3"/>
+    <output path="db:table(/gufa.dbm,GUFA,GUFA,INCOMING_FILE_RECORDS)" var="INCOMINGFILERECORDS"/>
+    <imports>
+        <import kind="esql" namespace="/convertToYaml.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="convertToYaml" uri="/convertToYaml.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="processCenter_UNPARSED">
+        <input namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="$var1/mb:msg(ganasevaEntity,assembly,XMLNSC,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="serializedRecord" ref="var"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileRecordID" ref="var"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="incomingFileID" ref="var"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="createdBy" ref="var"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="errorInYamlForm" ref="var"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="errorDescription" ref="var"/>
+        </input>
+        <output path="$INCOMINGFILERECORDS/db:insert(fn:false(),ID,INCOMING_FILE_ID,RECORD_NO,ENTITY_ID,ENTITY_NAME,RECORD_TXT,RECORD_ERRORS,CREATED_BY,CREATED_AT,IS_VALID)" var="dbinsert"/>
+        <foreach>
+            <input path="$MessageAssembly/ganasevaEntity" var="ganasevaEntity"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileRecordID[1]" var="incomingFileRecordID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/incomingFileID[1]" var="incomingFileID"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/serializedRecord[1]" var="serializedRecord"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/File/Record" var="Record1"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/createdBy[1]" var="createdBy"/>
+            <input auxiliary="true" path="$MessageAssembly/LocalEnvironment/Variables/errorDescription" var="errorDescription"/>
+            <output path="$dbinsert/."/>
+            <foreach>
+                <input path="$errorDescription/." var="errorDescription1"/>
+                <input auxiliary="true" path="$serializedRecord/." var="serializedRecord1"/>
+                <input auxiliary="true" path="$ganasevaEntity/." var="ganasevaEntity1"/>
+                <input auxiliary="true" path="$incomingFileRecordID/." var="incomingFileRecordID1"/>
+                <input auxiliary="true" path="$incomingFileID/." var="incomingFileID1"/>
+                <input auxiliary="true" path="$Record1/." var="Record2"/>
+                <input auxiliary="true" path="$createdBy/." var="createdBy1"/>
+                <output path="."/>
+                <transaction>
+                    <insert ref="dbinsert">
+                        <input path="$serializedRecord1/." var="serializedRecord1"/>
+                        <input path="$ganasevaEntity1/." var="ganasevaEntity1"/>
+                        <input path="$incomingFileRecordID1/." var="incomingFileRecordID1"/>
+                        <input path="$incomingFileID1/." var="incomingFileID1"/>
+                        <input path="$Record2/." var="Record2"/>
+                        <input path="$createdBy1/." var="createdBy1"/>
+                        <input path="$errorDescription1/." var="errorDescription2"/>
+                        <output path="."/>
+                        <move>
+                            <input path="$serializedRecord1/."/>
+                            <output path="RECORD_TXT"/>
+                        </move>
+                        <move>
+                            <input path="$ganasevaEntity1/entityName"/>
+                            <output path="ENTITY_NAME"/>
+                        </move>
+                        <move>
+                            <input path="$incomingFileRecordID1/."/>
+                            <output path="ID"/>
+                        </move>
+                        <move>
+                            <input path="$incomingFileID1/."/>
+                            <output path="INCOMING_FILE_ID"/>
+                        </move>
+                        <function ref="xs:int">
+                            <input path="$Record2/." var="Record"/>
+                            <output path="RECORD_NO"/>
+                            <param name="primitive" value="$Record"/>
+                        </function>
+                        <move>
+                            <input path="$createdBy1/."/>
+                            <output path="CREATED_BY"/>
+                        </move>
+                        <function ref="fn:current-dateTime">
+                            <output path="CREATED_AT"/>
+                        </function>
+                        <assign value="0">
+                            <output path="IS_VALID"/>
+                        </assign>
+                        <move>
+                            <input path="$errorDescription2/."/>
+                            <output path="RECORD_ERRORS"/>
+                        </move>
+                    </insert>
+                    <return>
+                        <input path="$var3/DBInsertReturn"/>
+                    </return>
+                </transaction>
+            </foreach>
+        </foreach>
+    </mappingDeclaration>
+</mappingRoot>

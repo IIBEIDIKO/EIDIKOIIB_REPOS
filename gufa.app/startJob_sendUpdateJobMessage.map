@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/ganasevaEntity.xsd" var="var1"/>
+    <input path="/localEnvironmentVariables.xsd" var="var"/>
+    <input path="/localEnvironmentVariables.xsd" var="var2"/>
+    <output path="/ganasevaEntity.xsd"/>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="startJob_sendUpdateJobMessage">
+        <input namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="$var1/mb:msg(ganasevaEntity,assembly,XMLNSC,LocalEnvironment,Properties)">
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaBatchID" ref="var"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaEntityID" ref="var"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaEntityName" ref="var"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaExternalID" ref="var"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaProcessID" ref="var"/>
+            <cast path="LocalEnvironment/Variables/any" qualifier="ganasevaProcessName" ref="var"/>
+        </input>
+        <output namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="mb:msg(ganasevaEntity,assembly,XMLNSC,Properties)"/>
+        <move>
+            <input path="Properties"/>
+            <output path="Properties"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaBatchID[1]"/>
+            <output path="ganasevaEntity/batchID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaEntityID[1]"/>
+            <output path="ganasevaEntity/entityID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaEntityName[1]"/>
+            <output path="ganasevaEntity/entityName"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaExternalID[1]"/>
+            <output path="ganasevaEntity/externalID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaProcessID[1]"/>
+            <output path="ganasevaEntity/processID"/>
+        </move>
+        <move>
+            <input path="LocalEnvironment/Variables/ganasevaProcessName[1]"/>
+            <output path="ganasevaEntity/processName"/>
+        </move>
+    </mappingDeclaration>
+</mappingRoot>

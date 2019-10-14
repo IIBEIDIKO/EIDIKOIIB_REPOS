@@ -1,0 +1,15 @@
+CREATE COMPUTE MODULE retryCustomerCreditCheck
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputRoot.XMLNSC.entityID = CAST(InputLocalEnvironment.HTTP.Input.QueryString.entityID AS INTEGER);
+		SET Environment.Variables.entityID = OutputRoot.XMLNSC.entityID;
+		
+		-- this is required while inserting record in customer_credit_Ratings
+		SET rs.rows[] = SELECT CUSTOMERS.EXTERNAL_ID, CUSTOMERS.CREATED_BY FROM Database.CUSTOMERS WHERE CUSTOMERS.ID = OutputRoot.XMLNSC.entityID;
+		SET Environment.Variables.createdBy = rs.rows[1].CREATED_BY;
+		SET Environment.Variables.customerExternalID = rs.rows[1].EXTERNAL_ID;
+		SET Environment.Variables.isByJob = 'N' ;
+	END;
+END MODULE;

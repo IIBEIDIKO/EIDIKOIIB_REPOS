@@ -1,0 +1,109 @@
+PATH com.quantiguous.iib;
+
+ 
+CREATE PROCEDURE LOG_EQUIFAX_CREDIT_CHECK_REQUEST_DETAILS(IN  PI_CUSTOMER_ID                INT,
+  														  IN  PI_EXTERNAL_ID                CHAR,
+														  IN  PI_REQUEST_XML                CHAR,
+														  IN  PI_CREATED_BY                 CHAR,
+														  IN  PI_INSTITUTIONS_COUNT_LIMIT   INT,
+														  IN  PI_CUSTOMER_NAME              CHAR,
+														  IN  PI_CUSTOMER_MOBILE            CHAR,
+														  IN  PI_CUSTOMER_ADDRESS           CHAR,
+														  IN  PI_WRITTEN_OFF_LIMIT          INT,
+														  IN  PI_PAST_DUE_AMOUNT_LIMIT      INT,
+ 														  IN  PI_OUTSTANDING_BALANCE_LIMIT  INT)
+RETURNS INT 
+LANGUAGE DATABASE
+EXTERNAL NAME "*.pk_qg_credit_check_helper.log_credit_check_request";   
+
+DECLARE soap NAMESPACE 'http://www.w3.org/2003/05/soap-envelope';
+
+CREATE COMPUTE MODULE setEquifaxDetails
+		
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- set all the header details required for equifax call from the user defined properties
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:CustomerId		= getProperty('EquifaxCS','equifaxCustomerId');
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:MemberNumber	= getProperty('EquifaxCS','equifaxMemberNumber');
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:Password		= getProperty('EquifaxCS','equifaxPassword');
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:ProductCode		= getProperty('EquifaxCS','equifaxProductCode');
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:ProductVersion	= getProperty('EquifaxCS','equifaxProductVersion');
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:ReportFormat	= getProperty('EquifaxCS','equifaxReportFormat');
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:SecurityCode	= getProperty('EquifaxCS','equifaxSecurityCode');
+		SET OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestHeader.ns:UserId			= getProperty('EquifaxCS','equifaxUserId');
+
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE readQueryString
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyMessageHeaders();
+		CALL CopyEntireMessage();
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment.Variables.entityID = InputLocalEnvironment.HTTP.Input.QueryString.entityID;
+		SET OutputLocalEnvironment.Variables.isExisting = FALSE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE buildSOAPFaultFromExceptionList
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		SET OutputRoot.SOAP.Body.soap:Fault.soap:Code.soap:Value = 'soapenv:Receiver';
+		SET OutputRoot.SOAP.Body.soap:Fault.soap:Reason.soap:Text = 'External customer ID does not exist for the loan to do credit check';
+		SET OutputRoot.SOAP.Body.soap:Fault.soap:Detail.OriginalMessage.XMLNSC = InputRoot.XMLNSC;
+		SET OutputRoot.SOAP.Body.soap:Fault.soap:Detail.OriginalMessage.JSON = InputRoot.JSON;
+		SET OutputRoot.SOAP.Body.soap:Fault.soap:Detail.ExceptionList = InputExceptionList;
+		
+		SET OutputLocalEnvironment.Destination.HTTP.ReplyStatusCode = 500;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE logEquifaxRequest
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE rs ROW;
+		DECLARE ID INTEGER;
+		DECLARE serializedRecord CHARACTER;
+		DECLARE auditDataSourceName CHAR getAuditDataSourceName();
+		DECLARE schemaName CHAR getProperty(USER_DEFINED_SERVICE_NAME,PROPERTY_SCHEMA_NAME);		
+		
+		SET OutputRoot = InputRoot;
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET serializedRecord = CAST(ASBITSTREAM(OutputRoot.XMLNSC) AS CHARACTER CCSID 1208);
+
+     -- logging equifax request xml  and parameters by calling package
+     CALL LOG_EQUIFAX_CREDIT_CHECK_REQUEST_DETAILS(Environment.Variables.entityID,
+     											   Environment.Variables.customerExternalID,
+												   serializedRecord,
+												   CAST(Environment.Variables.createdBy AS CHAR),
+											       Environment.Variables.noOfInstitutions,
+												   OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:FullName,
+												   OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:MobilePhone,
+												   OutputRoot.XMLNSC.ns:InquiryRequest.ns:RequestBody.ns:AddrLine1,
+												   Environment.Variables.writeOffAmount,
+												   Environment.Variables.pastDueAmount,
+												   Environment.Variables.overDueAmount
+	 )IN Database.{auditDataSourceName}.{schemaName} INTO Environment.Variables.customerCreditRatingID;
+ 												      
+		RETURN TRUE;
+	END;
+END MODULE;

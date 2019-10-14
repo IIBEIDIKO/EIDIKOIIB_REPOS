@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/ganasevaEntity.xsd" var="var"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,CUSTOMERS))" var="GUFA"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA1"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA2"/>
+    <input path="db:database(/ganaseva.dbm,GANASEVADB,db:schema-tables(dbo,GEO_HIERARCHY_SETTING))" var="GANASEVA3"/>
+    <input path="/localEnvironmentVariables.xsd" var="var1"/>
+    <input path="/localEnvironmentVariables.xsd" var="var2"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,LOANS))" var="GUFA1"/>
+    <output path="/OnlineInquiry-1.0.xsd"/>
+    <imports>
+        <import kind="esql" namespace="/ganasevaToEquifax.esql"/>
+    </imports>
+    <namespaces>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+        <namespace kind="extension" prefix="ganasevaToEquifax" uri="/ganasevaToEquifax.esql"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="callEquifax_mapNewCustomer">
+        <input namespace="http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd" path="$var/mb:msg(ganasevaEntity,assembly,XMLNSC,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/any" qualifier="CustomerId"/>
+            <cast path="$MessageAssembly/any" qualifier="Password"/>
+            <cast path="$MessageAssembly/any" qualifier="SecurityCode"/>
+            <cast path="$MessageAssembly/any" qualifier="MemberNumber"/>
+            <cast path="$MessageAssembly/any" qualifier="UserId"/>
+        </input>
+        <input path="$GUFA/db:select(fn:false(),ResultSet(GUFA/CUSTOMERS/ID,GUFA/CUSTOMERS/EXTERNAL_ID,GUFA/CUSTOMERS/EXTERNAL_CENTER_ID,GUFA/CUSTOMERS/TITLE,GUFA/CUSTOMERS/CUSTOMER_NAME,GUFA/CUSTOMERS/ADDRESS_LINE1,GUFA/CUSTOMERS/ADDRESS_LINE2,GUFA/CUSTOMERS/ADDRESS_LINE3,GUFA/CUSTOMERS/CITY_CODE,GUFA/CUSTOMERS/STATE_CODE,GUFA/CUSTOMERS/PIN,GUFA/CUSTOMERS/DATE_OF_BIRTH,GUFA/CUSTOMERS/MOBILE_NO,GUFA/CUSTOMERS/CASTE,GUFA/CUSTOMERS/GENDER,GUFA/CUSTOMERS/MARITAL_STATUS,GUFA/CUSTOMERS/NATIONALITY,GUFA/CUSTOMERS/RELIGION,GUFA/CUSTOMERS/MOTHER_TONGUE,GUFA/CUSTOMERS/BRANCH_CODE,GUFA/CUSTOMERS/OPERATING_REGION_CODE,GUFA/CUSTOMERS/AADHAR_NO,GUFA/CUSTOMERS/PENSION_CARD_NO,GUFA/CUSTOMERS/RATION_CARD_NO,GUFA/CUSTOMERS/VOTER_ID,GUFA/CUSTOMERS/PAN_NO,GUFA/CUSTOMERS/BARCODE_NO,GUFA/CUSTOMERS/AADHAR_SEEDING_CONSENT,GUFA/CUSTOMERS/HEALTH,GUFA/CUSTOMERS/OCCUPATION,GUFA/CUSTOMERS/EDUCATIONAL_QUALIFICATION,GUFA/CUSTOMERS/CATEGORY,GUFA/CUSTOMERS/LANGUAGE,GUFA/CUSTOMERS/CARD_ISSUANCE_FLAG,GUFA/CUSTOMERS/BC_BRANCH_CODE,GUFA/CUSTOMERS/COLLECTOR,GUFA/CUSTOMERS/APPROVER,GUFA/CUSTOMERS/CREATED_BY,GUFA/CUSTOMERS/CREATED_AT,GUFA/CUSTOMERS/STATUS,GUFA/CUSTOMERS/CREDIT_PASS_FAIL,GUFA/CUSTOMERS/INTERNAL_ID,GUFA/CUSTOMERS/PROCESS_ID,GUFA/CUSTOMERS/UPDATED_AT,GUFA/CUSTOMERS/RECORD_ERRORS,GUFA/CUSTOMERS/INCOMING_FILE_ID,GUFA/CUSTOMERS/SKIPPED),db:where('GUFA.CUSTOMERS.ID =  ?  AND GUFA.CUSTOMERS.EXTERNAL_ID =  ?1 ','?1'=$MessageAssembly/{http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd}:ganasevaEntity/externalID,'?'=$MessageAssembly/{http://www.quantiguous.com/ganaseva/ganasevaEntity.xsd}:ganasevaEntity/entityID))" var="dbselect"/>
+        <output namespace="http://services.equifax.com/eport/ws/schemas/1.0" path="mb:msg(InquiryRequest,assembly,XMLNSC,Properties)"/>
+        <select ref="dbselect">
+            <input path="$dbselect/ResultSet[1]" var="ResultSet"/>
+            <input path="$GANASEVA/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_CODE,dbo/GEO_HIERARCHY_SETTING/GHS_DESCRIPTION),db:where('dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? ','?'=$ResultSet/GUFA/CUSTOMERS/CITY_CODE))" var="dbselect1"/>
+            <input path="$GANASEVA1/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_CODE,dbo/GEO_HIERARCHY_SETTING/GHS_DESCRIPTION),db:where('dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? ','?'=$ResultSet/GUFA/CUSTOMERS/STATE_CODE))" var="dbselect2"/>
+            <input path="$GANASEVA2/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_CODE,dbo/GEO_HIERARCHY_SETTING/GHS_DESCRIPTION),db:where('dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? ','?'=$ResultSet/GUFA/CUSTOMERS/BRANCH_CODE))" var="dbselect3"/>
+            <input path="$GANASEVA3/db:select(fn:false(),ResultSet(dbo/GEO_HIERARCHY_SETTING/GHS_CODE,dbo/GEO_HIERARCHY_SETTING/GHS_DESCRIPTION),db:where('dbo.GEO_HIERARCHY_SETTING.GHS_CODE =  ? ','?'=$ResultSet/GUFA/CUSTOMERS/OPERATING_REGION_CODE))" var="dbselect4"/>
+            <input path="$GUFA1/db:select(fn:false(),ResultSet(GUFA/LOANS/LOAN_AMOUNT),db:where('GUFA.LOANS.EXTERNAL_CUSTOMER_ID =  ? ','?'=$ResultSet/GUFA/CUSTOMERS/EXTERNAL_ID))" var="dbselect5"/>
+            <output path="InquiryRequest"/>
+            <assign value="MCR">
+                <output path="RequestHeader/ProductCode"/>
+            </assign>
+            <assign value="1.0">
+                <output path="RequestHeader/ProductVersion"/>
+            </assign>
+            <assign value="XML">
+                <output path="RequestHeader/ReportFormat"/>
+            </assign>
+            <function ref="concat">
+                <input path="$ResultSet/GUFA/CUSTOMERS/BARCODE_NO" var="BARCODENO"/>
+                <input path="$ResultSet/GUFA/CUSTOMERS/EXTERNAL_ID" var="EXTERNALID"/>
+                <output path="RequestHeader/CustRefField"/>
+                <param name="input" value="($BARCODENO,$EXTERNALID)"/>
+                <property key="defaultDelimiter" value=" "/>
+            </function>
+            <expression>
+                <input path="$ResultSet/GUFA/CUSTOMERS/BRANCH_CODE" var="BRANCHCODE"/>
+                <input path="$dbselect3/ResultSet/dbo/GEO_HIERARCHY_SETTING/GHS_DESCRIPTION" var="GHSDESCRIPTION"/>
+                <output path="RequestAccountDetails/BranchIDMFI"/>
+                <code lang="xpath">fn:concat($BRANCHCODE,' ',$GHSDESCRIPTION)</code>
+            </expression>
+            <assign value="0E">
+                <output path="RequestBody/InquiryPurpose"/>
+            </assign>
+            <move>
+                <input path="$dbselect5/ResultSet[1]/GUFA/LOANS/LOAN_AMOUNT"/>
+                <output path="RequestBody/TransactionAmount"/>
+            </move>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/CUSTOMER_NAME"/>
+                <output path="RequestBody/FullName"/>
+            </move>
+            <customFunction lang="esql" ref="ganasevaToEquifax:getConcatAddress">
+                <input path="$ResultSet/GUFA/CUSTOMERS/ADDRESS_LINE1" var="ADDRESSLINE1"/>
+                <input path="$ResultSet/GUFA/CUSTOMERS/ADDRESS_LINE2" var="ADDRESSLINE2"/>
+                <input path="$ResultSet/GUFA/CUSTOMERS/ADDRESS_LINE3" var="ADDRESSLINE3"/>
+                <input path="$dbselect1/ResultSet/dbo/GEO_HIERARCHY_SETTING/GHS_DESCRIPTION" var="GHSDESCRIPTION1"/>
+                <input path="$ResultSet/GUFA/CUSTOMERS/STATE_CODE" var="STATECODE"/>
+                <input path="$ResultSet/GUFA/CUSTOMERS/PIN" var="PIN"/>
+                <output path="RequestBody/AddrLine1"/>
+                <param name="piLine1" value="fn:string($ADDRESSLINE1)"/>
+                <param name="piLine2" value="fn:string($ADDRESSLINE2)"/>
+                <param name="piLine3" value="fn:string($ADDRESSLINE3)"/>
+                <param name="piCityName" value="fn:string($GHSDESCRIPTION1)"/>
+                <param name="piStateCode" value="fn:string($STATECODE)"/>
+                <param name="piPin" value="fn:string($PIN)"/>
+            </customFunction>
+            <customFunction lang="esql" ref="ganasevaToEquifax:getEquifaxStateCode">
+                <input path="$ResultSet/GUFA/CUSTOMERS/STATE_CODE" var="STATECODE1"/>
+                <output path="RequestBody/State"/>
+                <param name="piGanasevaState" value="$STATECODE1"/>
+            </customFunction>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/PIN"/>
+                <output path="RequestBody/Postal"/>
+            </move>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/DATE_OF_BIRTH"/>
+                <output path="RequestBody/DOB"/>
+            </move>
+            <condition>
+                <if>
+                    <input path="$ResultSet/GUFA/CUSTOMERS/GENDER" var="GENDER"/>
+                    <output path="RequestBody/Gender"/>
+                    <test lang="xpath">$GENDER = '01'</test>
+                    <assign value="1">
+                        <output path="."/>
+                    </assign>
+                </if>
+                <else>
+                    <output path="RequestBody/Gender"/>
+                    <assign value="2">
+                        <output path="."/>
+                    </assign>
+                </else>
+            </condition>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/AADHAR_NO" var="AADHARNO"/>
+                <output path="RequestBody/NationalIdCard"/>
+            </move>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/RATION_CARD_NO" var="RATIONCARDNO"/>
+                <output path="RequestBody/RationCard"/>
+            </move>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/PAN_NO" var="PANNO"/>
+                <output path="RequestBody/PANId"/>
+            </move>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/VOTER_ID" var="VOTERID"/>
+                <output path="RequestBody/VoterId"/>
+            </move>
+            <move>
+                <input path="$ResultSet/GUFA/CUSTOMERS/MOBILE_NO" var="MOBILENO"/>
+                <output path="RequestBody/MobilePhone"/>
+            </move>
+        </select>
+    </mappingDeclaration>
+</mappingRoot>

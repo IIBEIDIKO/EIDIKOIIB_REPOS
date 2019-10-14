@@ -1,0 +1,135 @@
+-- this one will be used when we are selecting date from oracle database as in ESQL it will be cosidered as timestamp
+CREATE FUNCTION formatDate(IN piDate TIMESTAMP)RETURNS CHARACTER
+BEGIN
+	DECLARE lStringDate CHARACTER;
+	SET lStringDate = CAST(piDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+	RETURN lStringDate;
+END;
+
+CREATE FUNCTION formatTimeStampToDate(IN piDate TIMESTAMP)RETURNS DATE
+BEGIN
+	DECLARE lDate DATE;
+	SET lDate = CAST(piDate AS DATE FORMAT 'yyyy-MM-dd');
+	RETURN lDate;
+END;
+
+-- this one will be used when we are converting ESQL datatype date
+CREATE FUNCTION formatDateToString(IN piDate DATE)RETURNS CHARACTER
+BEGIN
+	DECLARE lStringDate CHARACTER;
+	SET lStringDate = CAST(piDate AS CHARACTER FORMAT 'dd/MM/yyyy');
+	RETURN lStringDate;
+END;
+
+CREATE FUNCTION getDatePart(IN piDate DATE) RETURNS CHARACTER
+BEGIN
+	DECLARE lString CHARACTER;
+	
+	SET lString = CAST(piDate AS CHARACTER FORMAT 'dd');
+	RETURN lString;
+END;
+
+
+CREATE FUNCTION getMonthPartNum(IN piDate DATE) RETURNS CHARACTER
+BEGIN
+	DECLARE lString CHARACTER;
+	DECLARE monthPart INTEGER;
+	DECLARE mon CHARACTER;
+	
+	SET lString = CAST(piDate AS CHARACTER FORMAT 'MM');
+	RETURN lString;
+END;
+
+
+CREATE FUNCTION getYearPart(IN piDate DATE) RETURNS CHARACTER
+BEGIN
+	DECLARE lString CHARACTER;
+	
+	SET lString = CAST(piDate AS CHARACTER FORMAT 'dd-MM-YYYY');
+	SET lString = SUBSTRING(lString AFTER '-');
+	SET lString = SUBSTRING(lString AFTER '-');
+	RETURN lString;
+END;
+
+CREATE FUNCTION formatTime(IN piHour INT, IN piMinute INT) RETURNS CHARACTER
+BEGIN
+	DECLARE lTime CHARACTER;
+	DECLARE lHour INTEGER;
+	DECLARE lHourString CHARACTER;
+	DECLARE lMinuteString CHARACTER;
+	DECLARE lAMPM CHARACTER;
+	DECLARE datePart INTEGER;
+	DECLARE lDate DATE;
+
+	IF (piHour > 12) THEN
+		SET lHour = piHour -12;
+		SET lAMPM = 'PM';
+	ELSEIF (piHour = 12) THEN
+		SET lHour = piHour;
+		SET lAMPM = 'PM';
+	ELSE
+		SET lHour = piHour;
+		SET lAMPM = 'AM';
+	END IF;
+	
+	IF (lHour < 10 ) THEN
+		SET lHourString = '0'||CAST(lHour AS CHARACTER);
+	ELSE
+		SET lHourString = CAST(lHour AS CHARACTER);
+	END IF;
+	
+	IF (piMinute < 10 ) THEN
+		SET lMinuteString = '0'||CAST(piMinute AS CHARACTER);
+	ELSE
+		SET lMinuteString = CAST(piMinute AS CHARACTER);
+	END IF;
+	
+	SET lTime = lHourString||':'||lMinuteString||lAMPM;
+	
+	RETURN lTime;
+END;
+
+CREATE FUNCTION getAge(IN picurrentDate DATE, IN piDOB DATE) RETURNS INTEGER
+BEGIN
+	DECLARE lAge INTEGER;
+	DECLARE inyear INTERVAL;
+	SET inyear = (picurrentDate-piDOB) YEAR; 
+	SET lAge= CAST(inyear AS INTEGER);
+	RETURN lAge;
+END;
+
+CREATE FUNCTION getAgeWithTimestamp(IN picurrentDate DATE, IN piDOB TIMESTAMP) RETURNS INTEGER
+BEGIN
+	DECLARE lAge INTEGER;
+	DECLARE inyear INTERVAL;
+	DECLARE lDOB DATE;
+	
+	DECLARE lDatePartToday INTEGER;
+	DECLARE lDatePartDOB INTEGER;
+	
+	DECLARE lMonthPartToday INTEGER;
+	DECLARE lMonthPartDOB INTEGER;
+	
+	SET lDOB = CAST(piDOB AS DATE FORMAT 'yyyyMMdd');
+	SET inyear = (picurrentDate-lDOB) YEAR; 
+	SET lAge= CAST(inyear AS INTEGER);
+	
+	SET lDatePartToday = CAST(getDatePart(picurrentDate) AS INTEGER);
+	SET lDatePartDOB = CAST(getDatePart(lDOB) AS INTEGER);
+	
+	SET lMonthPartToday = CAST(getMonthPartNum(picurrentDate) AS INTEGER);
+	SET lMonthPartDOB = CAST(getMonthPartNum(lDOB) AS INTEGER);
+	
+	IF lMonthPartDOB > lMonthPartToday THEN
+		SET lAge = lAge -1;
+	ELSEIF lMonthPartDOB = lMonthPartToday AND lDatePartDOB >= lDatePartToday THEN
+		SET lAge = lAge -1;
+	END IF;
+	
+	RETURN lAge;
+END;
+
+
+
+
+

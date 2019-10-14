@@ -1,0 +1,37 @@
+DECLARE ns1 NAMESPACE 'http://schemas.xmlsoap.org/soap/envelope/';
+/*
+DECLARE equifax NAMESPACE 'http://services.equifax.com/eport/ws/schemas/1.0';
+DECLARE aos NAMESPACE 'http://AccountOpeningService';
+DECLARE ns1 NAMESPACE 'http://www.quantiguous.com/FI/globalElements.xsd';
+DECLARE soapenv NAMESPACE 'http://schemas.xmlsoap.org/soap/envelope/';*/
+
+CREATE COMPUTE MODULE getCreditReport_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		 CALL CopyMessageHeaders();
+		 CALL CopyEntireMessage();
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE rs ROW;
+		DECLARE s CHARACTER;
+		SET OutputRoot = InputRoot;
+	--	SET OutputLocalEnvironment = InputLocalEnvironment;	
+	--	UPDATE Database.CUSTOMERS SET CREDIT_PASS_FAIL = OutputRoot.XMLNSC.getConsumerCreditReportResponse.getConsumerCreditReportResponse.getConsumerCreditReportResponse WHERE CUSTOMERS.EXTERNAL_CENTER_ID = rs.rows[I].EXTERNAL_ID;							
+		SET s = OutputRoot.XMLNSC.SOAP.Context.Namespace;
+		--UPDATE Database.CUSTOMERS SET CREDIT_PASS_FAIL = '1' WHERE CUSTOMERS.EXTERNAL_CENTER_ID = rs.rows[I].EXTERNAL_ID;
+		--.ns3:Header.ns3:Body.ns:getConsumerCreditReportResponse.getConsumerCreditReportReply.creditApproved;
+	END;
+END MODULE;

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.quantiguous.com/FI/globalElements.xsd">
+	<xsd:element name="meetingTime" type="xsd:time"/>
+	<xsd:element name="formationDate" type="xsd:date"/>
+	<xsd:element name="externalId">
+   		<xsd:simpleType>
+      		<xsd:restriction base="xsd:string">
+         		<xsd:maxLength value="20"/>
+      		</xsd:restriction>
+   		</xsd:simpleType>
+	</xsd:element>
+	<xsd:element name="operatingRegion">
+		<xsd:complexType>
+  			<xsd:sequence>
+  			<xsd:element name="operatingRegionCode">
+		   	<xsd:simpleType>
+		      <xsd:restriction base="xsd:string">
+		         <xsd:maxLength value="100"/>
+		      </xsd:restriction>
+		   </xsd:simpleType>
+		   </xsd:element>
+  			<xsd:element name="operatingRegionName">
+		   	<xsd:simpleType>
+		      <xsd:restriction base="xsd:string">
+		         <xsd:maxLength value="100"/>
+		      </xsd:restriction>
+		   </xsd:simpleType>
+		   </xsd:element>
+		   </xsd:sequence>
+		   </xsd:complexType>
+	</xsd:element>
+	<xsd:element name="productName">
+   		<xsd:simpleType>
+      		<xsd:restriction base="xsd:string">
+         		<xsd:maxLength value="50"/>
+      		</xsd:restriction>
+   		</xsd:simpleType>
+	</xsd:element>
+	<xsd:element name="title">
+	   <xsd:simpleType>
+	      <xsd:annotation>
+	         <xsd:documentation>11-Mr, 12-Mrs, 13-Smt, 14-Master, 15-Miss, 16-Dr,17-Ms, 18-Dr(Ms), 21-M/S,99-Banl</xsd:documentation>
+	      </xsd:annotation>
+	      <xsd:restriction base="xsd:string">
+	         <xsd:enumeration value="11"/>
+	         <xsd:enumeration value="12"/>
+	         <xsd:enumeration value="13"/>
+	         <xsd:enumeration value="14"/>
+	         <xsd:enumeration value="15"/>
+	         <xsd:enumeration value="16"/>
+	         <xsd:enumeration value="17"/>
+	         <xsd:enumeration value="18"/>
+	         <xsd:enumeration value="21"/>
+	         <xsd:enumeration value="99"/>
+	      </xsd:restriction>
+	   </xsd:simpleType>
+	</xsd:element>
+    <xsd:element name="customerName">
+       <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+             <xsd:maxLength value="100"/>
+          </xsd:restriction>
+       </xsd:simpleType>
+    </xsd:element>	
+    <xsd:element name="batchID" type="xsd:int"/>
+	<xsd:element name="dateOfBirth" type="xsd:date"/>
+	<xsd:element name="barcodeNo">
+	   <xsd:simpleType>
+	      <xsd:restriction base="xsd:string">
+	         <xsd:maxLength value="500"/>
+	      </xsd:restriction>
+	   </xsd:simpleType>
+	</xsd:element>
+     <xsd:element name="mobileNo">
+        <xsd:simpleType>
+           <xsd:restriction base="xsd:string">
+              <xsd:maxLength value="30"/>
+           </xsd:restriction>
+        </xsd:simpleType>
+     </xsd:element>	
+      <xsd:element name="branchCode">
+        <xsd:simpleType>
+           <xsd:restriction base="xsd:string">
+              <xsd:maxLength value="50"/>
+           </xsd:restriction>
+        </xsd:simpleType>
+     </xsd:element>
+      <xsd:element name="branchName">
+        <xsd:simpleType>
+           <xsd:restriction base="xsd:string">
+              <xsd:maxLength value="50"/>
+           </xsd:restriction>
+        </xsd:simpleType>
+     </xsd:element>
+     
+</xsd:schema>

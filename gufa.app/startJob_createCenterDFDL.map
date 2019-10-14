@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/localEnvironmentVariables.xsd" var="var"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,CENTERS))" var="GUFA"/>
+    <output path="/entityCenter.xsd"/>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="startJob_createCenterDFDL">
+        <input path="$var/mb:msg(entityID,assembly,XMLNSC,LocalEnvironment,Properties)" var="MessageAssembly"/>
+        <input path="$GUFA/db:select(fn:false(),ResultSet(GUFA/CENTERS/ID,GUFA/CENTERS/EXTERNAL_ID,GUFA/CENTERS/CENTER_NAME,GUFA/CENTERS/FORMATION_DATE,GUFA/CENTERS/SERVICING_AGENT,GUFA/CENTERS/MAXIMUM_INDIVIDUALS,GUFA/CENTERS/MEETING_TIME,GUFA/CENTERS/ADDRESS_LINE1,GUFA/CENTERS/ADDRESS_LINE2,GUFA/CENTERS/ADDRESS_LINE3,GUFA/CENTERS/CITY_CODE,GUFA/CENTERS/STATE_CODE,GUFA/CENTERS/PIN,GUFA/CENTERS/OPERATING_REGION_CODE,GUFA/CENTERS/BRANCH_CODE,GUFA/CENTERS/DESCRIPTION,GUFA/CENTERS/PHONE_NO,GUFA/CENTERS/PRIMARY_CONTACT,GUFA/CENTERS/SECONDARY_CONTACT,GUFA/CENTERS/SECONDARY_PHONE_NO,GUFA/CENTERS/UDF1,GUFA/CENTERS/UDF2,GUFA/CENTERS/UDF3,GUFA/CENTERS/UDF4,GUFA/CENTERS/UDF5,GUFA/CENTERS/UDF6,GUFA/CENTERS/UDF7,GUFA/CENTERS/UDF8,GUFA/CENTERS/UDF9,GUFA/CENTERS/UDF10,GUFA/CENTERS/UDF11,GUFA/CENTERS/UDF12,GUFA/CENTERS/UDF13,GUFA/CENTERS/UDF14,GUFA/CENTERS/UDF15,GUFA/CENTERS/UDF16,GUFA/CENTERS/UDF17,GUFA/CENTERS/UDF18,GUFA/CENTERS/UDF19,GUFA/CENTERS/UDF20,GUFA/CENTERS/UDF21,GUFA/CENTERS/UDF22,GUFA/CENTERS/UDF23,GUFA/CENTERS/UDF24,GUFA/CENTERS/UDF25,GUFA/CENTERS/UDF26,GUFA/CENTERS/UDF27,GUFA/CENTERS/UDF28,GUFA/CENTERS/UDF29,GUFA/CENTERS/UDF30),db:where('GUFA.CENTERS.ID =  ? ','?'=$MessageAssembly/entityID))" var="dbselect"/>
+        <output namespace="http://www.quantiguous.com/gufa/dfdl/entityCenter.xsd" path="mb:msg(entityCenter,assembly,DFDL,LocalEnvironment,Properties)"/>
+        <move>
+            <input path="$MessageAssembly/Properties"/>
+            <output path="Properties"/>
+            <override>
+                <assign value="{http://www.quantiguous.com/gufa/dfdl/entityCenter.xsd}:entityCenter">
+                    <output path="Properties/MessageType"/>
+                </assign>
+            </override>
+        </move>
+        <select ref="dbselect">
+            <input path="$dbselect/ResultSet"/>
+            <output path="entityCenter"/>
+            <foreach>
+                <input path="."/>
+                <output path="center"/>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/EXTERNAL_ID"/>
+                    <output path="external_id"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/CENTER_NAME"/>
+                    <output path="center_name"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/FORMATION_DATE"/>
+                    <output path="formation_date"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/SERVICING_AGENT"/>
+                    <output path="servicing_agent"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/MAXIMUM_INDIVIDUALS"/>
+                    <output path="maximum_individuals"/>
+                </move>
+                <function ref="xs:time">
+                    <input path="GUFA/CENTERS/MEETING_TIME" var="MEETINGTIME"/>
+                    <output path="meeting_time"/>
+                    <param name="primitive" value="$MEETINGTIME"/>
+                </function>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/ADDRESS_LINE1"/>
+                    <output path="address_line1"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/ADDRESS_LINE2"/>
+                    <output path="address_line2"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/ADDRESS_LINE3"/>
+                    <output path="address_line3"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/CITY_CODE"/>
+                    <output path="city_code"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/STATE_CODE"/>
+                    <output path="state_code"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/PIN"/>
+                    <output path="pin"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/OPERATING_REGION_CODE"/>
+                    <output path="operating_region_code"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/BRANCH_CODE"/>
+                    <output path="branch_code"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/DESCRIPTION"/>
+                    <output path="description"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/PHONE_NO"/>
+                    <output path="phone_no"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF1"/>
+                    <output path="udf1"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF2"/>
+                    <output path="udf2"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF3"/>
+                    <output path="udf3"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF4"/>
+                    <output path="udf4"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF5"/>
+                    <output path="udf5"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF6"/>
+                    <output path="udf6"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF7"/>
+                    <output path="udf7"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF8"/>
+                    <output path="udf8"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF9"/>
+                    <output path="udf9"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF10"/>
+                    <output path="udf10"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF11"/>
+                    <output path="udf11"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF12"/>
+                    <output path="udf12"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF13"/>
+                    <output path="udf13"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF14"/>
+                    <output path="udf14"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF15"/>
+                    <output path="udf15"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF16"/>
+                    <output path="udf16"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF17"/>
+                    <output path="udf17"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF18"/>
+                    <output path="udf18"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF19"/>
+                    <output path="udf19"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF20"/>
+                    <output path="udf20"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF21"/>
+                    <output path="udf21"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF22"/>
+                    <output path="udf22"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF23"/>
+                    <output path="udf23"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF24"/>
+                    <output path="udf24"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF25"/>
+                    <output path="udf25"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF26"/>
+                    <output path="udf26"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF27"/>
+                    <output path="udf27"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF28"/>
+                    <output path="udf28"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF29"/>
+                    <output path="udf29"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/CENTERS/UDF30"/>
+                    <output path="udf30"/>
+                </move>
+                <move>
+                    <input path="GUFA/CENTERS/PRIMARY_CONTACT"/>
+                    <output path="primary_contact"/>
+                </move>
+                <move>
+                    <input path="GUFA/CENTERS/SECONDARY_CONTACT"/>
+                    <output path="secondary_contact"/>
+                </move>
+                <move>
+                    <input path="GUFA/CENTERS/SECONDARY_PHONE_NO"/>
+                    <output path="secondary_phone_no"/>
+                </move>
+            </foreach>
+        </select>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment"/>
+            <output path="LocalEnvironment"/>
+        </move>
+    </mappingDeclaration>
+</mappingRoot>

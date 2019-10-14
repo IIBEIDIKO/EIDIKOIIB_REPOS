@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.4.0" xmlns:map="default">
+    <input path="/localEnvironmentVariables.xsd" var="var3"/>
+    <input path="db:database(/gufa.dbm,GUFA,db:schema-tables(GUFA,GROUPS))" var="GUFA1"/>
+    <output path="/entityGroup.xsd" var="var1"/>
+    <namespaces>
+        <namespace kind="extension" prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="startJob_createGroupDFDL">
+        <input path="$var3/mb:msg(entityID,assembly,XMLNSC,LocalEnvironment,Properties)" var="MessageAssembly">
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaBatchID" ref="var3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaEntityID" ref="var3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaEntityName" ref="var3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaExternalCustomerID" ref="var3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaExternalID" ref="var3"/>
+            <cast path="$MessageAssembly/LocalEnvironment/Variables/any" qualifier="ganasevaProcessName" ref="var3"/>
+        </input>
+        <input path="$GUFA1/db:select(fn:false(),ResultSet(GUFA/GROUPS/ID,GUFA/GROUPS/EXTERNAL_ID,GUFA/GROUPS/EXTERNAL_CENTER_ID,GUFA/GROUPS/CENTER_NAME,GUFA/GROUPS/MAXIMUM_CENTER_LIMIT,GUFA/GROUPS/GROUP_NAME,GUFA/GROUPS/GROUP_TYPE,GUFA/GROUPS/MIN_NUMBER,GUFA/GROUPS/MAX_NUMBER,GUFA/GROUPS/FORMATION_DATE,GUFA/GROUPS/MEETING_TIME,GUFA/GROUPS/MEETING_FREQUENCY,GUFA/GROUPS/DISTANCE_FROM_BRANCH,GUFA/GROUPS/BRANCH_CODE,GUFA/GROUPS/OPERATING_REGION_CODE,GUFA/GROUPS/UDF1,GUFA/GROUPS/UDF2,GUFA/GROUPS/UDF3,GUFA/GROUPS/UDF4,GUFA/GROUPS/UDF5,GUFA/GROUPS/UDF6,GUFA/GROUPS/UDF7,GUFA/GROUPS/UDF8,GUFA/GROUPS/UDF9,GUFA/GROUPS/UDF10,GUFA/GROUPS/UDF11,GUFA/GROUPS/UDF12,GUFA/GROUPS/UDF13,GUFA/GROUPS/UDF14,GUFA/GROUPS/UDF15,GUFA/GROUPS/UDF16,GUFA/GROUPS/UDF17,GUFA/GROUPS/UDF18,GUFA/GROUPS/UDF19,GUFA/GROUPS/UDF20,GUFA/GROUPS/UDF21,GUFA/GROUPS/UDF22,GUFA/GROUPS/UDF23,GUFA/GROUPS/UDF24,GUFA/GROUPS/UDF25,GUFA/GROUPS/UDF26,GUFA/GROUPS/UDF27,GUFA/GROUPS/UDF28,GUFA/GROUPS/UDF29,GUFA/GROUPS/UDF30),db:where('GUFA.GROUPS.ID =  ? ','?'=$MessageAssembly/entityID))" var="dbselect"/>
+        <output namespace="http://www.quantiguous.com/gufa/dfdl/entityGroup.xsd" path="$var1/mb:msg(entityGroup,assembly,DFDL,LocalEnvironment,Properties)" var="MessageAssembly1">
+            <cast path="$MessageAssembly1/LocalEnvironment/Variables/any" qualifier="ganasevaBatchID" ref="var3"/>
+            <cast path="$MessageAssembly1/LocalEnvironment/Variables/any" qualifier="ganasevaEntityID" ref="var3"/>
+            <cast path="$MessageAssembly1/LocalEnvironment/Variables/any" qualifier="ganasevaEntityName" ref="var3"/>
+            <cast path="$MessageAssembly1/LocalEnvironment/Variables/any" qualifier="ganasevaExternalCustomerID" ref="var3"/>
+            <cast path="$MessageAssembly1/LocalEnvironment/Variables/any" qualifier="ganasevaExternalID" ref="var3"/>
+            <cast path="$MessageAssembly1/LocalEnvironment/Variables/any" qualifier="ganasevaProcessName" ref="var3"/>
+        </output>
+        <move>
+            <input path="$MessageAssembly/Properties"/>
+            <output path="$MessageAssembly1/Properties"/>
+        </move>
+        <move>
+            <input path="$MessageAssembly/LocalEnvironment"/>
+            <output path="$MessageAssembly1/LocalEnvironment"/>
+        </move>
+        <select ref="dbselect">
+            <input path="$dbselect/ResultSet"/>
+            <output path="$MessageAssembly1/entityGroup"/>
+            <foreach>
+                <input path="."/>
+                <output path="group"/>
+                <move>
+                    <input path="GUFA/GROUPS/EXTERNAL_ID"/>
+                    <output path="external_id"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/EXTERNAL_CENTER_ID"/>
+                    <output path="external_center_id"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/CENTER_NAME"/>
+                    <output path="center_name"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/MAXIMUM_CENTER_LIMIT"/>
+                    <output path="maximum_center_limit"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/GROUP_NAME"/>
+                    <output path="group_name"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/GROUP_TYPE"/>
+                    <output path="group_type"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/MIN_NUMBER"/>
+                    <output path="min_number"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/MAX_NUMBER"/>
+                    <output path="max_number"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/FORMATION_DATE"/>
+                    <output path="formation_date"/>
+                </move>
+                <function ref="xs:time">
+                    <input path="GUFA/GROUPS/MEETING_TIME" var="MEETINGTIME"/>
+                    <output path="meeting_time"/>
+                    <param name="primitive" value="$MEETINGTIME"/>
+                </function>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/MEETING_FREQUENCY"/>
+                    <output path="meeting_frequency"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/DISTANCE_FROM_BRANCH"/>
+                    <output path="distance_from_branch"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/BRANCH_CODE"/>
+                    <output path="branch_code"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/OPERATING_REGION_CODE"/>
+                    <output path="operating_region_code"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF1"/>
+                    <output path="udf1"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF2"/>
+                    <output path="udf2"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF3"/>
+                    <output path="udf3"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF4"/>
+                    <output path="udf4"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF5"/>
+                    <output path="udf5"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF6"/>
+                    <output path="udf6"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF7"/>
+                    <output path="udf7"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF8"/>
+                    <output path="udf8"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF9"/>
+                    <output path="udf9"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF10"/>
+                    <output path="udf10"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF11"/>
+                    <output path="udf11"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF12"/>
+                    <output path="udf12"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF13"/>
+                    <output path="udf13"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF14"/>
+                    <output path="udf14"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF15"/>
+                    <output path="udf15"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF16"/>
+                    <output path="udf16"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF17"/>
+                    <output path="udf17"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF18"/>
+                    <output path="udf18"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF19"/>
+                    <output path="udf19"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF20"/>
+                    <output path="udf20"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF21"/>
+                    <output path="udf21"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF22"/>
+                    <output path="udf22"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF23"/>
+                    <output path="udf23"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF24"/>
+                    <output path="udf24"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF25"/>
+                    <output path="udf25"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF26"/>
+                    <output path="udf26"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF27"/>
+                    <output path="udf27"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF28"/>
+                    <output path="udf28"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF29"/>
+                    <output path="udf29"/>
+                </move>
+                <move automap="true">
+                    <input path="GUFA/GROUPS/UDF30"/>
+                    <output path="udf30"/>
+                </move>
+            </foreach>
+        </select>
+    </mappingDeclaration>
+</mappingRoot>

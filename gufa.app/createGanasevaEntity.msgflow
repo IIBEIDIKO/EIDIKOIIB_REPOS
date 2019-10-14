@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmLabel.msgnode="ComIbmLabel.msgnode" xmlns:ComIbmMQInput.msgnode="ComIbmMQInput.msgnode" xmlns:createCenter.subflow="createCenter.subflow" xmlns:createCustomer.subflow="createCustomer.subflow" xmlns:createGroup.subflow="createGroup.subflow" xmlns:createLoan.subflow="createLoan.subflow" xmlns:createSaving.subflow="createSaving.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:existingCustomerUpdate.subflow="existingCustomerUpdate.subflow" xmlns:uploadCustomerDocument.subflow="uploadCustomerDocument.subflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="createGanasevaEntity.msgflow" nsPrefix="createGanasevaEntity.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="createGanasevaEntity" bundleName="createGanasevaEntity" pluginId="gufa.app"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj16/createGanasevaEntity.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/gufa.app/icons/full/obj30/createGanasevaEntity.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="513,115" labelName="createCenter">
+        <translation xmi:type="utility:ConstantString" string="createCenter"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="42,604" labelName="createGroup">
+        <translation xmi:type="utility:ConstantString" string="createGroup"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="582,453" labelName="createLoan">
+        <translation xmi:type="utility:ConstantString" string="createLoan"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="38,413" labelName="createSaving">
+        <translation xmi:type="utility:ConstantString" string="createSaving"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="25,231" labelName="createCustomer">
+        <translation xmi:type="utility:ConstantString" string="createCustomer"/>
+      </nodes>
+      <nodes xmi:type="createCustomer.subflow:FCMComposite_1" xmi:id="FCMComposite_1_8" location="160,231">
+        <translation xmi:type="utility:ConstantString" string="createCustomerSubFlow"/>
+      </nodes>
+      <nodes xmi:type="createSaving.subflow:FCMComposite_1" xmi:id="FCMComposite_1_17" location="191,413">
+        <translation xmi:type="utility:ConstantString" string="openSavingSubFlow"/>
+      </nodes>
+      <nodes xmi:type="createGroup.subflow:FCMComposite_1" xmi:id="FCMComposite_1_19" location="181,604">
+        <translation xmi:type="utility:ConstantString" string="openGroupSubFlow"/>
+      </nodes>
+      <nodes xmi:type="createLoan.subflow:FCMComposite_1" xmi:id="FCMComposite_1_20" location="699,453">
+        <translation xmi:type="utility:ConstantString" string="openLoanAccount"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="238,127" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityFail.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setCustomerFail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_13" location="338,235" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntitySuccess.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setCustomerSuccess"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_24" location="264,306" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityFail.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setSavingFail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_25" location="360,417" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntitySuccess.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setSavingSuccess"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_33" location="254,509" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityFail.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setGroupFail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_34" location="334,608" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntitySuccess.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setGroupSuccess"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_43" location="772,343" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityFail.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setLoanFail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_44" location="860,457" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntitySuccess.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setLoanSuccess"/>
+      </nodes>
+      <nodes xmi:type="createCenter.subflow:FCMComposite_1" xmi:id="FCMComposite_1_16" location="638,115">
+        <translation xmi:type="utility:ConstantString" string="createCenterSubFlow"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_21" location="716,5" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityFail.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setCenterFail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_26" location="797,119" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntitySuccess.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setCenterSuccess"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="147,36" transaction="commit" computeExpression="esql://routine/#routeToEntity.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="routeToEntity"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="31,36" queueName="IN" destinationQueueManagerName="SAMPLE" messageDomainProperty="XMLNSC">
+        <translation xmi:type="utility:ConstantString" string="MQ Input"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="561,569" labelName="updateIntegrationJob">
+        <translation xmi:type="utility:ConstantString" string="updateIntegrationJob"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="780,569" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#updateJobStatus.Main" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="updateJobStatus"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="532,264" labelName="uploadImage">
+        <translation xmi:type="utility:ConstantString" string="uploadImage"/>
+      </nodes>
+      <nodes xmi:type="uploadCustomerDocument.subflow:FCMComposite_1" xmi:id="FCMComposite_1_14" location="641,264">
+        <translation xmi:type="utility:ConstantString" string="uploadCustomerDocument"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_15" location="839,260" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntitySuccess.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setImageUploadSuccess"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_18" location="716,165" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityFail.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setImageUploadFail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_22" location="45,154" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityException.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="setEntityException"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_23" location="382,721" labelName="updateExistingCustomer">
+        <translation xmi:type="utility:ConstantString" string="updateExistingCustomer"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_27" location="622,629" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntityFail.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setExistingCustomerFail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_28" location="784,725" dataSource="GUFA" transaction="commit" computeExpression="esql://routine/#setEntitySuccess.Main" computeMode="destinationAndMessage" treatWarningsAsErrors="true">
+        <translation xmi:type="utility:ConstantString" string="setExistingCustomerSuccess"/>
+      </nodes>
+      <nodes xmi:type="existingCustomerUpdate.subflow:FCMComposite_1" xmi:id="FCMComposite_1_29" location="568,721">
+        <translation xmi:type="utility:ConstantString" string="existingCustomerUpdate"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_25" sourceNode="FCMComposite_1_17" sourceTerminalName="OutTerminal.Output1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_24" sourceNode="FCMComposite_1_17" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_16" targetNode="FCMComposite_1_34" sourceNode="FCMComposite_1_19" sourceTerminalName="OutTerminal.Success" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_19" targetNode="FCMComposite_1_44" sourceNode="FCMComposite_1_20" sourceTerminalName="OutTerminal.Output1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_13" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.Output1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_24" targetNode="FCMComposite_1_21" sourceNode="FCMComposite_1_16" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_25" targetNode="FCMComposite_1_26" sourceNode="FCMComposite_1_16" sourceTerminalName="OutTerminal.Output1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_17" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_33" sourceNode="FCMComposite_1_19" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_43" sourceNode="FCMComposite_1_20" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_20" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_17" targetNode="FCMComposite_1_16" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_14" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input1"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_18" targetNode="FCMComposite_1_15" sourceNode="FCMComposite_1_14" sourceTerminalName="OutTerminal.Output1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_18" sourceNode="FCMComposite_1_14" sourceTerminalName="OutTerminal.Failure1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_15" targetNode="FCMComposite_1_22" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_20" targetNode="FCMComposite_1_29" sourceNode="FCMComposite_1_23" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_22" targetNode="FCMComposite_1_27" sourceNode="FCMComposite_1_29" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_23" targetNode="FCMComposite_1_28" sourceNode="FCMComposite_1_29" sourceTerminalName="OutTerminal.Success" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>
