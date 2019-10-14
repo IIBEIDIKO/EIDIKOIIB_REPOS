@@ -27,7 +27,7 @@ public class JCNSample_XML_JavaCompute extends MbJavaComputeNode {
 			MbElement outMsg = outParser.createElementAsLastChild(MbXMLNSC.FOLDER, "ACCOUNTINFO", null);
 			outMsg.createElementAsLastChild(MbXMLNSC.FIELD, "ACCOUNT_FIRSTNAME", "PRATHAP");
 			outMsg.createElementAsLastChild(MbXMLNSC.FIELD, "ACCOUNT_NUM", "SBI0009856322");
-			outMsg.createElementAsLastChild(MbXMLNSC.FIELD, "ACCOUNT_BALANCE", 8562);
+			outMsg.createElementAsLastChild(MbXMLNSC.FIELD, "ACCOUNT_BALANCE", 8000);
 			// End of user code
 			// ----------------------------------------------------------
 		} catch (MbException e) {
