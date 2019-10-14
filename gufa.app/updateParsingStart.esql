@@ -24,8 +24,8 @@ CREATE DATABASE MODULE updateParsingStart
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		DECLARE retVal, l_file_id, l_created_by INT;
-		DECLARE schemaName CHAR getProperty('GUFA','gufaSchemaName');
-		DECLARE dataSourceName CHAR getProperty('GUFA','gufaDataSourceName');
+		DECLARE schemaName CHAR ''; -- getProperty('GUFA','gufaSchemaName');
+		DECLARE dataSourceName CHAR ''; -- getProperty('GUFA','gufaDataSourceName');
 
 		--this is the case where the file has been picked twice by the node
 		IF LocalEnvironment.File.Record = 1 THEN
