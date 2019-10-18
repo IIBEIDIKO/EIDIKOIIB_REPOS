@@ -1,0 +1,22 @@
+
+
+Importing file: C:\Users\Administrator\IBM\IIBT10\workspace\MASHREQ_SMS_NOTIFICATION\SMSNotification.wsdl
+
+The WSDL import will proceed with bindings SMSNotificationSOAP.
+Creating wsdl schema document for file:///C:/Users/Administrator/IBM/IIBT10/workspace/MASHREQ_SMS_NOTIFICATION/SMSNotification.wsdl.
+Parsing wsdl binding {http://www.example.org/SMSNotification/}SMSNotificationSOAP.
+Parsing wsdl binding input SMSNOTIFICATION.
+Parsing wsdl binding output SMSNOTIFICATION.
+Processing doc style for operation SMSNOTIFICATION.
+Populating WSDL schema SMSNotification.xsd.
+Creating file SMSNotification.xsd in the workspace.
+Creating file SMSNotification_InlineSchema1.xsd in the workspace.
+Copying source WSDL SMSNotification.wsdl to SMSNotification.wsdl.
+
+Elapsed time processing this message definition file: 0.294 seconds
+Number of warnings for this message definition file: 0
+
+
+Number of files processed: 1
+
+

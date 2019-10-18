@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="SMSNotification" targetNamespace="http://www.example.org/SMSNotification/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/SMSNotification/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:documentation>
+    <wsdl:appinfo source="WMQI_APPINFO">
+      <MRWSDLAppInfo imported="true">
+        <generatedXSD location="SMSNotification_InlineSchema1.xsd"/>
+        <binding hasEncoding="false" imported="true" name="SMSNotificationSOAP" originalBindingStyle="document"/>
+      </MRWSDLAppInfo>
+    </wsdl:appinfo>
+  </wsdl:documentation>
+  <wsdl:types>
+    
+          <xsd:schema targetNamespace="http://www.example.org/SMSNotification/" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions">
+<xsd:include schemaLocation="SMSNotification_InlineSchema1.xsd"/>
+    </xsd:schema>
+    </wsdl:types>
+  <wsdl:message name="SMSNOTIFICATIONRequest">
+    <wsdl:part element="tns:SMSNOTIFICATION" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="SMSNOTIFICATIONResponse">
+    <wsdl:part element="tns:SMSNOTIFICATIONResponse" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="SMSNotification">
+    <wsdl:operation name="SMSNOTIFICATION">
+      <wsdl:input message="tns:SMSNOTIFICATIONRequest"/>
+      <wsdl:output message="tns:SMSNOTIFICATIONResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="SMSNotificationSOAP" type="tns:SMSNotification">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="SMSNOTIFICATION">
+      <soap:operation soapAction="http://www.example.org/SMSNotification/SMSNOTIFICATION"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="SMSNotification">
+    <wsdl:port binding="tns:SMSNotificationSOAP" name="SMSNotificationSOAP">
+      <soap:address location="http://192.168.2.22:7801/SMSNotification"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
