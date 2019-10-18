@@ -19,6 +19,6 @@ CREATE COMPUTE MODULE TimerSample_Compute
 	END;
 
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
-		SET OutputRoot.JSON.Data = InputRoot.XMLNSC;
+		SET OutputRoot.JSON.Data.Employee = InputRoot.XMLNSC.EMP;
 	END;
 END MODULE;
