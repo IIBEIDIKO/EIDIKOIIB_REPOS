@@ -15,7 +15,7 @@ CREATE COMPUTE MODULE SMS_Compute1
 		WHILE I < J DO
 			SET OutputRoot.*[I] = InputRoot.*[I];
 			SET I = I + 1;
-		END WHILE;
+		END WHILE  ;
 	END;
 
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
