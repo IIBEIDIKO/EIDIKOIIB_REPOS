@@ -25,6 +25,11 @@ CREATE COMPUTE MODULE HTTPSample1_Compute
 --		CREATE LASTCHILD OF OutputRoot DOMAIN('JSON') PARSE(BLOBDATA CCSID 1208 ENCODING 576);
 --		CALL Dynamic1(Environment.Resultset[]);
 --		SET OutputRoot.XMLNSC.Emp.Data[] = Environment.Resultset[] ;
+<<<<<<< HEAD
 		SET OutputRoot = InputRoot;
+=======
+SET OutputRoot.JSON.Data = InputRoot.XMLNSC;
+		
+>>>>>>> refs/remotes/origin/IIBEIDIKO_BRANCH
 	END;
 END MODULE;

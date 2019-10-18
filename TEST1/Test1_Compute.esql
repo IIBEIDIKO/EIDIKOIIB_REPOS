@@ -1,6 +1,6 @@
 
 
-CREATE COMPUTE MODULE GIT_Sample_Compute
+CREATE COMPUTE MODULE Test1_Compute
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		-- CALL CopyMessageHeaders();
@@ -19,6 +19,6 @@ CREATE COMPUTE MODULE GIT_Sample_Compute
 	END;
 
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
-		SET OutputRoot = InputRoot.XMLNSC;
+		SET OutputRoot.XMLNSC = InputRoot.JSON.Data;
 	END;
 END MODULE;

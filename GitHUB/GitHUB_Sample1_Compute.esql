@@ -1,10 +1,10 @@
 
 
-CREATE COMPUTE MODULE Sample1_Compute
+CREATE COMPUTE MODULE GitHUB_Sample1_Compute
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		-- CALL CopyMessageHeaders();
-		   CALL CopyEntireMessage();
+		 CALL CopyEntireMessage();
 		RETURN TRUE;
 	END;
 
@@ -19,10 +19,6 @@ CREATE COMPUTE MODULE Sample1_Compute
 	END;
 
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
-	--  SET OutputRoot.JSON.Data.emp.name = InputRoot.XMLNSC.name;
-	-- SET OutputLocalEnvironment.Destination.File.Directory = 'C:\Users\Administrator\Desktop\File\OverriddenDestination';
---	set OutputRoot = InputRoot;
---	SET OutputRoot.MQMD.CorrelId=InputRoot.MQMD.MsgId;
-		
+		SET OutputRoot.JSON.Data.id = InputRoot.XMLNSC;
 	END;
 END MODULE;
