@@ -4,7 +4,7 @@ CREATE COMPUTE MODULE SMS_Compute1
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		-- CALL CopyMessageHeaders();
-		 CALL CopyEntireMessage();
+		  CALL CopyEntireMessage();
 		RETURN TRUE;
 	END;
 
@@ -13,7 +13,7 @@ CREATE COMPUTE MODULE SMS_Compute1
 		DECLARE J INTEGER;
 		SET J = CARDINALITY(InputRoot.*[]);
 		WHILE I < J DO
-			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET OutputRoot.*[I] = InputRoot.  *[I];
 			SET I = I + 1;
 		END WHILE;
 	END;
