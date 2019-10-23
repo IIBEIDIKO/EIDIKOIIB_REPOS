@@ -1,11 +1,13 @@
  DECLARE ns NAMESPACE 'http://www.example.org/MASHREQ_MIRROR_MESSAGE/';
  
+DECLARE CONFIG_FILE_NAME EXTERNAL CHARACTER;
 
 CREATE COMPUTE MODULE MIRROR_MESSAGE_Compute
-	DECLARE CONFIG_FILE_NAME EXTERNAL CHARACTER;	
+	DECLARE rb BOOLEAN;
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		-- CALL CopyMessageHeaders();
+		CALL initFlow(CONFIG_FILE_NAME) INTO rb;
 		 CALL CopyEntireMessage();
 		RETURN TRUE;
 	END;
@@ -22,16 +24,29 @@ CREATE COMPUTE MODULE MIRROR_MESSAGE_Compute
  
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
 --		SET OutputRoot = InputRoot;
+		CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO','===== MASHREQ_MIRROR_MESSAGE Flow Started =====') INTO rb;
 		DECLARE Ref REFERENCE TO InputRoot.SOAP.Body.ns:MASHREQ_MIRROR_MESSAGE;
+		DECLARE InputReq CHARACTER CAST(ASBITSTREAM(InputRoot.SOAP CCSID 1208) AS CHARACTER CCSID 1208); 
+		CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO','### Input Message Recevied From Channel ### ') INTO rb;
+		CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO', InputReq) INTO rb;
 		INSERT INTO Database.ORADSN.SYSTEM.MASHREQ_MIRROR_MESSAGE(EVENTID,TRANSACTIONRRN,TRANSACTIONREQUESTDATETIME,TRANSACTIONCODE,TRANSACTIONTYPE,CREDITDEBITINDICATOR) VALUES(Ref.eventId, Ref.transactionRrn, Ref.transactionRequestDateTime, Ref.transactionCode, Ref.transactionType, Ref.creditDebitIndicator);
+		CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO','### DB Connection Established!! ### ') INTO rb;
 		IF SQLCODE = 0 THEN
+			CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO','### Data Inserted Succesfully ### ') INTO rb;
 			SET OutputRoot.SOAP.Body.ns:MASHREQ_MIRROR_MESSAGEResponse.eventId = Ref.eventId;
 			SET OutputRoot.SOAP.Body.ns:MASHREQ_MIRROR_MESSAGEResponse.messageResponseDateTime = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yyyymmddhhMMssss');
 			SET OutputRoot.SOAP.Body.ns:MASHREQ_MIRROR_MESSAGEResponse.responseCode = 'SUCCESS';
+			DECLARE OutReq CHARACTER CAST(ASBITSTREAM(OutputRoot.SOAP CCSID 1208) AS CHARACTER CCSID 1208);
+			CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO','### Output Message to Channel ### ') INTO rb;
+			CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO', OutReq) INTO rb;
 		ELSE
+			CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO','### Data Insertion Failed ### ') INTO rb;
 			SET OutputRoot.SOAP.Body.ns:MASHREQ_MIRROR_MESSAGEResponse.eventId = Ref.eventId;
 			SET OutputRoot.SOAP.Body.ns:MASHREQ_MIRROR_MESSAGEResponse.messageResponseDateTime = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yyyymmddhhMMssss');
 			SET OutputRoot.SOAP.Body.ns:MASHREQ_MIRROR_MESSAGEResponse.responseCode = 'FAILURE';
+			DECLARE OutReq CHARACTER CAST(ASBITSTREAM(OutputRoot.SOAP CCSID 1208) AS CHARACTER CCSID 1208);
+			CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO','### Output Message to Channel ### ') INTO rb;
+			CALL writeToLog(MessageFlowLabel, 'Logging', 'INFO', OutReq) INTO rb;
 		END IF;
 		 
 	END;
