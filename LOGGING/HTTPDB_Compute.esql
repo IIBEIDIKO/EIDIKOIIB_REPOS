@@ -1,0 +1,103 @@
+DECLARE Config EXTERNAL CHARACTER ;
+
+CREATE COMPUTE MODULE HTTPDB_Compute
+	DECLARE rb BOOLEAN;
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL initFlow(Config) INTO rb;
+		  CALL CopyMessageHeaders();
+		CALL CopyEntireMessage();
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+				DECLARE Ref REFERENCE TO InputRoot.XMLNSC.Data.Org.Emp;
+		DECLARE A,B,C CHARACTER;
+		DECLARE message ROW;
+		CREATE LASTCHILD OF OutputRoot DOMAIN 'XMLNSC';
+		DECLARE OutRef1,OutRef2 REFERENCE TO OutputRoot.XMLNSC;
+		-- SET A = InputLocalEnvironment.HTTP.Input.RequestLine.Method;
+		CALL writeToLog(MessageFlowLabel, 'Log', 'INFO','Method :' || A) INTO rb;
+		CREATE LASTCHILD OF OutputRoot.XMLNSC AS OutRef1 Name 'Org';
+		IF CONTAINS(A , 'POST') THEN
+			WHILE LASTMOVE(Ref) DO
+				CREATE LASTCHILD OF OutRef1 AS OutRef2 Name 'Emp';
+----				INSERT INTO Database.system.HDB(Name,Age,Location) VALUES (Ref.NAME,Ref.AGE,Ref.LOCATION);
+--				 CALL writeToLog(MessageFlowLabel, 'Log', 'INFO', INSERT INTO Database.system.emp(Name,Age,Location) VALUES (Ref.NAME,Ref.AGE,Ref.LOCATION)) INTO rb;
+				IF SQLCODE= 0 THEN
+					SET OutRef2.NAME = Ref.NAME;
+					SET OutRef2.AGE = Ref.AGE;
+					SET OutRef2.LOC = Ref.LOCATION;
+					CALL writeToLog(MessageFlowLabel, 'Log', 'INFO','Output Reference :' || cast(ASBITSTREAM(OutputRoot.XMLNSC CCSID 1208) AS CHARACTER CCSID 1208)) INTO rb;
+					-- SET OutRef2.value = 'DATABASE INSERTION DONE SUCCESFULLY :';
+					 CALL writeToLog(MessageFlowLabel, 'Log', 'INFO','DATABASE INSERTION DONE SUCCESFULLY  :' || OutRef2) INTO rb;
+				ELSE
+					SET OutRef2.val = 'Database Insertion Failed :' || SQLERRORTEXT;
+					--CALL writeToLog(MessageFlowLabel, 'Log', 'INFO', CAST(ASBITSTREAM(OutputRoot.XMLNSC CCSID 1208) AS CHARACTER CCSID 1208)  ) INTO rb;
+
+				END IF;
+				MOVE Ref NEXTSIBLING;
+			END WHILE;
+			CALL writeToLog(MessageFlowLabel, 'Log', 'INFO', CAST(ASBITSTREAM(OutputRoot CCSID 1208) AS CHARACTER CCSID 1208)) INTO rb;
+		ELSEIF CONTAINS(A,'GET') THEN
+			-- Set B = InputLocalEnvironment.HTTP.Input.QueryString.AGE;
+			CALL writeToLog(MessageFlowLabel, 'Log', 'INFO','QueryString :' || B) INTO rb;
+			CREATE LASTCHILD OF OutRef1 AS OutRef2 Name 'Emp';
+			-- SET message.value[] = SELECT * FROM Database.system.HDB as P  where P.AGE=B;
+			-- SET OutputRoot.XMLNSC.val = message;
+			-- SET message.value[] = {1,2};
+
+--			SET Environment.var =ASBITSTREAM( message.value CCSID InputRoot.Properties.CodedCharSetId ENCODING InputRoot.Properties.Encoding);
+			CREATE LASTCHILD OF Environment DOMAIN('XMLNSC') ;
+			SET Environment.XMLNSC.Result[]=message.value[] ;
+			DECLARE D CHARACTER;
+			DECLARE bodyBlob BLOB ASBITSTREAM(Environment.XMLNSC ENCODING InputRoot.Properties.Encoding CCSID InputRoot.Properties.CodedCharSetId);
+			SET D = CAST( bodyBlob AS CHARACTER CCSID InputRoot.Properties.CodedCharSetId ENCODING InputRoot.Properties.Encoding);
+			CALL writeToLog(MessageFlowLabel, 'Log', 'INFO', D) INTO rb;
+			-- CALL writeToLog(MessageFlowLabel, 'Log', 'INFO','SELECT A.NAME,A.AGE,A.LOCATION FROM Database.system.EMP  AS T WHERE A.AGE'|| '=' || B || ';') INTO rb;
+			IF EXISTS(message.value[]) THEN
+--				SET OutRef2 = message;
+				-- SET OutRef2.vl = 'DATABASE Retrieved DONE SUCCESFULLY :';
+				SET OutputRoot.DFDL.CSV.record[] = message.value[];
+				CALL writeToLog(MessageFlowLabel, 'Log', 'INFO', 'CSV DATA :' || cast(ASBITSTREAM(OutputRoot.DFDL CCSID 1208) AS CHARACTER CCSID 1208)) INTO rb;
+
+				PROPAGATE TO TERMINAL 'out1';
+			ELSE
+			-- 	SET OutRef2 = 'Database Retrieve Failed :' || SQLERRORTEXT;
+				CALL writeToLog(MessageFlowLabel, 'Log', 'INFO',OutRef2) INTO rb;
+			END IF;
+
+		END IF;
+
+		DECLARE X,Y CHARACTER;
+		DECLARE SNO INTEGER;
+
+		SET X = CAST(ASBITSTREAM(InputRoot CCSID 1208) AS CHARACTER CCSID 1208);
+		SET Y =CAST(ASBITSTREAM(OutputRoot CCSID 1208) AS CHARACTER CCSID 1208);
+		INSERT INTO Database.system.DBLOG (SNO,REQ,RESP) VALUES (2,X,Y);
+
+		CALL writeToLog(MessageFlowLabel, 'Log1', 'DEBUG','================ INPUT REQUEST CREATED   =========' ) INTO rb;
+		CALL writeToLog(MessageFlowLabel, 'Log1', 'DEBUG','INPUT DATA :' || cast(ASBITSTREAM(InputRoot CCSID 1208) AS CHARACTER CCSID 1208)) INTO rb;
+		CALL writeToLog(MessageFlowLabel, 'Log1', 'DEBUG','================ OUTPUT RESPONSE GENERATED   =========' ) INTO rb;
+		CALL writeToLog(MessageFlowLabel, 'Log1', 'DEBUG','OUTPUT DATA :' || cast(ASBITSTREAM(OutputRoot CCSID 1208) AS CHARACTER CCSID 1208)) INTO rb;
+		CALL writeToLog(MessageFlowLabel, 'Log1', 'DEBUG','========================================================') INTO rb;
+	END;
+	CREATE FUNCTION initFlow(IN CONFIG_FILE_NAME CHARACTER)
+	RETURNS BOOLEAN
+	LANGUAGE JAVA
+	EXTERNAL NAME "com.ibm.broker.IAM3.Log4jNode.initLog4j";
+	CREATE FUNCTION writeToLog( IN COMPONENT_NAME CHARACTER, IN LOGGER_NAME CHARACTER, IN LEVEL CHARACTER, IN TEXT CHARACTER)
+	RETURNS BOOLEAN
+	LANGUAGE JAVA
+	EXTERNAL NAME "com.ibm.broker.IAM3.Log4jNode.log";
+		END MODULE;
