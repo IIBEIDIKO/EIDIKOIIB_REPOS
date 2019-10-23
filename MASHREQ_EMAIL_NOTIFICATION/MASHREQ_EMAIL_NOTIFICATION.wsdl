@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="MASHREQ_EMAIL_NOTIFICATION" targetNamespace="http://www.example.org/MASHREQ_EMAIL_NOTIFICATION/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/MASHREQ_EMAIL_NOTIFICATION/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:documentation>
+    <wsdl:appinfo source="WMQI_APPINFO">
+      <MRWSDLAppInfo imported="true">
+        <generatedXSD location="MASHREQ_EMAIL_NOTIFICATION_InlineSchema1.xsd"/>
+        <binding hasEncoding="false" imported="true" name="MASHREQ_EMAIL_NOTIFICATIONSOAP" originalBindingStyle="document"/>
+      </MRWSDLAppInfo>
+    </wsdl:appinfo>
+  </wsdl:documentation>
+  <wsdl:types>
+    
+          <xsd:schema targetNamespace="http://www.example.org/MASHREQ_EMAIL_NOTIFICATION/" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions">
+<xsd:include schemaLocation="MASHREQ_EMAIL_NOTIFICATION_InlineSchema1.xsd"/>
+    </xsd:schema>
+    </wsdl:types>
+  <wsdl:message name="MASHREQ_EMAIL_NOTIFICATIONRequest">
+    <wsdl:part element="tns:MASHREQ_EMAIL_NOTIFICATION" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="MASHREQ_EMAIL_NOTIFICATIONResponse">
+    <wsdl:part element="tns:MASHREQ_EMAIL_NOTIFICATIONResponse" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="MASHREQ_EMAIL_NOTIFICATION">
+    <wsdl:operation name="MASHREQ_EMAIL_NOTIFICATION">
+      <wsdl:input message="tns:MASHREQ_EMAIL_NOTIFICATIONRequest"/>
+      <wsdl:output message="tns:MASHREQ_EMAIL_NOTIFICATIONResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MASHREQ_EMAIL_NOTIFICATIONSOAP" type="tns:MASHREQ_EMAIL_NOTIFICATION">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="MASHREQ_EMAIL_NOTIFICATION">
+      <soap:operation soapAction="http://www.example.org/MASHREQ_EMAIL_NOTIFICATION/MASHREQ_EMAIL_NOTIFICATION"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MASHREQ_EMAIL_NOTIFICATION">
+    <wsdl:port binding="tns:MASHREQ_EMAIL_NOTIFICATIONSOAP" name="MASHREQ_EMAIL_NOTIFICATIONSOAP">
+      <soap:address location="http://192.168.2.22:7801/MASHREQ_EMAIL_NOTIFICATION"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

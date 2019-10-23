@@ -1,0 +1,22 @@
+
+
+Importing file: C:\Users\Administrator\IBM\IIBT10\Git\MASHREQ_EMAIL_NOTIFICATION\MASHREQ_EMAIL_NOTIFICATION.wsdl
+
+The WSDL import will proceed with bindings MASHREQ_EMAIL_NOTIFICATIONSOAP.
+Creating wsdl schema document for file:///C:/Users/Administrator/IBM/IIBT10/Git/MASHREQ_EMAIL_NOTIFICATION/MASHREQ_EMAIL_NOTIFICATION.wsdl.
+Parsing wsdl binding {http://www.example.org/MASHREQ_EMAIL_NOTIFICATION/}MASHREQ_EMAIL_NOTIFICATIONSOAP.
+Parsing wsdl binding input MASHREQ_EMAIL_NOTIFICATION.
+Parsing wsdl binding output MASHREQ_EMAIL_NOTIFICATION.
+Processing doc style for operation MASHREQ_EMAIL_NOTIFICATION.
+Populating WSDL schema MASHREQ_EMAIL_NOTIFICATION.xsd.
+Creating file MASHREQ_EMAIL_NOTIFICATION.xsd in the workspace.
+Creating file MASHREQ_EMAIL_NOTIFICATION_InlineSchema1.xsd in the workspace.
+Copying source WSDL MASHREQ_EMAIL_NOTIFICATION.wsdl to MASHREQ_EMAIL_NOTIFICATION.wsdl.
+
+Elapsed time processing this message definition file: 0.298 seconds
+Number of warnings for this message definition file: 0
+
+
+Number of files processed: 1
+
+
