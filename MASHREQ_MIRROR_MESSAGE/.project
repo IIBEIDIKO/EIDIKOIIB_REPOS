@@ -3,6 +3,7 @@
 	<name>MASHREQ_MIRROR_MESSAGE</name>
 	<comment></comment>
 	<projects>
+		<project>Exception_Subflow</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
