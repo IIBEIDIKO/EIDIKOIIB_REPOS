@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/MASHREQ_MIRROR_MESSAGE/" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/MASHREQ_MIRROR_MESSAGE/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+      <xsd:element ibmSchExtn:docRoot="true" name="MASHREQ_MIRROR_MESSAGE">
+        <xsd:complexType>
+          <xsd:sequence>
+          	<xsd:element maxOccurs="1" minOccurs="1" name="eventId">
+
+          		<xsd:simpleType>
+          			<xsd:restriction base="xsd:string">
+
+          				<xsd:length value="36" />
+          				<xsd:pattern value=".{36,36}"></xsd:pattern>
+          			</xsd:restriction>
+          		</xsd:simpleType>
+          	</xsd:element>
+          	<xsd:element maxOccurs="1" minOccurs="1" name="transactionRrn">
+
+          		<xsd:simpleType>
+          			<xsd:restriction base="xsd:string">
+
+          				<xsd:length value="12" />
+          				<xsd:pattern value=".{12,12}"></xsd:pattern>
+          			</xsd:restriction>
+          		</xsd:simpleType>
+          	</xsd:element>
+          	<xsd:element maxOccurs="1" minOccurs="1" name="transactionRequestDateTime">
+
+          		<xsd:simpleType>
+          			<xsd:restriction base="xsd:string">
+
+          				<xsd:length value="14" />
+          				<xsd:pattern value=".{14,14}"></xsd:pattern>
+          			</xsd:restriction>
+          		</xsd:simpleType>
+          	</xsd:element>
+          	<xsd:element maxOccurs="1" minOccurs="1" name="transactionCode">
+
+          		<xsd:simpleType>
+          			<xsd:restriction base="xsd:string">
+
+          				<xsd:length value="2" />
+          				<xsd:pattern value=".{2,2}"></xsd:pattern>
+          			</xsd:restriction>
+          		</xsd:simpleType>
+          	</xsd:element>
+          	<xsd:element maxOccurs="1" minOccurs="1"
+          		name="transactionType">
+
+          		<xsd:simpleType>
+          			<xsd:restriction base="xsd:string">
+          				<xsd:pattern value=".{1,1}"></xsd:pattern>
+          			</xsd:restriction>
+          		</xsd:simpleType>
+          	</xsd:element>
+          	<xsd:element maxOccurs="1" minOccurs="1"
+          		name="creditDebitIndicator">
+
+          		<xsd:simpleType>
+          			<xsd:restriction base="xsd:string">
+          				<xsd:pattern value=".{2,2}"></xsd:pattern>
+          			</xsd:restriction>
+          		</xsd:simpleType>
+          	</xsd:element>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element ibmSchExtn:docRoot="true" name="MASHREQ_MIRROR_MESSAGEResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+          	<xsd:element name="eventId" type="xsd:string"/>
+          	<xsd:element name="responseCode" type="xsd:string"/>
+          	<xsd:element name="messageResponseDateTime" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>

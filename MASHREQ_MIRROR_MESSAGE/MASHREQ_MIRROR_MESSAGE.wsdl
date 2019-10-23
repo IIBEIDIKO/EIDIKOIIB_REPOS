@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="MASHREQ_MIRROR_MESSAGE" targetNamespace="http://www.example.org/MASHREQ_MIRROR_MESSAGE/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/MASHREQ_MIRROR_MESSAGE/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:documentation>
+    <wsdl:appinfo source="WMQI_APPINFO">
+      <MRWSDLAppInfo imported="true">
+        <generatedXSD location="MASHREQ_MIRROR_MESSAGE_InlineSchema1.xsd"/>
+        <binding hasEncoding="false" imported="true" name="MASHREQ_MIRROR_MESSAGESOAP" originalBindingStyle="document"/>
+      </MRWSDLAppInfo>
+    </wsdl:appinfo>
+  </wsdl:documentation>
+  <wsdl:types>
+    
+          <xsd:schema targetNamespace="http://www.example.org/MASHREQ_MIRROR_MESSAGE/" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions">
+<xsd:include schemaLocation="MASHREQ_MIRROR_MESSAGE_InlineSchema1.xsd"/>
+    </xsd:schema>
+    </wsdl:types>
+  <wsdl:message name="MASHREQ_MIRROR_MESSAGERequest">
+    <wsdl:part element="tns:MASHREQ_MIRROR_MESSAGE" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="MASHREQ_MIRROR_MESSAGEResponse">
+    <wsdl:part element="tns:MASHREQ_MIRROR_MESSAGEResponse" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="MASHREQ_MIRROR_MESSAGE">
+    <wsdl:operation name="MASHREQ_MIRROR_MESSAGE">
+      <wsdl:input message="tns:MASHREQ_MIRROR_MESSAGERequest"/>
+      <wsdl:output message="tns:MASHREQ_MIRROR_MESSAGEResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MASHREQ_MIRROR_MESSAGESOAP" type="tns:MASHREQ_MIRROR_MESSAGE">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="MASHREQ_MIRROR_MESSAGE">
+      <soap:operation soapAction="http://www.example.org/MASHREQ_MIRROR_MESSAGE/MASHREQ_MIRROR_MESSAGE"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MASHREQ_MIRROR_MESSAGE">
+    <wsdl:port binding="tns:MASHREQ_MIRROR_MESSAGESOAP" name="MASHREQ_MIRROR_MESSAGESOAP">
+      <soap:address location="http://localhost:7800/MASHREQ_MIRROR_MESSAGE"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

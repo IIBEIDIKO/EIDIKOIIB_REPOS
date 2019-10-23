@@ -1,0 +1,22 @@
+
+
+Importing file: C:\Users\Administrator\IBM\IIBT10\Git\MASHREQ_MIRROR_MESSAGE\MASHREQ_MIRROR_MESSAGE.wsdl
+
+The WSDL import will proceed with bindings MASHREQ_MIRROR_MESSAGESOAP.
+Creating wsdl schema document for file:///C:/Users/Administrator/IBM/IIBT10/Git/MASHREQ_MIRROR_MESSAGE/MASHREQ_MIRROR_MESSAGE.wsdl.
+Parsing wsdl binding {http://www.example.org/MASHREQ_MIRROR_MESSAGE/}MASHREQ_MIRROR_MESSAGESOAP.
+Parsing wsdl binding input MASHREQ_MIRROR_MESSAGE.
+Parsing wsdl binding output MASHREQ_MIRROR_MESSAGE.
+Processing doc style for operation MASHREQ_MIRROR_MESSAGE.
+Populating WSDL schema MASHREQ_MIRROR_MESSAGE.xsd.
+Creating file MASHREQ_MIRROR_MESSAGE.xsd in the workspace.
+Creating file MASHREQ_MIRROR_MESSAGE_InlineSchema1.xsd in the workspace.
+Copying source WSDL MASHREQ_MIRROR_MESSAGE.wsdl to MASHREQ_MIRROR_MESSAGE.wsdl.
+
+Elapsed time processing this message definition file: 0.134 seconds
+Number of warnings for this message definition file: 0
+
+
+Number of files processed: 1
+
+
