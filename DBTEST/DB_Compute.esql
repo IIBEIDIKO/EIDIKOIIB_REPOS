@@ -19,6 +19,6 @@ CREATE COMPUTE MODULE DB_Compute
 	END;
 
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
-		SET OutputRoot.JSON.Data = 'InputRoot';
+		SET OutputRoot.JSON.Data = 'InputRoot Sample';
 	END;
 END MODULE;
