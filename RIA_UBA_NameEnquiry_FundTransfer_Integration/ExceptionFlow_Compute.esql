@@ -1,0 +1,134 @@
+	DECLARE exceptionDataShared SHARED CHARACTER '';
+	DECLARE interShared SHARED CHARACTER '';
+CREATE COMPUTE MODULE ExceptionFlow_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE TIMESTAMP_FORMAT CHARACTER 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS';
+		DECLARE ccsid INTEGER 1208;
+		CALL getFlowDetails(InputRoot);
+		SET Environment.Variables.TraceFileExc.ExceptionDate = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT TIMESTAMP_FORMAT);
+		CALL originalMsg(ccsid, InputRoot);
+		SET Environment.Variables.TraceFileExc.exceptionDesc = getExceptionDesc(InputRoot, OutputRoot, InputExceptionList);
+		RETURN TRUE;
+	END;
+	CREATE PROCEDURE originalMsg (IN ccsid INTEGER, IN InputRoot REFERENCE)
+	BEGIN
+		--If error occurs capture the original message
+		DECLARE domainFldName CHARACTER FIELDNAME(InputBody);
+		IF domainFldName = 'MRM' THEN
+			SET Environment.Variables.TraceFileExc.originalMessage = InputRoot.MRM;
+		ELSEIF domainFldName = 'XMLNSC' THEN
+			SET Environment.Variables.TraceFileExc.originalMessage = CAST(ASBITSTREAM(InputRoot.XMLNSC CCSID ccsid) AS CHARACTER CCSID ccsid);
+		ELSEIF domainFldName = 'SOAP' THEN
+			SET Environment.Variables.TraceFileExc.originalMessage = CAST(ASBITSTREAM(InputRoot.SOAP CCSID ccsid) AS CHARACTER CCSID ccsid);
+		ELSEIF domainFldName = 'BLOB' THEN
+			SET Environment.Variables.TraceFileExc.originalMessage = CAST(ASBITSTREAM(InputRoot.BLOB CCSID ccsid) AS CHARACTER CCSID ccsid);
+			DECLARE inMsg BLOB CAST(InputRoot.BLOB.BLOB AS BLOB CCSID 1208);
+			CREATE LASTCHILD OF Environment DOMAIN('XMLNSC') PARSE(inMsg,546,1208);
+			--SET interShared = Environment.XMLNSC.MSG.MSGHEADER.INTERFACECODE;
+			--SET OutputRoot.XMLNSC.MSG.MSGHEADER.INTERFACECODE = Environment.XMLNSC.MSG.MSGHEADER.INTERFACECODE;
+			SET Environment.Variables.TraceFileExc.exceptionDesc = getExceptionDesc(InputRoot, OutputRoot, InputExceptionList);
+			DECLARE data CHARACTER;
+			SET data = Environment.Variables.TraceFileExc.exceptionDesc;
+			--CREATE NEXTSIBLING OF OutputRoot.XMLNSC.MSG.MSGHEADER NAME 'MSGDETAIL';
+			SET OutputRoot.MQMD.CodedCharSetId = 437; 
+			SET OutputRoot.MQMD.GroupId = CAST(InputRoot.MQRFH2.GroupId AS BLOB);-- CCSID 1208);
+			SET OutputRoot.MQMD.MsgSeqNumber =CAST(InputRoot.MQRFH2.MsgSeqNumber AS INTEGER);
+			SET OutputRoot.MQMD.MsgFlags = CAST(InputRoot.MQRFH2.MsgFlags AS INTEGER);
+			
+			SET OutputRoot.MQRFH2 = InputRoot.MQRFH2;
+		
+			--SET OutputRoot.XMLNSC.MSG.MSGHEADER.SERVICEID = Environment.XMLNSC.MSG.MSGHEADER.SERVICEID;
+			--SET OutputRoot.XMLNSC.MSG.MSGHEADER.INTERFACECODE = Environment.XMLNSC.MSG.MSGHEADER.INTERFACECODE;
+			
+			SET OutputRoot.XMLNSC.MSGDETAIL.CMSTRANSID = Environment.XMLNSC.MSG.MSGDETAIL.CMSTRANSID;--data;-- exceptionDataShared;-- Environment.XMLNSC.MSG.MSGDETAIL.CMSTRANSID;
+			SET OutputRoot.XMLNSC.MSGDETAIL.STATUSCODE = '99';
+			SET OutputRoot.XMLNSC.MSGDETAIL.ERRCODE = '200';
+			SET OutputRoot.XMLNSC.MSGDETAIL.ERRREASON = SUBSTRING(data FROM 1 FOR 250);
+			
+			IF OutputRoot.MQMD.MsgFlags ='8' THEN 
+			propagate to terminal 'out1';
+		else 
+			propagate to terminal 'out1';
+			propagate to terminal 'out2';
+		END IF;
+			
+			--Propagate to TERMINAL 'out1';
+			
+		END IF;
+	END;
+
+	CREATE PROCEDURE getFlowDetails(IN InputRoot REFERENCE)
+	BEGIN
+		--Taking messge flow details
+		--Taking message flow name , node name
+		DECLARE nodeName CHARACTER;
+		DECLARE label CHARACTER;
+		DECLARE flowName, flowNameone,flowNametwo CHARACTER;
+		DECLARE fieldPosition INTEGER;
+		DECLARE excListRef REFERENCE TO InputExceptionList.*[1];
+		SET label  =  excListRef.Label;
+		SET flowNameone  =  excListRef.Name;
+		SET fieldPosition  =  POSITION('.' IN label);
+		SET flowNametwo = SUBSTRING(flowNameone AFTER '.');
+		IF flowNametwo = '' THEN
+			SET flowName = SUBSTRING(flowNameone BEFORE '#');
+		ELSE
+			SET flowName = SUBSTRING(flowNametwo BEFORE '#');
+		END IF;
+		SET nodeName = SUBSTRING(label FROM (fieldPosition+1));
+		SET Environment.Variables.TraceFileExc.FlowName = flowName;
+		SET Environment.Variables.TraceFileExc.NodeName = nodeName;
+	END;
+END MODULE;
+
+CREATE PROCEDURE getExceptionDesc (IN InputRoot REFERENCE, IN OutputRoot REFERENCE, IN InputExceptionList REFERENCE)
+RETURNS CHAR
+BEGIN
+	--Copy the exception description
+	DECLARE continueLoop BOOLEAN;
+	DECLARE inRefName,inRefValue CHARACTER;
+	DECLARE flag INTEGER 0;
+	DECLARE inRef REFERENCE TO InputRoot;
+	DECLARE outRef REFERENCE TO OutputRoot;
+	DECLARE exceptionData CHAR;
+	SET continueLoop  =  TRUE;
+	MOVE inRef TO InputExceptionList;
+	WHILE continueLoop DO
+		IF CARDINALITY(inRef.RecoverableException[])  =  0 THEN
+			SET continueLoop  =  FALSE;
+		ELSE
+			MOVE inRef TO inRef.RecoverableException[1];
+		END IF;
+	END WHILE;
+	DECLARE messageText CHARACTER;
+	DECLARE inRef2 REFERENCE TO InputExceptionList;
+	WHILE lastmove(inRef2) DO
+		IF inRef2.Number is not null THEN
+        		SET messageText  =  inRef2.Text;
+  			END IF;
+			move inRef2 lastchild;
+	END WHILE;
+	SET messageText = messageText||'    ' || inRef2;
+	CREATE LASTCHILD OF OutputRoot AS outRef DOMAIN 'XMLNS';
+	CREATE LASTCHILD OF OutputRoot.XMLNS AS outRef NAME 'ExceptionText';
+	IF (LENGTH(inRef.[<].Text) = 0) THEN
+		SET inRefName =  FIELDNAME(inRef);
+		SET inRefValue =  FIELDVALUE(inRef.Text);
+		SET outRef.ExceptionText  =  FIELDNAME(inRef)||'  :'||'  '||FIELDVALUE(inRef.Text);
+	ELSE
+		SET inRefName =  FIELDNAME(inRef);
+		SET inRefValue =  FIELDVALUE(inRef.Text);
+		SET outRef.ExceptionText  =  FIELDNAME(inRef.[<])||'  :'||'  '||FIELDVALUE(inRef.[<].Text);
+	END IF;
+	--SET exceptionData  =  CAST(ASBITSTREAM(outRef) AS CHAR CCSID Coalesce(InputRoot.MQMD.CodedCharSetId,437));
+	--trace:Exception Description  :${SUBSTRING(Environment.Variables.TraceFileExc.exceptionDesc FROM 16 FOR LENGTH(Environment.Variables.TraceFileExc.exceptionDesc)-31)}
+	--SET exceptionData = inRefName||' '||inRefValue;
+	  
+	--IF CONTAINS(exceptionData,messageText) THEN
+--	SET exceptionData = inRefName||'    '||inRefValue||'    '||messageText;
+	--END IF;
+	SET exceptionData = messageText;
+	SET OutputRoot.XMLNS  =  NULL;
+	RETURN exceptionData;
+END;

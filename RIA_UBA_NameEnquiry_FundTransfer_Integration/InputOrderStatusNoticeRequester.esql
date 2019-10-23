@@ -1,0 +1,104 @@
+
+
+
+
+CREATE COMPUTE MODULE NE_FT_IOSN_Compute2
+	
+	
+	DECLARE soapenv NAMESPACE 'http://schemas.xmlsoap.org/soap/envelope/';
+	DECLARE ces NAMESPACE 'CES.Services.FXGlobal';
+	DECLARE ns1 NAMESPACE 'http://finaclews.org';
+	DECLARE fin NAMESPACE 'http://finaclews.org';
+
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyEntireMessage();
+		RETURN TRUE;
+	END;
+
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot.HTTPRequestHeader.SOAPAction = 'CES.Services.FXGlobal/IRiaAsSender/InputOrderStatusNotices';
+		DECLARE ORDERSTATUS CHARACTER;
+		DECLARE ACTION_CODE, RESPONSE_CODE INTEGER;
+		
+		IF STARTSWITH(Environment.Variable.BIC_SWIFT, 'UBA')THEN
+			
+			----- Intra bank Fundtransfer Response--------
+			DECLARE INTRAFTSCRes CHARACTER InputRoot.SOAP.Body.ns1:sendTransactionResponse.return;
+			CREATE LASTCHILD OF Environment Name 'IntraFundTransferRes';
+			CREATE LASTCHILD OF Environment.IntraFundTransferRes DOMAIN 'XMLNSC' PARSE(CAST(INTRAFTSCRes AS BLOB CCSID 1208) CCSID 1208);
+			DECLARE ACTION_CODE INTEGER CAST(Environment.IntraFundTransferRes.XMLNSC.C24TRANRES.ACTION_CODE AS INTEGER);
+
+		ELSE
+			-----------Inter Bank Fund Transfer Response DB Logging-------------
+			DECLARE FundTransferINTERRes CHARACTER CAST(ASBITSTREAM(InputRoot.SOAP CCSID 1208) AS CHARACTER CCSID 1208);
+			UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET FUNDTRANSFER_RES_INTER = FundTransferINTERRes WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+			
+			------ Inter Bank Fund Transfer Response-------
+			DECLARE INTERFTSCRes CHARACTER InputRoot.SOAP.Body.fin:sendTransactionResponse.return;
+			CREATE LASTCHILD OF Environment Name 'InterFundTransferRes';
+			CREATE LASTCHILD OF Environment.InterFundTransferRes DOMAIN 'XMLNSC' PARSE(CAST(INTERFTSCRes AS BLOB CCSID 1208) CCSID 1208);
+			DECLARE RESPONSE_CODE INTEGER CAST(Environment.InterFundTransferRes.XMLNSC.FTSingleCreditResponse.ResponseCode AS INTEGER);
+
+		END IF;
+		
+		---------Checking Action Code or Response Code for Order Status---------------
+		IF ACTION_CODE = 000 OR RESPONSE_CODE = 00 THEN
+			------FUND TRANSFER Status logging in Status Table------------------------
+			UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.RIA_UBA_FT_FLAG_STATUS AS B SET FUND_TRANSFER='Y' WHERE B.ORDERNO = Environment.GetOrderResponse.ORDERNO ;
+			SET ORDERSTATUS = 'PAID';
+		ELSE
+			------FUND TRANSFER Status logging in Status Table------------------------
+			UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.RIA_UBA_FT_FLAG_STATUS AS B SET FUND_TRANSFER='N' WHERE B.ORDERNO = Environment.GetOrderResponse.ORDERNO ;
+			SET ORDERSTATUS = 'REJECTED';
+		END IF;
+		 
+		------- Sending Request to InputOrderStatusNotices() ----------
+		SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:soapenv = 'http://schemas.xmlsoap.org/soap/envelope/';
+		SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:ces = 'CES.Services.FXGlobal';
+		SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Header = '';
+		SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Body.ces:InputOrderStatusNotices.ces:xmlDoc.Root.CorrespID = Environment.GetOrderResponse.CORRESPID;
+
+		DECLARE IOSRequestRef, IOSRequestRef1, IOSRequestRef2 REFERENCE TO OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Body.ces:InputOrderStatusNotices.ces:xmlDoc.Root;
+		SET IOSRequestRef.LayoutVersion = '2.0';
+		SET IOSRequestRef.Header.CallID = Environment.GetOrderResponse.CALLID;
+		SET IOSRequestRef.Header.CallDateTimeLocal = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yyyymmdd');
+		SET IOSRequestRef.Header.CorrespLocNo = Environment.GetOrderResponse.CORRESPLOCNO;
+		SET IOSRequestRef.Header.CorrespLocNo_Ria = Environment.GetOrderResponse.CORRESPLOC_RIA;
+		SET IOSRequestRef.Header.CorrespLocName = Environment.GetOrderResponse.CORRESPLOCNAME;
+		SET IOSRequestRef.Header.CorrespLocCountry = Environment.GetOrderResponse.CORRESPLOCCOUNTRY;
+		SET IOSRequestRef.Header.UserID = Environment.GetOrderResponse.USERID;
+		SET IOSRequestRef.Header.TerminalID = Environment.GetOrderResponse.TERMINALID;
+		SET IOSRequestRef.Header.LanguageCultureCode = Environment.GetOrderResponse.LANGUAGECULTURECODE;
+
+		CREATE LASTCHILD OF IOSRequestRef AS IOSRequestRef1 Name 'OrderStatusNotices';
+		CREATE LASTCHILD OF IOSRequestRef1 AS IOSRequestRef2 Name 'OrderStatusNotice';
+
+		SET IOSRequestRef2.PCOrderNo = Environment.GetOrderResponse.ORDERNO;
+		SET IOSRequestRef2.SCOrderNo = Environment.GetOrderResponse.ORDERNO;
+		SET IOSRequestRef2.OrderStatus = ORDERSTATUS;
+		SET IOSRequestRef2.StatusDate = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yyyymmdd');
+		SET IOSRequestRef2.StatusTime = CAST(CURRENT_TIME AS CHARACTER);
+		SET IOSRequestRef2.Reason = '';
+		SET IOSRequestRef2.BeneIDType = '';
+		SET IOSRequestRef2.BeneIDNo = '';
+		SET IOSRequestRef2.BeneIDIssuedByCountry = '';
+		SET IOSRequestRef2.BeneIDIssuedByState = '';
+		SET IOSRequestRef2.BeneIDExpirationDate = '';
+		SET IOSRequestRef2.PaidByCorrespID = '';
+		SET IOSRequestRef2.CorrespLocID = '';
+		SET IOSRequestRef2.CorrespLocName = '';
+		SET IOSRequestRef2.CorrespLocAddress = '';
+		SET IOSRequestRef2.CorrespLocCity = '';
+		SET IOSRequestRef2.CorrespLocState = '';
+		SET IOSRequestRef2.CorrespLocPostalCode = '';
+		SET IOSRequestRef2.CorrespLocCountry = '';		
+		
+		-----------Input Order Status Notice Request DB Logging-------------
+		DECLARE InputOrderStatusReq CHARACTER CAST(ASBITSTREAM(OutputRoot.XMLNSC CCSID 1208) AS CHARACTER CCSID 1208);
+		UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET IOSN_REQ = InputOrderStatusReq WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+
+	END;
+	
+END MODULE;

@@ -1,0 +1,179 @@
+
+
+
+
+CREATE COMPUTE MODULE NE_FT_IOSN_Compute3	
+
+
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyEntireMessage();
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		-----------Input Order Status Notices Response DB Logging-------------
+		DECLARE InputOrderStatusRes CHARACTER CAST(ASBITSTREAM(InputRoot.SOAP CCSID 1208) AS CHARACTER CCSID 1208);
+		UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET IOSN_RES = InputOrderStatusRes WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+		-------Framing Final JSON Data Response for Channel-------------
+		DECLARE InRef REFERENCE TO InputRoot.XMLNSC.*:InputOrderStatusNoticesResponse.*:InputOrderStatusNoticesResult.Root.Acknowledgements.OrderStatusNoticeAcknowledgement;
+		IF InRef <> NULL THEN
+			UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.RIA_UBA_FT_FLAG_STATUS AS B SET RIA_INPUT_STATUS='Y' WHERE B.ORDERNO = Environment.GetOrderResponse.ORDERNO ;
+		ELSE 
+			UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.RIA_UBA_FT_FLAG_STATUS AS B SET RIA_INPUT_STATUS='N' WHERE B.ORDERNO = Environment.GetOrderResponse.ORDERNO ;
+		END IF;	
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.OrderStatusNoticeAcknowledgement.OrderID = InRef.SCOrderNo;
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.OrderStatusNoticeAcknowledgement.ProcessDate = InRef.ProcessDate;
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.OrderStatusNoticeAcknowledgement.ProcessTime = InRef.ProcessTime;
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.OrderStatusNoticeAcknowledgement.NotificationCode = InRef.NotificationCode;
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.OrderStatusNoticeAcknowledgement.NotificationDesc = InRef.NotificationDesc;
+		--------ESB Response-----------------------------------------------------
+		CALL ESBResponse();
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.ESBStatusAck.ErrorCode = COALESCE(Environment.ESBStatusACK.CODE,'000');
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.ESBStatusAck.ErrorDescription = COALESCE(Environment.ESBStatusACK.ErrorDescription,'Success');
+		SET OutputRoot.JSON.Data.InputOrderStatusNoticesResponse.ESBStatusAck.Trace = Environment.ESBStatusACK.Trace;
+		-----------Input Order Status Notices Response DB Logging-------------
+		DECLARE ChannelRes CHARACTER CAST(ASBITSTREAM(OutputRoot.JSON.Data CCSID 1208) AS CHARACTER CCSID 1208);
+		UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET IOSN_RES_2_CHANNEL = ChannelRes WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+
+	END;
+	
+	CREATE PROCEDURE ESBResponse( )
+	BEGIN
+		-------Handling Application Based Exceptions-------------------------
+		If Environment.InterFundTransferRes.XMLNSC.FTSingleCreditResponse.ResponseCode <> '00' OR Environment.InterNameEnquiryRes.XMLNSC.NESingleResponse.ResponseCode <> '00' THEN
+			DECLARE ResponseCode CHARACTER;
+			IF Environment.InterFundTransferRes.XMLNSC.FTSingleCreditResponse.ResponseCode <> '00' THEN
+				SET ResponseCode=Environment.InterFundTransferRes.XMLNSC.FTSingleCreditResponse.ResponseCode;
+				SET Environment.ESBStatusACK.CODE='002';
+				SET Environment.ESBStatusACK.ErrorDescription='Fund Transfer Failure';
+			ELSE
+				SET ResponseCode=Environment.InterNameEnquiryRes.XMLNSC.NESingleResponse.ResponseCode;
+				SET Environment.ESBStatusACK.CODE='001';
+			 	SET Environment.ESBStatusACK.ErrorDescription='Name Enquiry Failure';
+			END IF;
+			
+			CASE ResponseCode
+
+			WHEN '03' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Sender';
+			WHEN '05' THEN
+				SET Environment.ESBStatusACK.Trace= 'Do not honor';
+			WHEN '06' THEN
+				SET Environment.ESBStatusACK.Trace='Dormant Account';
+			WHEN '07' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Account';
+			WHEN '08' THEN
+				SET Environment.ESBStatusACK.Trace='Account Name Mismatch';
+			WHEN '09' THEN
+				SET Environment.ESBStatusACK.Trace='Request processing in progress';
+			WHEN '12' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Transaction';
+			WHEN '13' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Amount';
+			WHEN '14' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Batch Number';
+			WHEN '15' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Session or Record ID';
+			WHEN '16' THEN
+				SET Environment.ESBStatusACK.Trace='Unknown Bank Code';
+			WHEN '17' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Channel';
+			WHEN '18' THEN
+				SET Environment.ESBStatusACK.Trace='Wrong Method Call';
+			WHEN '21' THEN
+				SET Environment.ESBStatusACK.Trace='No Action Taken';
+			WHEN '25' THEN
+				SET Environment.ESBStatusACK.Trace='Unable to locate record';
+			ELSE
+				SET Environment.ESBStatusACK.Trace='Unknown Error from NIBBS';
+			END CASE;
+		
+		-------Handling Application Based Exceptions-------------------------
+		ELSEIF Environment.IntraFundTransferRes.XMLNSC.C24TRANRES.ACTION_CODE <> '000' OR Environment.IntraNameEnquiryRes.XMLNSC.C24TRANRES.ACTION_CODE<>'000' THEN
+			DECLARE ActionCode CHARACTER;
+			IF Environment.IntraFundTransferRes.XMLNSC.C24TRANRES.ACTION_CODE <> '000' THEN
+				SET ActionCode=Environment.IntraFundTransferRes.XMLNSC.C24TRANRES.ACTION_CODE;
+				SET Environment.ESBStatusACK.CODE='002';
+				SET Environment.ESBStatusACK.ErrorDescription='Fund Transfer Failure';
+			ELSE
+				SET ActionCode=Environment.IntraNameEnquiryRes.XMLNSC.C24TRANRES.ACTION_CODE;
+				SET Environment.ESBStatusACK.CODE='001';
+				SET Environment.ESBStatusACK.ErrorDescription='Name Enquiry Failure';
+			END IF;
+			
+			
+			CASE ActionCode
+
+			WHEN '913' THEN
+				SET Environment.ESBStatusACK.Trace='Duplicate transmission';
+			WHEN '184' THEN
+				SET Environment.ESBStatusACK.Trace= 'Requested Block operation failed since Account is closed/frozen. .';
+			WHEN '911' THEN
+				SET Environment.ESBStatusACK.Trace='Card issuer timed out';
+			WHEN '909' THEN
+				SET Environment.ESBStatusACK.Trace='System malfunction';
+			WHEN '907' THEN
+				SET Environment.ESBStatusACK.Trace='Card issuer inoperative';
+			WHEN '906' THEN
+				SET Environment.ESBStatusACK.Trace='Cut-over in progress ';
+			WHEN '904' THEN
+				SET Environment.ESBStatusACK.Trace='Format Error ';
+			WHEN '902' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid transaction.';
+			WHEN '800' THEN
+				SET Environment.ESBStatusACK.Trace='Network message was accepted';
+			WHEN '190' THEN
+				SET Environment.ESBStatusACK.Trace='DD Already Paid';
+			WHEN '189' THEN
+				SET Environment.ESBStatusACK.Trace='Cheque Book Already Issued';
+			WHEN '188' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Rate Currency Combination';
+			WHEN '187' THEN
+				SET Environment.ESBStatusACK.Trace='Cheque Stopped';
+			WHEN '186' THEN
+				SET Environment.ESBStatusACK.Trace='Block does not exist';
+			WHEN '185' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Currency/Transaction Amount';
+			WHEN '183' THEN
+				SET Environment.ESBStatusACK.Trace='Cheque not issued to this account';
+			WHEN '182' THEN
+				SET Environment.ESBStatusACK.Trace= 'Not all cheques could be stopped';
+			WHEN '181' THEN
+				SET Environment.ESBStatusACK.Trace='Cheques are in different books';
+			WHEN '180' THEN
+				SET Environment.ESBStatusACK.Trace='Transfer Limit Exceeded';
+			WHEN '163' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid Cheque Status';
+			WHEN '121' THEN
+				SET Environment.ESBStatusACK.Trace='Withdrawal amount limit exceeded.';
+			WHEN '119' THEN
+				SET Environment.ESBStatusACK.Trace='Transaction not permitted to card holder';
+			WHEN '116' THEN
+				SET Environment.ESBStatusACK.Trace='Insufficient funds';
+			WHEN '115' THEN
+				SET Environment.ESBStatusACK.Trace='Requested function not supported (First two digits of processing code or Function code is invalid)';
+			WHEN '114' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid account number ';
+			WHEN '111' THEN
+				SET Environment.ESBStatusACK.Trace='Invalid scheme type';
+			ELSE
+				SET Environment.ESBStatusACK.Trace='Unknown Error from CBS';
+			END CASE;
+			
+		-------Handling HTTP Based Time Out Exceptions-------------------------
+		ELSEIF EXISTS(InputRoot.SOAP.*:Body.*:Fault.[]) THEN
+			SET Environment.ESBStatusACK.CODE = '901';
+				SET Environment.ESBStatusACK.ErrorDescription = 'Host Timout';
+				SET Environment.ESBStatusACK.Trace = InputRoot.SOAP.*:Body.*:Fault.*:faultstring || ' ' ||TRIM('/' FROM InputRoot.SOAP.*:Body.*:Fault.*:faultactor ) ;
+		
+		-------Handling HTTP Based Exceptions-------------------------
+		ELSEIF EXISTS(Environment.Variables.TraceFileExc.[]) THEN
+			
+				SET Environment.ESBStatusACK.CODE = '999';
+				SET Environment.ESBStatusACK.ErrorDescription = 'ESB Internal Error';
+				SET Environment.ESBStatusACK.Trace = Environment.Variables.TraceFileExc.exceptionDesc;
+			
+		END IF;
+	END;
+END MODULE;

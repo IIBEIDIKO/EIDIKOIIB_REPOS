@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmFlowOrder.msgnode="ComIbmFlowOrder.msgnode" xmlns:ComIbmSOAPExtract.msgnode="ComIbmSOAPExtract.msgnode" xmlns:ComIbmSOAPRequest.msgnode="ComIbmSOAPRequest.msgnode" xmlns:ComIbmTrace.msgnode="ComIbmTrace.msgnode" xmlns:ComIbmTryCatch.msgnode="ComIbmTryCatch.msgnode" xmlns:ComIbmWSInput.msgnode="ComIbmWSInput.msgnode" xmlns:ComIbmWSReply.msgnode="ComIbmWSReply.msgnode"
+    xmlns:ExceptionFlow.subflow="ExceptionFlow.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="NameEnquiry_FundTransfer_StatusNotice.msgflow" nsPrefix="NameEnquiry_FundTransfer_StatusNotice.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.PROC_CODE" name="PROC_CODE" defaultValueLiteral="82">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.UDP_DBSOURCE" name="UDP_DBSOURCE" defaultValueLiteral="SOFT_DEV">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.UDP_DBSCHEMA" name="UDP_DBSCHEMA" defaultValueLiteral="ESBUSER">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.UDP_DBReqResTab" name="UDP_DBReqResTab" defaultValueLiteral="RIA_INTEGRATION_REQ_RES">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="NameEnquiry_FundTransfer_StatusNotice" bundleName="NameEnquiry_FundTransfer_StatusNotice" pluginId="RIA_UBA_NameEnquiry_FundTransfer_Integration"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/RIA_UBA_NameEnquiry_FundTransfer_Integration/icons/full/obj16/NameEnquiry_FundTransfer_StatusNotice.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/RIA_UBA_NameEnquiry_FundTransfer_Integration/icons/full/obj30/NameEnquiry_FundTransfer_StatusNotice.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmWSInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="11,220" URLSpecifier="/RiaFundTransfer" messageDomainProperty="JSON">
+        <translation xmi:type="utility:ConstantString" string="NEFTRequestHandler"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSReply.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="1524,85">
+        <translation xmi:type="utility:ConstantString" string="IOSNResForChannel"/>
+      </nodes>
+      <nodes xmi:type="ComIbmSOAPRequest.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="346,170" wsdlOperationMode="gateway" useHTTPTransport="true" webServiceURL="http://172.20.236.2:7808/cba/wbs" requestTimeout="10" sslProtocol="TLS" parserXmlnscBuildTreeUsingXMLSchema="false" validateMaster="none">
+        <translation xmi:type="utility:ConstantString" string="NEFTNameEnquiryRequestor"/>
+      </nodes>
+      <nodes xmi:type="ComIbmSOAPRequest.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="872,187" wsdlOperationMode="gateway" useHTTPTransport="true" webServiceURL="http://172.20.236.2:7808/cba/wbs" sslProtocol="TLS" parserXmlnscBuildTreeUsingXMLSchema="false" validateMaster="none">
+        <translation xmi:type="utility:ConstantString" string="NEFTFundTransferNIBBSRequestor"/>
+      </nodes>
+      <nodes xmi:type="ComIbmSOAPRequest.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="1181,202" wsdlOperationMode="gateway" useHTTPTransport="true" webServiceURL="http://stagingfxglobalwebsvcnocert.riaenvia.net:9771/FXGlobalSending.svc/Binding_Basic_NoCert" sslProtocol="TLS" parserXmlnscBuildTreeUsingXMLSchema="false" validateMaster="none">
+        <translation xmi:type="utility:ConstantString" string="IOSNRIARequestor"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="297,254" dataSource="SOFT_DEV" transaction="commit" computeExpression="esql://routine/#NE_FT_IOSN_Compute.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="NEFTNameEnquiryReq"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="517,158" dataSource="SOFT_DEV" transaction="commit" computeExpression="esql://routine/#NE_FT_IOSN_Compute1.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="CBSFundTransferRequester"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="1092,312" dataSource="SOFT_DEV" transaction="commit" computeExpression="esql://routine/#NE_FT_IOSN_Compute2.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="IOSNRiaReq"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="1348,183" dataSource="SOFT_DEV" transaction="commit" computeExpression="esql://routine/#NE_FT_IOSN_Compute3.Main">
+        <translation xmi:type="utility:ConstantString" string="IOSNRIARespHandler"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="164,360" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Request message from Channel==========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: NEFTChannelInputTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="NEFTChannelInputTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="294,387" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Name Enquiry Request message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: NEFTNameEnquiryReqTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="NEFTNameEnquiryReqTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_13" location="419,336" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Name Enquiry Response Message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: NEFTNameEnquiryRespTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="NEFTNameEnquiryRespTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_14" location="829,326" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Inter Bank Fund Transfer Request Message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: NEFTInterFundTransferReqTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="NEFTInterFundTransferReqTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_15" location="1015,226" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Inter Bank Fund Transfer Response Message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: NEFTFundTransferResTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="NEFTFundTransferResTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_16" location="1145,370" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Input Order Status Notices() Request Message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: IOSNReqMapperForIOSNTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="IOSNReqMapperForIOSNTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_17" location="1299,291" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Input Order Status Notices() Response Message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: IOSNRIAReqTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="IOSNRIAReqTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTryCatch.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_18" location="140,213">
+        <translation xmi:type="utility:ConstantString" string="NEFTTryCatch"/>
+      </nodes>
+      <nodes xmi:type="ComIbmFlowOrder.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_19" location="591,23">
+        <translation xmi:type="utility:ConstantString" string="NSFTIOSNFlowOrder"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_20" location="1421,312" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Input Order Status Notices() Response Message to Channel=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: IOSNResForChannelTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="IOSNResForChannelTrace"/>
+      </nodes>
+      <nodes xmi:type="ExceptionFlow.subflow:FCMComposite_1" xmi:id="FCMComposite_1_21" location="821,30">
+        <translation xmi:type="utility:ConstantString" string="ExceptionFlow"/>
+      </nodes>
+      <nodes xmi:type="ComIbmSOAPRequest.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="628,185" wsdlOperationMode="gateway" useHTTPTransport="true" webServiceURL="http://172.20.236.2:7808/cba/wbs" sslProtocol="TLS" parserXmlnscBuildTreeUsingXMLSchema="false" validateMaster="none">
+        <translation xmi:type="utility:ConstantString" string="NEFTFundTransferCBSRequestor"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_22" location="764,207" dataSource="SOFT_DEV" transaction="commit" computeExpression="esql://routine/#FundTransferNIBBSRequester.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="NIBBSFundTransferRequester"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_23" location="689,372" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Intra Bank Fund Transfer Response Message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: NEFTIntraFundTransferResTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="NEFTIntraFundTransferResTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_24" location="577,314" destination="file" filePath="/var/UBA/LOG/RIAUBAIntegrationSuccess.log" pattern="==========Intra Bank Fund Transfer Request Message=========&#xD;&#xA;[${CURRENT_TIMESTAMP}] : &#xD;&#xA;Trace Node Name :: NEFTNameEnquiryRespTrace&#xD;&#xA;--------------------------------------------&#xD;&#xA;Message :: ${CAST(ASBITSTREAM(Root.XMLNSC) AS CHARACTER CCSID 1208)}&#xD;&#xA;*****************************************************************************************************************************************************************************&#xD;&#xA;${CAST(CAST('X''0D0A''' AS BLOB) AS CHAR CCSID 819)}">
+        <translation xmi:type="utility:ConstantString" string="NEFTIntraFundTransferReqTrace"/>
+      </nodes>
+      <nodes xmi:type="ComIbmSOAPExtract.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_27" location="1241,250">
+        <translation xmi:type="utility:ConstantString" string="SOAP Extract"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_17" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_14" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_13" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_12" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_13" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_18" sourceTerminalName="OutTerminal.try" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_16" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_20" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_17" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_18" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_18" targetNode="FCMComposite_1_18" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_19" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in">
+        <bendPoints>149,-189,-430,8</bendPoints>
+      </connections>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_20" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.timeout" targetTerminalName="InTerminal.in">
+        <bendPoints>168,-170,-411,27</bendPoints>
+      </connections>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_21" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in">
+        <bendPoints>192,-153,-387,44</bendPoints>
+      </connections>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_22" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_23" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.fault" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_24" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_25" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.fault" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_26" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_27" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.fault" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_28" targetNode="FCMComposite_1_21" sourceNode="FCMComposite_1_19" sourceTerminalName="OutTerminal.first" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_29" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_19" sourceTerminalName="OutTerminal.second" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_30" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.in">
+        <bendPoints>192,183,-833,292</bendPoints>
+        <bendPoints>588,188,-437,297</bendPoints>
+        <bendPoints>976,163,-49,272</bendPoints>
+      </connections>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_31" targetNode="FCMComposite_1_23" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_32" targetNode="FCMComposite_1_22" sourceNode="FCMComposite_1_23" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_36" targetNode="FCMComposite_1_24" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_37" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_24" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_39" targetNode="FCMComposite_1_14" sourceNode="FCMComposite_1_22" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_47" targetNode="FCMComposite_1_16" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_48" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_16" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_49" targetNode="FCMComposite_1_15" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_50" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_15" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.fault" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_22" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in">
+        <bendPoints>21,171,-261,66</bendPoints>
+        <bendPoints>229,168,-53,63</bendPoints>
+      </connections>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_15" targetNode="FCMComposite_1_20" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_33" targetNode="FCMComposite_1_27" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_34" targetNode="FCMComposite_1_17" sourceNode="FCMComposite_1_27" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.PROC_CODE">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.PROC_CODE" bundleName="NameEnquiry_FundTransfer_StatusNotice" pluginId="RIA_UBA_NameEnquiry_FundTransfer_Integration"/>
+        <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.UDP_DBSOURCE">
+          <propertyName xmi:type="utility:TranslatableString" key="Property.UDP_DBSOURCE" bundleName="NameEnquiry_FundTransfer_StatusNotice" pluginId="RIA_UBA_NameEnquiry_FundTransfer_Integration"/>
+          <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.UDP_DBSCHEMA">
+            <propertyName xmi:type="utility:TranslatableString" key="Property.UDP_DBSCHEMA" bundleName="NameEnquiry_FundTransfer_StatusNotice" pluginId="RIA_UBA_NameEnquiry_FundTransfer_Integration"/>
+            <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.UDP_DBReqResTab">
+              <propertyName xmi:type="utility:TranslatableString" key="Property.UDP_DBReqResTab" bundleName="NameEnquiry_FundTransfer_StatusNotice" pluginId="RIA_UBA_NameEnquiry_FundTransfer_Integration"/>
+            </propertyDescriptor>
+          </propertyDescriptor>
+        </propertyDescriptor>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

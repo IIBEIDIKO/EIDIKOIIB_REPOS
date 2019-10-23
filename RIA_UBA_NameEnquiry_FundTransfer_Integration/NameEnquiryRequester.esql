@@ -1,0 +1,108 @@
+
+
+
+
+DECLARE PROC_CODE EXTERNAL CHARACTER '';
+DECLARE UDP_DBSOURCE EXTERNAL CHARACTER '' ;
+DECLARE UDP_DBSCHEMA EXTERNAL CHARACTER '';
+DECLARE UDP_DBReqResTab EXTERNAL CHARACTER '';
+
+CREATE COMPUTE MODULE NE_FT_IOSN_Compute
+
+	DECLARE soapenv NAMESPACE 'http://schemas.xmlsoap.org/soap/envelope/' ;
+	DECLARE fin NAMESPACE 'http://finaclews.org';
+
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		-------DB Logging for Channel Request------------------------
+		DECLARE ChannelREQ CHARACTER CAST(ASBITSTREAM(InputRoot.JSON.Data CCSID 1208) AS CHARACTER CCSID 1208);
+		UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET CHANNELREQ_FOR_NAMEENQUIRY = ChannelREQ WHERE A.ORDERNO = InputRoot.JSON.Data.OrderID;
+	
+		----------------- Request For Name Enquiry of Intra Bank --------------------------------
+		SET Environment.GetOrderResponse[] = PASSTHRU('SELECT * FROM RIA_GET_ODR_FOR_DOWNLOAD WHERE ORDERNO = ?' to Database.{UDP_DBSOURCE} VALUES(InputRoot.JSON.Data.OrderID));
+
+		IF EXISTS(Environment.GetOrderResponse[]) THEN
+
+			SET Environment.Variables.ServiceID = 'RIAtoUBA';
+			SET Environment.Variables.CountryCode = 'NGA';
+			SET Environment.Variables.UserID = 'RIA';
+			SET Environment.Variables.CLIENTID_INTRA = 'intra';
+			SET Environment.Variables.CLIENTID_INTER = 'inter';
+			SET Environment.Variable.BIC_SWIFT = Environment.GetOrderResponse.BIC_SWIFT;
+
+			DECLARE QUERY ROW;
+			SET QUERY = 'SELECT * FROM ESBUSER.AFFILIATE_COUNTRIES where COUNTRY_ALPHA_CODE_1 =?';
+			SET Environment.COUNTRY_DETAILS.data[] = PASSTHRU(QUERY TO Database.{UDP_DBSOURCE} VALUES ('NG'));									
+
+
+			IF STARTSWITH(Environment.Variable.BIC_SWIFT, 'UBA') THEN
+				--------Framing XMLNSC Structure for Intra Bank Name Enquiry-----------------
+				CREATE LASTCHILD OF Environment Name 'IntraNameEnquiry';
+				CREATE LASTCHILD OF Environment.IntraNameEnquiry DOMAIN ('XMLNSC');
+				SET Environment.IntraNameEnquiry.XMLNSC.C24TRANREQ.PROCESSING_CODE = PROC_CODE;
+				SET Environment.IntraNameEnquiry.XMLNSC.C24TRANREQ.DR_ACCT_NUM = Environment.GetOrderResponse.BANKACCOUNTNO;
+				SET Environment.IntraNameEnquiry.XMLNSC.C24TRANREQ.TRAN_CRNCY_CODE = Environment.COUNTRY_DETAILS.data.BASE_CRNCY;
+				SET Environment.IntraNameEnquiry.XMLNSC.C24TRANREQ.COUNTRY_CODE = Environment.Variables.CountryCode ;
+
+				DECLARE NameEnquiryBlob BLOB ASBITSTREAM(Environment.IntraNameEnquiry.XMLNSC, 546, 1208);
+				DECLARE NameEnquiryRequest CHAR CAST(NameEnquiryBlob AS CHAR CCSID 1208 ENCODING 546);				
+				------ Framing the URL to Name Enquiry of Intra Bank ------------
+				SET OutputLocalEnvironment.Destination.SOAP.Request.Transport.HTTP.WebServiceURL = 'http://172.20.236.2:7808/cba/wbs';
+				----- creating soap structure in CDATA format Request ----------
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:soapenv = 'http://schemas.xmlsoap.org/soap/envelope/';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:fin = 'http://finaclews.org';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Header = '';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Body.fin:sendTransaction.(XMLNSC.CDataField)arg0 = NameEnquiryRequest;
+				-----------Intra Bank Name Enquiry Request DB Logging-------------
+				DECLARE NameEnquiryINTRAReq CHARACTER CAST(ASBITSTREAM(OutputRoot.XMLNSC CCSID 1208) AS CHARACTER CCSID 1208);
+				UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET NAMEENQUIRY_REQ = NameEnquiryINTRAReq WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;				
+
+
+			ELSE
+				------------------ Request For Name Enquiry for Inter Bank --------------------------------
+				DECLARE Random DECIMAL (RAND()* POWER(10,20));
+				DECLARE RandomCharacter CHAracter SUBSTRING(CAST(Random AS CHARACTER) FROM 1 FOR 13);
+				-----Sender Bank Code-----
+				DECLARE SenderBankDetails ROW;
+				SET SenderBankDetails.Result[] = PASSTHRU('SELECT NEWINSTITUTIONCODE FROM NIP_INST_MAP  WHERE OLDINSTITUTIONCODE = ? AND DEL_FLG = ?' TO Database.{UDP_DBSOURCE} VALUES('033','N'));
+				SET Environment.SenderBankCode = SenderBankDetails.Result.NEWINSTITUTIONCODE;
+				
+				------ Destination Bank Code -------
+				DECLARE ReceiverBankDetails ROW ;
+				SET ReceiverBankDetails.Result[] = PASSTHRU('SELECT BIC FROM BANK_CODE_BIC_MAPPING WHERE SWIFT_CODE=?' TO Database.{UDP_DBSOURCE} VALUES(Environment.GetOrderResponse.BIC_SWIFT));
+				SET Environment.ReceiverBankCode = ReceiverBankDetails.Result.BANK_CODE;
+				----- Overridding URL for Inter Bank NameEnquiry---------
+				SET OutputLocalEnvironment.Destination.SOAP.Request.Transport.HTTP.WebServiceURL = 'http://172.20.236.2:7830/nip9/outflw_v3';
+				-------Framing XMLNSC Structure for Inter Bank Name Enquiry----------------
+				CREATE LASTCHILD OF Environment NAME 'InterNameEnquiryReq';
+				CREATE LASTCHILD OF Environment.NameEnquiry DOMAIN('XMLNSC');
+				SET Environment.InterNameEnquiryReq.XMLNSC.NESingleRequest.SessionID = Environment.SenderBankCode||Environment.ReceiverBankCode||CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yymmddHHmmss')||RandomCharacter;
+				SET Environment.InterNameEnquiryReq.XMLNSC.NESingleRequest.DestinationInstitutionCode = Environment.ReceiverBankCode;
+				SET Environment.InterNameEnquiryReq.XMLNSC.NESingleRequest.ChannelCode = '07';
+				SET Environment.InterNameEnquiryReq.XMLNSC.NESingleRequest.AccountNumber = Environment.GetOrderResponse.BANKACCOUNTNO;			
+
+
+				DECLARE NameEnquiryBlob BLOB ASBITSTREAM(Environment.InterNameEnquiry.XMLNSC,546,1208);
+				DECLARE InterNameEnquiryRequest CHAR CAST(NameEnquiryBlob AS CHAR CCSID 1208 ENCODING 546);
+				---------Defining and framing SOAP Namespaces, Header and Body for Inter Bank Name Enquiry ----------------------
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:soapenv = 'http://schemas.xmlsoap.org/soap/envelope/';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:fin = 'http://finaclews.org';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Header = '';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Body.fin:sendTransaction.(XMLNSC.CDataField)arg0 = InterNameEnquiryRequest;
+				-----------Inter Bank Name Enquiry Request DB Logging-------------
+				DECLARE NameEnquiryINTERReq CHARACTER CAST(ASBITSTREAM(OutputRoot.XMLNSC CCSID 1208) AS CHARACTER CCSID 1208);
+				UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET NAMEENQUIRY_REQ = NameEnquiryINTERReq WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+
+			END IF;
+
+		ELSE
+			-------If OrderID is invalid, it will give response to Channel-------------
+			SET OutputRoot.JSON.Data.GetOrderForDownloadResponse.Message = 'Invalid Order ID Provided';
+			PROPAGATE TO TERMINAL 'out1';
+			RETURN FALSE;
+
+		END IF;
+		RETURN TRUE;
+	END;
+END MODULE;

@@ -1,0 +1,291 @@
+
+
+
+
+CREATE COMPUTE MODULE NE_FT_IOSN_Compute1	
+	
+
+
+	DECLARE soapenv NAMESPACE 'http://schemas.xmlsoap.org/soap/envelope/' ;
+	DECLARE ns1 NAMESPACE 'http://finaclews.org';
+	DECLARE fin NAMESPACE 'http://finaclews.org';
+
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+
+		IF STARTSWITH(Environment.Variable.BIC_SWIFT, 'UBA') THEN
+			-----------Intra Bank Name Enquiry Response DB Logging-------------
+			DECLARE NameEnquiryINTRARes CHARACTER CAST(ASBITSTREAM(InputRoot.SOAP CCSID 1208) AS CHARACTER CCSID 1208);
+			UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET NAMEENQUIRY_RES = NameEnquiryINTRARes WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+			----- Intra Bank Name Enquiry Response--------
+			DECLARE NEResCDataChar CHARACTER InputRoot.SOAP.Body.ns1:sendTransactionResponse.return;
+			CREATE LASTCHILD OF Environment Name 'IntraNameEnquiryRes';
+			CREATE LASTCHILD OF Environment.IntraNameEnquiryRes DOMAIN 'XMLNSC' PARSE(CAST(NEResCDataChar AS BLOB CCSID 1208) CCSID 1208);
+			DECLARE ACTION_CODE INTEGER CAST(Environment.IntraNameEnquiryRes.XMLNSC.C24TRANRES.ACTION_CODE AS INTEGER);
+
+
+			IF ACTION_CODE = 000 THEN
+				------Name Enquiry Status logging in Status Table------------------------
+				INSERT INTO Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.RIA_UBA_FT_FLAG_STATUS(ORDERNO, NAME_ENQUIRY) VALUES (Environment.GetOrderResponse.ORDERNO,'Y');
+
+				DECLARE DBREF ROW;
+				-----------Fetching Credit and Debit Account Number from CONTRA_ACC_CONFIG Table------------------
+				SET DBREF.DATA[] = SELECT B.CR_ACCT_NUM, B.DR_ACCT_NUM FROM Database.{UDP_DBSOURCE}.esbuser.CONTRA_ACC_CONFIG AS B WHERE B.SERVICE_ID = Environment.variables.ServiceID AND B.APPLCODE = Environment.variables.UserID AND B.COUNTRY_CODE = Environment.variables.CountryCode;
+				DECLARE creditAccountNum CHARACTER CAST(DBREF.CR_ACCT_NUM AS CHARACTER CCSID 1208);
+				DECLARE debitAccountNum CHARACTER CAST(DBREF.DR_ACCT_NUM AS CHARACTER CCSID 1208);
+				
+				-----------------Fetching Fee Details from FEES_CONFIG Table-----------------------------
+				 DECLARE QUERY CHARACTER;
+				 DECLARE DETAILS ROW;
+				 SET QUERY = 'SELECT * FROM ESBUSER.FEES_CONFIG WHERE SERVICE_ID =? AND COUNTRY_CODE=? AND CLIENT_ID = ?';
+				 SET DETAILS.VALUE[] = PASSTHRU(QUERY TO Database.{UDP_DBSOURCE} VALUES (Environment.Variables.ServiceID, Environment.Variables.CountryCode, Environment.Variables.CLIENTID_INTRA));
+				
+				 DECLARE feeRef REFERENCE TO DETAILS.VALUE[>];
+				 DECLARE i int 1;
+				 DECLARE FeeCrAccountNum,feeAmtChar,feeCrncy,FeeDrAccountNum,finalFeeString CHARACTER;
+				 DECLARE feeString CHARACTER '';
+				 DECLARE decimalPoint INTEGER 1;
+				 WHILE (lastmove(feeRef)) DO
+				 IF feeRef.CR_ACC_DERIVATN_FLG = 'Y' THEN
+				 SET FeeCrAccountNum = CAST(feeRef.CR_ACC_PREFIX AS CHARACTER)|| CAST(feeRef.CR_ACC_SUFFIX AS CHARACTER);
+				 ELSE
+				 SET FeeCrAccountNum = feeRef.CR_ACCT_NUM;
+				 END IF;
+				
+				 IF feeRef.DR_ACC_DERIVATN_FLG = 'Y' THEN
+				 SET FeeDrAccountNum = CAST(feeRef.DR_ACC_PREFIX AS CHARACTER)|| CAST(feeRef.DR_ACC_SUFFIX AS CHARACTER);
+				 ELSE
+				 SET FeeDrAccountNum = feeRef.DR_ACCT_NUM;
+				 END IF;
+				 SET feeCrncy = feeRef.FEE_CRNCY;
+				 SET feeAmtChar = feeRef.FEE_AMT;
+				 DECLARE feeAmount DECIMAL;
+				 SET feeAmount = TRUNCATE(CAST(feeAmtChar AS DECIMAL),decimalPoint);
+				 IF feeRef.FIX_AMT = 'N' THEN
+				 SET feeAmtChar = REPLACE(CAST(feeAmount as CHARACTER),'.','');
+				 SET feeAmount = CAST(Environment.Variables.CBSTranAmount AS INTEGER)*CAST(feeAmtChar AS INTEGER)/100;
+				 SET feeAmtChar = CAST(feeAmount as CHARACTER);
+				 IF CONTAINS(feeAmtChar,'.') THEN
+				 SET feeAmtChar = SUBSTRING(feeAmtChar BEFORE '.');
+				 ELSE
+				 END IF;
+				
+				 ELSE
+				 SET feeAmtChar = REPLACE(CAST(feeAmount as CHARACTER),'.','');
+				 END IF;
+				
+				 DECLARE feeID CHARACTER CAST(i AS CHARACTER);
+				 DECLARE FeeIdStr,feeStr CHARACTER '';
+				 IF feeID = '1' THEN
+				 SET FeeIdStr = '<FEE ID=''1''>';
+				 ELSEIF feeID = '2' THEN
+				 SET FeeIdStr = '<FEE ID=''2''>';
+				 ELSEIF feeID = '3' THEN
+				 SET FeeIdStr = '<FEE ID=''3''>';
+				 ELSEIF feeID = '4' THEN
+				 SET FeeIdStr = '<FEE ID=''4''>';
+				 ELSEIF feeID = '5' THEN
+				 SET FeeIdStr = '<FEE ID=''5''>';
+				 END IF;
+				
+				 SET feeStr = FeeIdStr||'<DR_ACCT_NO>'||FeeDrAccountNum||'</DR_ACCT_NO><CR_ACCT_NO>'||FeeCrAccountNum||'</CR_ACCT_NO><AMOUNT>'||feeAmtChar||'</AMOUNT></FEE>';
+				 SET feeString = feeString||feeStr;
+				 SET i=i+1;
+				
+				 MOVE feeRef NEXTSIBLING;
+				 END WHILE;
+
+				SET finalFeeString = '<Fees>'||feeString||'</Fees>';
+				
+				-------- Overriding the URL FOR FundTransfer for IntraBank -------------
+				SET OutputLocalEnvironment.Destination.SOAP.Request.Transport.HTTP.WebServiceURL = 'http://192.168.1.166:7801/FundTransferIntra'; --'http://172.20.236.2:7808/cba/wbs';
+				
+				------ Request formation of FundTransfer Intra Bank in SOAP (CDATA) Format--------
+				CREATE LASTCHILD OF Environment Name 'IntraFundTransfer';
+				CREATE LASTCHILD OF Environment.FundTransfer DOMAIN ('XMLNSC');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.STAN = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yymmddHHmmss');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.TRAN_DATE_TIME = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yymmddHHmmssSS');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.TRAN_AMT = Environment.GetOrderResponse.BENEFICIARYAMOUNT;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.PROCESSING_CODE = PROC_CODE ;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.TRAN_CRNCY_CODE = Environment.COUNTRY_DETAILS.data.BASE_CRNCY;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.COUNTRY_CODE = Environment.Variables.CountryCode;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.VALUE_DATE = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yymmdd');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.DR_ACCT_NUM = debitAccountNum;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.CR_ACCT_NUM = Environment.GetOrderResponse.BANKACCOUNTNO;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.RESERVED_FLD_1 = 'DECLARATION DES FRAIS D IMPRESSION 3 PAGES @ 17% VAT';
+				----------Framing XMLNSC Structure for Fee details--------------------------
+				CREATE LASTCHILD OF Environment Name 'IntraFees';
+				CREATE LASTCHILD OF Environment.IntraFees Domain 'XMLNSC' PARSE(CAST(finalFeeString AS BLOB CCSID 1208)CCSID 1208);
+				DECLARE inputRef REFERENCE TO Environment.IntraFees.XMLNSC.Fees.Fee;
+				DECLARE FTSCRRef, FTSCRRef2 REFERENCE TO Environment.IntraFundTransfer.XMLNSC.C24TRANREQ;
+				CREATE LASTCHILD OF Environment.IntraFundTransfer.XMLNSC.C24TRANREQ AS FTSCRRef Name 'Fees';
+
+				WHILE LASTMOVE(inputRef) DO
+					CREATE LASTCHILD OF FTSCRRef AS FTSCRRef2 Name 'FEE';
+					SET FTSCRRef2.(XMLNSC.SingleAttribute)Id = inputRef.(XMLNSC.Attribute)ID;
+					SET FTSCRRef2.DR_ACCT_NO = inputRef.DR_ACCT_NO;
+					SET FTSCRRef2.CR_ACCT_NO = inputRef.CR_ACCT_NO;
+					SET FTSCRRef2.AMOUNT = inputRef.AMOUNT;
+					MOVE inputRef NEXTSIBLING;
+				END WHILE;
+
+				DECLARE FundTransferBlob BLOB ASBITSTREAM(Environment.IntraFundTransfer.XMLNSC, 546, 1208);
+				DECLARE IntraFundTransferRequest CHAR CAST(FundTransferBlob AS CHAR CCSID 1208 ENCODING 546);
+				---------Defining and framing SOAP Namespaces, Header and Body for Intra Bank Fund Tranfer ----------------------
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:soapenv = 'http://schemas.xmlsoap.org/soap/envelope/';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:fin = 'http://finaclews.org';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Header = '';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Body.fin:sendTransaction.(XMLNSC.CDataField)arg0 = IntraFundTransferRequest;
+				-----------Intra Bank Fund Transfer Request DB Logging-------------
+				DECLARE INTRAFundTransferReq CHARACTER CAST(ASBITSTREAM(OutputRoot.XMLNSC CCSID 1208) AS CHARACTER CCSID 1208);
+				UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} As A SET NAMEENQUIRY_REQ = INTRAFundTransferReq WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+			ELSE
+				------Name Enquiry Status logging in Status Table------------------------
+				INSERT INTO Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.RIA_UBA_FT_FLAG_STATUS(ORDERNO, NAME_ENQUIRY) VALUES (Environment.GetOrderResponse.ORDERNO,'N');
+				------------If ACTION_CODE is other than 000, then it propagate to InputOrderStatusNotices Flow---------------------------
+				propagate to TERMINAL 'out1';
+				RETURN FALSE;
+
+			END IF;
+			-------- Request formation for Inter Bank Fund Transfer(CBS CALL)------------
+		ELSEIF NOT STARTSWITH(Environment.GetOrderResponse.BIC_SWIFT, 'UBA') THEN
+			-----------Intra Bank Name Enquiry Response DB Logging-------------
+			DECLARE INTERNameEnquiryRes CHARACTER CAST(ASBITSTREAM(InputRoot.SOAP CCSID 1208) AS CHARACTER CCSID 1208);
+			UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET NAMEENQUIRY_RES = INTERNameEnquiryRes WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;
+			-----------Retriveing Inter Bank Fund Transfer Response ----------------
+			DECLARE INTERNERes CHARACTER InputRoot.SOAP.Body.fin:sendTransactionResponse.return;
+			CREATE LASTCHILD OF Environment Name 'InterNameEnquiryRes';
+			CREATE LASTCHILD OF Environment.InterNameEnquiryRes DOMAIN 'XMLNSC' PARSE(CAST(INTERNERes AS BLOB CCSID 1208) CCSID 1208);
+			DECLARE RESPONSE_CODE INTEGER CAST(Environment.InterNameEnquiryRes.XMLNSC.NESingleResponse.ResponseCode AS INTEGER);
+
+			IF RESPONSE_CODE = 00 THEN
+				-----------Fetching Credit and Debit Account Number from CONTRA_ACC_CONFIG Table------------------
+				DECLARE DBREF ROW;
+				SET DBREF.DATA[] = SELECT B.CR_ACCT_NUM, B.DR_ACCT_NUM FROM Database.{UDP_DBSOURCE}.esbuser.CONTRA_ACC_CONFIG AS B WHERE B.SERVICE_ID = Environment.variables.ServiceID AND B.APPLCODE = Environment.variables.UserID AND B.COUNTRY_CODE = Environment.variables.CountryCode;
+				DECLARE creditAccountNum CHARACTER CAST(DBREF.CR_ACCT_NUM AS CHARACTER CCSID 1208);
+				DECLARE debitAccountNum CHARACTER CAST(DBREF.DR_ACCT_NUM AS CHARACTER CCSID 1208);
+				 
+				 -----------------Fetching Fee Details from FEES_CONFIG Table-----------------------------
+				 DECLARE QUERY CHARACTER;
+				 DECLARE DETAILS ROW;
+				 SET QUERY = 'SELECT * FROM ESBUSER.FEES_CONFIG WHERE SERVICE_ID =? AND COUNTRY_CODE=? AND CLIENT_ID = ?';
+				 SET DETAILS.VALUE[] = PASSTHRU(QUERY TO Database.{UDP_DBSOURCE} VALUES (Environment.Variables.ServiceID, Environment.Variables.CountryCode, Environment.Variables.CLIENTID_INTER));
+				
+				 DECLARE feeRef REFERENCE TO DETAILS.VALUE[>];
+				 DECLARE i int 1;
+				 DECLARE FeeCrAccountNum,feeAmtChar,feeCrncy,FeeDrAccountNum,finalFeeString CHARACTER;
+				 DECLARE feeString CHARACTER '';
+				 DECLARE decimalPoint INTEGER 2;
+				 WHILE (lastmove(feeRef)) DO
+				 IF feeRef.CR_ACC_DERIVATN_FLG = 'Y' THEN
+				 SET FeeCrAccountNum = CAST(feeRef.CR_ACC_PREFIX AS CHARACTER)|| CAST(feeRef.CR_ACC_SUFFIX AS CHARACTER);
+				 ELSE
+				 SET FeeCrAccountNum = feeRef.CR_ACCT_NUM;
+				 END IF;
+				
+				 IF feeRef.DR_ACC_DERIVATN_FLG = 'Y' THEN
+				 SET FeeDrAccountNum = CAST(feeRef.DR_ACC_PREFIX AS CHARACTER)|| CAST(feeRef.DR_ACC_SUFFIX AS CHARACTER);
+				 ELSE
+				 SET FeeDrAccountNum = feeRef.DR_ACCT_NUM;
+				 END IF;
+				 SET feeCrncy = feeRef.FEE_CRNCY;
+				 SET feeAmtChar = feeRef.FEE_AMT;
+				 DECLARE feeAmount DECIMAL;
+				 SET feeAmount = TRUNCATE(CAST(feeAmtChar AS DECIMAL),decimalPoint);
+				 IF feeRef.FIX_AMT = 'N' THEN
+				 SET feeAmtChar = REPLACE(CAST(feeAmount as CHARACTER),'.','');
+				 SET feeAmount = CAST(Environment.Variables.CBSTranAmount AS INTEGER)*CAST(feeAmtChar AS INTEGER)/100;
+				 SET feeAmtChar = CAST(feeAmount as CHARACTER);
+				 IF CONTAINS(feeAmtChar,'.') THEN
+				 SET feeAmtChar = SUBSTRING(feeAmtChar BEFORE '.');
+				 ELSE
+				 END IF;
+				
+				 ELSE
+				 SET feeAmtChar = REPLACE(CAST(feeAmount as CHARACTER),'.','');
+				 END IF;
+				
+				 DECLARE feeID CHARACTER CAST(i AS CHARACTER);
+				 DECLARE FeeIdStr,feeStr CHARACTER '';
+				 IF feeID = '1' THEN
+				 SET FeeIdStr = '<FEE ID=''1''>';
+				 ELSEIF feeID = '2' THEN
+				 SET FeeIdStr = '<FEE ID=''2''>';
+				 ELSEIF feeID = '3' THEN
+				 SET FeeIdStr = '<FEE ID=''3''>';
+				 ELSEIF feeID = '4' THEN
+				 SET FeeIdStr = '<FEE ID=''4''>';
+				 ELSEIF feeID = '5' THEN
+				 SET FeeIdStr = '<FEE ID=''5''>';
+				 END IF;
+				
+				 SET feeStr = FeeIdStr||'<DR_ACCT_NO>'||FeeDrAccountNum||'</DR_ACCT_NO><CR_ACCT_NO>'||FeeCrAccountNum||'</CR_ACCT_NO><AMOUNT>'||feeAmtChar||'</AMOUNT></FEE>';
+				 SET feeString = feeString||feeStr;
+				 SET i=i+1;
+				
+				 MOVE feeRef NEXTSIBLING;
+				 END WHILE;
+
+				
+
+
+				SET finalFeeString = '<Fees>'||feeString||'</Fees>';
+				-------- Overriding the URL FOR FundTransfer for IntraBank -------------
+				SET OutputLocalEnvironment.Destination.SOAP.Request.Transport.HTTP.WebServiceURL = 'http://172.20.236.2:7808/cba/wbs';
+				
+				------ Request formation of FundTransfer Intra Bank SOAP (CDATA) Format--------
+				CREATE LASTCHILD OF Environment Name 'IntraFundTransfer';
+				CREATE LASTCHILD OF Environment.FundTransfer DOMAIN ('XMLNSC');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.STAN = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yymmddHHmmss');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.TRAN_DATE_TIME = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yymmddHHmmssSS');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.TRAN_AMT = Environment.GetOrderResponse.BENEFICIARYAMOUNT;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.PROCESSING_CODE = PROC_CODE ;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.TRAN_CRNCY_CODE = Environment.COUNTRY_DETAILS.data.BASE_CRNCY;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.COUNTRY_CODE = Environment.Variables.CountryCode;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.VALUE_DATE = CAST(CURRENT_TIMESTAMP AS CHARACTER FORMAT 'yymmdd');
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.DR_ACCT_NUM = debitAccountNum;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.CR_ACCT_NUM = creditAccountNum;
+				SET Environment.IntraFundTransfer.XMLNSC.C24TRANREQ.RESERVED_FLD_1 = 'DECLARATION DES FRAIS D IMPRESSION 3 PAGES @ 17% VAT';
+				----------Framing XMLNSC Structure for Fee details--------------------------
+				CREATE LASTCHILD OF Environment Name 'IntraFee';
+				CREATE LASTCHILD OF Environment.IntraFee Domain 'XMLNSC' PARSE(CAST(finalFeeString AS BLOB CCSID 1208)CCSID 1208);
+				DECLARE inputRef REFERENCE TO Environment.IntraFee.XMLNSC.Fees.Fee;
+				DECLARE FTSCRRef, FTSCRRef2 REFERENCE TO Environment.IntraFundTransfer.XMLNSC.C24TRANREQ;
+				CREATE LASTCHILD OF Environment.IntraFundTransfer.XMLNSC.C24TRANREQ AS FTSCRRef Name 'Fees';
+
+				WHILE LASTMOVE(inputRef) DO
+					CREATE LASTCHILD OF FTSCRRef AS FTSCRRef2 Name 'FEE';
+					SET FTSCRRef2.(XMLNSC.SingleAttribute)Id = inputRef.(XMLNSC.Attribute)ID;
+					SET FTSCRRef2.DR_ACCT_NO = inputRef.DR_ACCT_NO;
+					SET FTSCRRef2.CR_ACCT_NO = inputRef.CR_ACCT_NO;
+					SET FTSCRRef2.AMOUNT = inputRef.AMOUNT;
+					MOVE inputRef NEXTSIBLING;
+				END WHILE;
+
+				DECLARE FundTransferBlob BLOB ASBITSTREAM(Environment.IntraFundTransfer.XMLNSC, 546, 1208 );
+				DECLARE IntraFundTransferRequest CHAR CAST(FundTransferBlob AS CHAR CCSID 1208 ENCODING 546);
+				---------Defining and framing SOAP Namespaces, Header and Body for Intra Bank Fund Tranfer ----------------------
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:soapenv = 'http://schemas.xmlsoap.org/soap/envelope/';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.(XMLNSC.NamespaceDecl)xmlns:fin = 'http://finaclews.org';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Header = '';
+				SET OutputRoot.XMLNSC.soapenv:Envelope.soapenv:Body.fin:sendTransaction.(XMLNSC.CDataField)arg0 = IntraFundTransferRequest;
+				-----------Intra Bank Fund Transfer Request(InterBank) DB Logging-------------
+				DECLARE INTRAFundTransferReq CHARACTER CAST(ASBITSTREAM(OutputRoot.XMLNSC CCSID 1208) AS CHARACTER CCSID 1208);
+				UPDATE Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.{UDP_DBReqResTab} AS A SET FUNDTRANSFER_REQ_INTRA = INTRAFundTransferReq WHERE A.ORDERNO = Environment.GetOrderResponse.ORDERNO;			
+
+
+			ELSE
+				------Name Enquiry Status logging in Status Table------------------------
+				INSERT INTO Database.{UDP_DBSOURCE}.{UDP_DBSCHEMA}.RIA_UBA_FT_FLAG_STATUS(ORDERNO, NAME_ENQUIRY) VALUES (Environment.GetOrderResponse.ORDERNO,'N');
+				------------If RESPONSE_CODE is other than 000, then it propagate to InputOrderStatusNotices Flow---------------------------
+				PROPAGATE TO TERMINAL 'out1';
+				RETURN FALSE;
+
+
+			END IF;
+		END IF;
+		RETURN TRUE;
+	END;
+
+END MODULE;
